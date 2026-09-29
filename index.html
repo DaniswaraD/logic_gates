@@ -848,22 +848,36 @@ function buildBackend(){
   section("CTRL · DATA DECODE 6→64",2400,function(){
     dataDec=dec6(core.finalData);
   });
-  section("CTRL · DELAY 4-bit",900,function(){
+
+  /* ====================== DELAY (FIXED) ======================
+     - delayLoad hanya saat DELAY (opDec[18]) & effRunEdge & delayReg==0
+     - delayReg decrement tiap CLK, berhenti di 0
+     =========================================================== */
+  section("CTRL · DELAY 4-bit",1200,function(){
     core.delayReg=[];
     for(i=0;i<4;i++) core.delayReg.push(LAT(0));
     var db=[core.delayReg[0].o,core.delayReg[1].o,core.delayReg[2].o,core.delayReg[3].o];
-    var nz=OR(OR(db[0],db[1]),OR(db[2],db[3]));
-    var decBits=addN(db,[K1,K0,K0,K0],K0,4).sum;
-    var delayLoad=AND(opDec[18],core.effRunEdge);
+    var delayActive=OR(OR(db[0],db[1]),OR(db[2],db[3]));
+    var nDelay=NOT(delayActive);
+
+    var delayLoad=AND(opDec[18], AND(core.effRunEdge, nDelay));
     var nLoad=NOT(delayLoad);
+
+    /* -1 dalam two's complement 4-bit = 0b1111 */
+    var negOne=[K1,K1,K1,K1];
+    var decBits=addN(db,negOne,K0,4).sum; /* db - 1 */
+
     for(i=0;i<4;i++){
-      var dd=OR(AND(delayLoad,core.finalData[i]),AND(nLoad,decBits[i]));
+      /* jika delayActive: decBits[i]; jika tidak: 0 */
+      var keepBit=AND(delayActive, decBits[i]);
+      /* jika delayLoad: finalData[i]; jika tidak: keepBit */
+      var dd=OR(AND(delayLoad,core.finalData[i]),AND(nLoad,keepBit));
       setLat(core.delayReg[i],dd,core.CLKo);
     }
-    var delayActive=OR(OR(core.delayReg[0].o,core.delayReg[1].o),OR(core.delayReg[2].o,core.delayReg[3].o));
-    core.nDelay=NOT(delayActive);
+    core.nDelay=nDelay;
   });
   forceNewRow();
+
   section("MUX · READ B  8 × 48:1",4800,function(){
     for(b=0;b<8;b++){
       beginGroup(400);
@@ -945,18 +959,26 @@ function buildBackend(){
   });
   forceNewRow();
 
-  /* ================= WRITE ENABLE (FIXED) =================
-     Ketika RUN_Q aktif, paksa WR agar program queue tetap menulis
-     ke RAM. Tanpa ini, layar 16x16 tidak akan pernah muncul. */
-  section("OUTPUT · WRITE ENABLE",1800,function(){
+  /* ==================== WRITE ENABLE (FIXED) ====================
+     - RUN_Q memaksa WR aktif
+     - NOP (0), DELAY (18), SCRCLR (19) TIDAK menulis ke RAM[dest]
+       → mencegah DELAY/SCRCLR menghapus karakter di layar
+     ============================================================== */
+  section("OUTPUT · WRITE ENABLE",2200,function(){
     var runOk=AND(core.effRunEdge,core.nDelay);
     var wrEnable=OR(core.WRo,core.RUNQo);
     var wrPulse=AND(runOk,wrEnable);
     var nClr=NOT(core.clrEdge);
     var scrClrPulse=AND(runOk,opDec[19]);
+
+    /* Opcode yang BOLEH menulis dest: semua kecuali 0, 18, 19 */
+    var noWrite=OR(OR(opDec[0],opDec[18]),opDec[19]);
+    var doWrite=NOT(noWrite);
+
     for(i=0;i<48;i++){
-      beginGroup(50);
-      var wEn=AND(wrPulse,destDec[i]);
+      beginGroup(60);
+      var wEn=AND(AND(wrPulse,destDec[i]),doWrite);
+      /* SCRCLR: tulis 0 ke RAM[0..3] */
       if(i<4) wEn=OR(wEn,scrClrPulse);
       var en=OR(wEn,core.clrEdge);
       for(b=0;b<8;b++){
@@ -1214,13 +1236,12 @@ function routeWires(){
 }
 
 /* ===================== PROGRAM LOADER ===================== */
-var NOOP_INSTR=[0x01,0x00,0x00,0x2F]; /* SET RAM[47]=0 (aman, di luar layar) */
-
 var DEFAULT_PROGRAM=[
-  [0x01,0x48,0x00,0x00],[0x01,0x49,0x00,0x01],[0x12,0x04,0x00,0x00],
+  [0x01,0x48,0x00,0x00],[0x01,0x49,0x00,0x01],[0x01,0x48,0x00,0x00],
   [0x01,0x4C,0x00,0x00],[0x01,0x4F,0x00,0x01],[0x01,0x4C,0x00,0x02],
-  [0x12,0x04,0x00,0x00],[0x13,0x00,0x00,0x00]
+  [0x13,0x00,0x00,0x00],[0x13,0x00,0x00,0x00]
 ];
+var NOOP_INSTR=[0x01,0x00,0x00,0x2F];
 
 function writeRamByte(arr,addr,val){
   for(var b=0;b<8;b++) arr[addr][b].prev=(val>>b)&1;
@@ -1246,7 +1267,7 @@ function loadProgram(program){
   var padded=(program||[]).slice(0,8);
   while(padded.length<8) padded.push(NOOP_INSTR.slice());
 
-  var addr=4; /* instruksi mulai dari RAM[4] */
+  var addr=4;
   for(var i=0;i<8;i++){
     var ins=padded[i];
     writeRamByte(core.RAM, addr,   ins[0]&0x1F);
@@ -1271,7 +1292,6 @@ function initProjectSelector(){
   }
 
   var list=window.BUILTIN_PROJECTS.projects;
-  /* kosongkan dulu (kalau ada dari reload) */
   while(dd.firstChild) dd.removeChild(dd.firstChild);
   for(var i=0;i<list.length;i++){
     var opt=document.createElement("option");
@@ -1282,7 +1302,7 @@ function initProjectSelector(){
   }
   dd.onchange=function(){
     for(var j=0;j<list.length;j++){
-      if(list[j].id===dd.value){ loadProgram(list[j].program); return; }
+      if(list[j].id===dd.value){ loadProgram(list[j].program); simulate(); return; }
     }
   };
   box.style.display="flex";
@@ -1298,7 +1318,7 @@ function loadProject(){
   frame43=relayout43();
   routeWires();
   if(frame43){
-    labels.push({t:"CPU 48 · 4-byte instruction queue executor · pilih built-in project di kanan atas",
+    labels.push({t:"CPU 48 · pilih built-in project di kanan atas → nyalakan RUN_Q",
       x:Math.round(frame43.w/2),y:60,s:16,c:"#222"});
   }
   initProjectSelector();
