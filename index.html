@@ -12,6 +12,7 @@ svg.drag{cursor:grabbing}
 text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-events:none}
 #title{position:fixed;top:10px;left:12px;z-index:10;font-size:14px;font-weight:700;color:#222;background:#fff;padding:4px 8px;border:2px solid #333}
 #help{position:fixed;bottom:10px;left:12px;font-size:11px;color:#888;z-index:10}
+#lod{position:fixed;bottom:10px;right:78px;font-size:11px;color:#666;z-index:10;background:#fff;padding:2px 6px;border:1px solid #ccc}
 #cheat{position:fixed;top:10px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:360px;font-size:11px;line-height:1.5}
 #cheat .bar{background:#333;color:#fff;padding:6px 10px;font-weight:700;font-size:11px;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 #cheat .bar .btn{font-size:16px;font-weight:700;padding:0 6px}
@@ -27,6 +28,7 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 </head>
 <body>
 <div id="title">CPU 48</div>
+<div id="lod">LOD: full</div>
 <div id="cheat" class="min">
   <div class="bar" id="cheatBar"><span>CHEAT SHEET</span><span class="btn" id="cheatMin">+</span></div>
   <div class="body">
@@ -50,16 +52,17 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
     <div class="row"><span class="c">10000</span>NEG</div>
     <div class="row"><span class="c">10001</span>CLR   RAM[A]=0</div>
     <div class="row"><span class="c">10010</span>DELAY</div>
+    <div class="hdr">QUEUE</div>
+    <div class="row">Set QA · toggle QUEUE → slot</div>
+    <div class="row">RUN_Q → eksekusi urut</div>
+    <div class="row">CLR_Q → hapus queue</div>
     <div class="hdr">SCREEN 16×16</div>
-    <div class="row">Byte 0..3 → 4 kotak 8×8</div>
-    <div class="row">Digit 0-9 · A-Z · space</div>
-    <div class="hdr">CONTOH: 4+3 = 7</div>
-    <div class="row">1) OP=00001 D=00000100 A=000000</div>
-    <div class="row">2) OP=00001 D=00000011 A=000001</div>
-    <div class="row">3) OP=00100 T=000000 D=000001 A=000010</div>
-    <div class="row">4) OP=00100 D=00110000 A=000010</div>
-    <div class="row">5) OP=00010 B=000010 A=000000</div>
-    <div class="row">6) Lihat screen TL = '7'</div>
+    <div class="row">RAM byte 0..3 = 4 kotak (TL TR BL BR)</div>
+    <div class="row">Font: space · 0-9 · A-Z</div>
+    <div class="hdr">CONTOH 4+3=7</div>
+    <div class="row">SET byte0=4 · SET byte1=3</div>
+    <div class="row">ADD → byte2 · ADD byte2+0x30 → byte2</div>
+    <div class="row">MOV byte2→byte0 → screen tampil '7'</div>
   </div>
 </div>
 <div id="zoomCtrl">
@@ -114,18 +117,18 @@ FONT[87]=[0x63,0x63,0x63,0x6B,0x7F,0x77,0x63,0x00];
 FONT[88]=[0x66,0x66,0x3C,0x18,0x3C,0x66,0x66,0x00];
 FONT[89]=[0x66,0x66,0x66,0x3C,0x18,0x18,0x18,0x00];
 FONT[90]=[0x7E,0x06,0x0C,0x18,0x30,0x60,0x7E,0x00];
-
 var SUPPORTED=Object.keys(FONT).map(Number);
 
 var gates=[],sws=[],leds=[],labels=[],wires=[];
 var vp,lW,lG,lL,lU,lS;
 var K0={v:0,x:0,y:0,virtual:true},K1={v:1,x:0,y:0,virtual:true};
 var groupStack;
-var softResets=[];
+var globalRAM=null;
+var sectionsData=[];
 
 function reset(){
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  gates=[];sws=[];leds=[];labels=[];wires=[];softResets=[];
+  gates=[];sws=[];leds=[];labels=[];wires=[];sectionsData=[];
   groupStack=[{x:20,y:80,rowH:0,maxW:60000,maxXUsed:0,maxYUsed:0,gStart:0,sStart:0,lStart:0}];
   vp=E("g",{});svg.appendChild(vp);
   lS=E("g",{});lW=E("g",{});lG=E("g",{});lL=E("g",{});lU=E("g",{});
@@ -171,11 +174,11 @@ function section(title,maxW,fn){
   for(var i=l0;i<leds.length;i++){var l=leds[i];var r=l.sz?l.sz*0.4:10;ext(l.px-r-3,l.py-r-3,l.px+r+3,l.py+r+3);}
   if(!isFinite(minX))return;
   var pad=12;
-  var bx=minX-pad,by=minY-pad-18;
-  var bw=(maxX-minX)+2*pad,bh=(maxY-minY)+2*pad+18;
-  lS.appendChild(E("rect",{x:bx,y:by,width:bw,height:bh,fill:"#fafafa",stroke:"#c0c0c0","stroke-width":1.4,"stroke-dasharray":"4 3"}));
-  var t=E("text",{x:bx+10,y:by+13,"font-size":10,"font-weight":700,fill:"#666","letter-spacing":"1px"});
-  t.textContent=title;lS.appendChild(t);
+  sectionsData.push({
+    x:minX-pad, y:minY-pad-18,
+    w:(maxX-minX)+2*pad, h:(maxY-minY)+2*pad+18,
+    title:title
+  });
 }
 function N(v,d){return{v:v|0,d:d|0};}
 function mkGate(t,ins){
@@ -247,6 +250,15 @@ function gateBody(t){
   }
   return "M0,0 L34,0 L34,30 L0,30 Z";
 }
+
+function clearLayer(g){ while(g.firstChild) g.removeChild(g.firstChild); }
+
+function renderSection(s){
+  var rect=E("rect",{x:s.x,y:s.y,width:s.w,height:s.h,fill:"#fafafa",stroke:"#c0c0c0","stroke-width":1.4,"stroke-dasharray":"4 3"});
+  lS.appendChild(rect);
+  var t=E("text",{x:s.x+10,y:s.y+13,"font-size":10,"font-weight":700,fill:"#666","letter-spacing":"1px"});
+  t.textContent=s.title;lS.appendChild(t);
+}
 function renderGate(g){
   var grp=E("g",{transform:"translate("+g.px+","+g.py+")"});
   grp.appendChild(E("path",{d:gateBody(g.t),fill:"#fff",stroke:"#222","stroke-width":1.4,"stroke-linejoin":"round"}));
@@ -268,16 +280,14 @@ function renderSwitch(s){
   var w=38,h=46;
   var grp=E("g",{transform:"translate("+s.px+","+s.py+")"});
   if(s.osc){
-    grp.appendChild(E("rect",{x:0,y:0,width:w,height:h,fill:"#dbe9ff",stroke:"#222","stroke-width":1.4}));
+    grp.appendChild(E("rect",{x:0,y:0,width:w,height:h,fill:s.v?"#8ab4ff":"#dbe9ff",stroke:"#222","stroke-width":1.4}));
     grp.appendChild(E("path",{d:"M5,23 H10 L14,11 L22,35 L26,23 H33",fill:"none",stroke:"#1a56db","stroke-width":1.4}));
   }else{
     grp.appendChild(E("rect",{x:0,y:0,width:w,height:h,fill:"#c8c8c8",stroke:"#222","stroke-width":1.4}));
     var ky=s.v?4:h-20;
-    var knob=E("rect",{x:4,y:ky,width:w-8,height:15,fill:"#fff",stroke:"#222","stroke-width":1.4});
-    grp.appendChild(knob);s._knob=knob;
+    grp.appendChild(E("rect",{x:4,y:ky,width:w-8,height:15,fill:"#fff",stroke:"#222","stroke-width":1.4}));
   }
   grp.appendChild(E("line",{x1:w,y1:23,x2:w+12,y2:23,stroke:"#222","stroke-width":1.4}));
-  s._box=grp.firstChild;s._h=h;
   if(s.label){
     var t=E("text",{x:w/2,y:h+11,"text-anchor":"middle","font-size":8,"font-weight":700,fill:"#222"});
     t.textContent=s.label;grp.appendChild(t);
@@ -293,10 +303,21 @@ function renderSwitch(s){
           if(sws[q]!==s && sws[q].group===s.group) sws[q].v=0;
         }
       }
-      if(s.v && s.softReset){
-        for(var q=0;q<sws.length;q++){
-          if(sws[q]!==s && sws[q].softReset) sws[q].v=0;
-        }
+      if(s.label==="RUN" && s.v){
+        setTimeout(function(){
+          for(var q=0;q<sws.length;q++){
+            var o=sws[q];
+            if(o!==s && !o.osc && o.label!=="DESTRUCT") o.v=0;
+          }
+        },150);
+      }
+      if(s.label==="RUN_Q" && s.v){
+        setTimeout(function(){
+          for(var q=0;q<sws.length;q++){
+            var o=sws[q];
+            if(o!==s && !o.osc && o.label!=="DESTRUCT" && o.label!=="RUN") o.v=0;
+          }
+        },400);
       }
       if(s.label==="DESTRUCT" && s.v){
         for(var q=0;q<gates.length;q++){
@@ -308,14 +329,14 @@ function renderSwitch(s){
   }
   lU.appendChild(grp);
 }
-function renderLED(l){
+function renderLed(l){
   var sz=l.sz||22,rOut=sz*0.4,rIn=sz*0.22;
+  var on=l.i.v;
   var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
   if(sz<28)grp.appendChild(E("line",{x1:-rOut-2,y1:0,x2:-rOut,y2:0,stroke:"#222","stroke-width":1.2}));
   grp.appendChild(E("circle",{cx:0,cy:0,r:rOut,fill:"#fff",stroke:"#222","stroke-width":sz>28?2:1.4}));
-  var inner=E("circle",{cx:0,cy:0,r:rIn,fill:"#e8e8e8"});
-  grp.appendChild(inner);l._inner=inner;
-  if(l.label){
+  grp.appendChild(E("circle",{cx:0,cy:0,r:rIn,fill:on?l.c:"#e8e8e8"}));
+  if(l.label && sz>=20){
     var t=E("text",{x:0,y:-rOut-3,"text-anchor":"middle","font-size":7,fill:"#555"});
     t.textContent=l.label;grp.appendChild(t);
   }
@@ -325,27 +346,100 @@ function renderLabel(L){
   var t=E("text",{x:L.x,y:L.y,"font-size":L.s,fill:L.c,"font-weight":600,"text-anchor":"middle"});
   t.textContent=L.t;lU.appendChild(t);
 }
-function renderWire(){
-  for(var i=0;i<wires.length;i++){
-    var w=wires[i],dx,dy;
-    if(w.l){dx=w.l.px-(w.l.sz||22)*0.4-2;dy=w.l.py;}
-    else{dx=w.g.px-6;dy=w.g.py+w.py;}
-    var sx=w.s.x,sy=w.s.y;
-    if(sx===undefined||sy===undefined)continue;
-    var path;
-    if(Math.abs(sy-dy)<3){path="M"+sx+","+sy+"H"+dx;}
-    else{var mx=sx+(dx-sx)/2;path="M"+sx+","+sy+"H"+mx+"V"+dy+"H"+dx;}
-    var line=E("path",{d:path,fill:"none",stroke:"#cfcfcf","stroke-width":1.2,"stroke-linecap":"round","stroke-linejoin":"round"});
-    lW.appendChild(line);w._line=line;w._lastV=-1;
+function renderWire(sx,sy,dx,dy,on){
+  var path;
+  if(Math.abs(sy-dy)<3) path="M"+sx+","+sy+"H"+dx;
+  else { var mx=sx+(dx-sx)/2; path="M"+sx+","+sy+"H"+mx+"V"+dy+"H"+dx; }
+  var line=E("path",{d:path,fill:"none",stroke:on?"#111":"#cfcfcf","stroke-width":on?1.8:1.2,"stroke-linecap":"round","stroke-linejoin":"round"});
+  lW.appendChild(line);
+}
+
+/* ---- VIEWPORT-CULLED RENDERER ----
+   Only draws items intersecting the current viewport.
+   LOD (level-of-detail) progressively drops layers when zoomed out:
+     lod > 0.03  →  wires
+     lod > 0.08  →  gates
+     lod > 0.10  →  switches
+     lod > 0.12  →  LEDs
+   The circuit always simulates regardless of rendering. */
+function renderFrame(){
+  var r = svg.getBoundingClientRect();
+  var vx1 = -view.x / view.k;
+  var vy1 = -view.y / view.k;
+  var vx2 = vx1 + r.width / view.k;
+  var vy2 = vy1 + r.height / view.k;
+  var lod = view.k;
+  var pad = 40;
+
+  clearLayer(lW); clearLayer(lG); clearLayer(lL); clearLayer(lU);
+
+  // Sections - always render (few, cheap)
+  clearLayer(lS);
+  for(var i=0;i<sectionsData.length;i++){
+    var s=sectionsData[i];
+    if(s.x+s.w < vx1 || s.x > vx2 || s.y+s.h < vy1 || s.y > vy2) continue;
+    renderSection(s);
   }
+
+  // Wires
+  if(lod > 0.03){
+    for(var i=0;i<wires.length;i++){
+      var w=wires[i];
+      var sx=w.s.x, sy=w.s.y;
+      if(sx===undefined||sy===undefined) continue;
+      var dx,dy;
+      if(w.l){ dx=w.l.px-(w.l.sz||22)*0.4-2; dy=w.l.py; }
+      else { dx=w.g.px-6; dy=w.g.py+w.py; }
+      var minx=Math.min(sx,dx),maxx=Math.max(sx,dx);
+      var miny=Math.min(sy,dy),maxy=Math.max(sy,dy);
+      if(maxx < vx1-pad || minx > vx2+pad || maxy < vy1-pad || miny > vy2+pad) continue;
+      renderWire(sx,sy,dx,dy,w.s.v);
+    }
+  }
+
+  // Gates
+  if(lod > 0.08){
+    for(var i=0;i<gates.length;i++){
+      var g=gates[i];
+      if(g.px+50 < vx1-pad || g.px > vx2+pad) continue;
+      if(g.py+44 < vy1-pad || g.py > vy2+pad) continue;
+      renderGate(g);
+    }
+  }
+
+  // Switches
+  if(lod > 0.10){
+    for(var i=0;i<sws.length;i++){
+      var s=sws[i];
+      if(s.px+70 < vx1-pad || s.px > vx2+pad) continue;
+      if(s.py+86 < vy1-pad || s.py > vy2+pad) continue;
+      renderSwitch(s);
+    }
+  }
+
+  // LEDs
+  if(lod > 0.12){
+    for(var i=0;i<leds.length;i++){
+      var l=leds[i];
+      var rad=(l.sz||22)*0.5 + 4;
+      if(l.px+rad < vx1 || l.px-rad > vx2) continue;
+      if(l.py+rad < vy1 || l.py-rad > vy2) continue;
+      renderLed(l);
+    }
+  }
+
+  // Labels
+  for(var i=0;i<labels.length;i++){
+    var L=labels[i];
+    if(L.x+300 < vx1 || L.x-300 > vx2 || L.y+50 < vy1 || L.y-50 > vy2) continue;
+    renderLabel(L);
+  }
+
+  var lodText = lod > 0.12 ? "full" : lod > 0.08 ? "no-LED" : lod > 0.05 ? "gates" : lod > 0.03 ? "wires" : "sections";
+  var el=document.getElementById("lod");
+  if(el.textContent !== "LOD: "+lodText) el.textContent = "LOD: "+lodText;
 }
-function renderAll(){
-  renderWire();
-  for(var i=0;i<gates.length;i++)renderGate(gates[i]);
-  for(var i=0;i<sws.length;i++)renderSwitch(sws[i]);
-  for(var i=0;i<leds.length;i++)renderLED(leds[i]);
-  for(var i=0;i<labels.length;i++)renderLabel(labels[i]);
-}
+
 function evalComb(g){
   var a=g.i[0]?g.i[0].v:0,b=g.i[1]?g.i[1].v:0;
   switch(g.t){
@@ -383,26 +477,6 @@ function simulate(){
       g=gates[i];
       if(g.t==="LAT"){g.o.v=g.prev;continue;}
       g.o.v=evalComb(g);
-    }
-  }
-}
-function updateVisual(){
-  for(var i=0;i<leds.length;i++){
-    var l=leds[i];
-    if(l.v!==l.i.v){l.v=l.i.v;l._inner.setAttribute("fill",l.v?l.c:"#e8e8e8");}
-  }
-  for(var i=0;i<sws.length;i++){
-    var s=sws[i];
-    if(s.osc)s._box.setAttribute("fill",s.v?"#8ab4ff":"#dbe9ff");
-    else s._knob.setAttribute("y",s.v?4:s._h-20);
-  }
-  for(var i=0;i<wires.length;i++){
-    var w=wires[i];if(!w._line)continue;
-    var v=w.s.v;
-    if(v!==w._lastV){
-      w._lastV=v;
-      w._line.setAttribute("stroke",v?"#111":"#cfcfcf");
-      w._line.setAttribute("stroke-width",v?1.8:1.2);
     }
   }
 }
@@ -504,7 +578,6 @@ function buildCPU48(){
   var screenLeds=[],ramViewLeds=[];
   var fontNodes={};
   var i,b,c,r;
-
   for(var key in FONT){
     fontNodes[key]=[];
     for(r=0;r<8;r++)for(c=0;c<8;c++){
@@ -512,7 +585,6 @@ function buildCPU48(){
       fontNodes[key].push(bitv?K1:K0);
     }
   }
-
   section("OPCODE (5)",600,function(){
     for(i=4;i>=0;i--) OP[i]=sw("O"+i);
     beginGroup(160);
@@ -520,7 +592,6 @@ function buildCPU48(){
     endGroup();
   });
   forceNewRow();
-
   section("DATA (8)",900,function(){
     for(i=7;i>=0;i--) D[i]=sw("D"+i);
     beginGroup(200);
@@ -528,7 +599,6 @@ function buildCPU48(){
     endGroup();
   });
   forceNewRow();
-
   section("TAG (8)",900,function(){
     for(i=7;i>=0;i--) T[i]=sw("T"+i);
     beginGroup(200);
@@ -536,35 +606,25 @@ function buildCPU48(){
     endGroup();
   });
   forceNewRow();
-
-  section("DEST ADDR (6 · 0..47)",700,function(){
+  section("DEST ADDR (6)",700,function(){
     for(i=5;i>=0;i--) A[i]=sw("A"+i);
     beginGroup(200);
     for(i=5;i>=0;i--) led(A[i].o,"#a060ff","A"+i,22);
     endGroup();
   });
   forceNewRow();
-
   section("ACTION",1000,function(){
-    WRo=sw("WR","wr").o;
-    RDo=sw("RD","wr").o;
-    RUNo=sw("RUN",null,true).o;
-    CLRo=sw("CLR").o;
-    LDo=sw("LOAD").o;
-    DESTo=sw("DESTRUCT").o;
+    WRo=sw("WR","wr").o;RDo=sw("RD","wr").o;
+    RUNo=sw("RUN").o;CLRo=sw("CLR").o;LDo=sw("LOAD").o;DESTo=sw("DESTRUCT").o;
     beginGroup(340);
-    led(WRo,"#39d353","W",22);
-    led(RDo,"#4a9eff","R",22);
-    led(RUNo,"#ff4d4d","N",22);
-    led(CLRo,"#ff4d4d","C",22);
-    led(LDo,"#ffb020","L",22);
-    led(DESTo,"#000","D",22);
+    led(WRo,"#39d353","W",22);led(RDo,"#4a9eff","R",22);
+    led(RUNo,"#ff4d4d","N",22);led(CLRo,"#ff4d4d","C",22);
+    led(LDo,"#ffb020","L",22);led(DESTo,"#000","D",22);
     endGroup();
   });
   section("CLK",240,function(){ CLKo=osc(2,"CLK").o; });
   forceNewRow();
-
-  section("SCREEN 16 × 16  (4 kotak 8×8 dari RAM 0..3)",620,function(){
+  section("SCREEN 16 × 16",620,function(){
     for(r=0;r<16;r++){
       beginGroup(600);
       screenLeds.push([]);
@@ -576,8 +636,7 @@ function buildCPU48(){
       endGroup();
     }
   });
-
-  section("RAM VIEW 48 × 8  (1 baris = 1 byte)",320,function(){
+  section("RAM VIEW 48 × 8",320,function(){
     for(b=0;b<48;b++){
       beginGroup(300);
       ramViewLeds.push([]);
@@ -589,9 +648,7 @@ function buildCPU48(){
       endGroup();
     }
   });
-
   forceNewRow();
-
   section("EDGE DETECT",800,function(){
     runPrev=LAT(0);setLat(runPrev,RUNo,CLKo);
     clrPrev=LAT(0);setLat(clrPrev,CLRo,CLKo);
@@ -605,7 +662,6 @@ function buildCPU48(){
     destDec=dec6([A[0].o,A[1].o,A[2].o,A[3].o,A[4].o,A[5].o]);
   });
   forceNewRow();
-
   section("TAG DECODE 6→64",2400,function(){
     tagDec=dec6([T[0].o,T[1].o,T[2].o,T[3].o,T[4].o,T[5].o]);
   });
@@ -625,7 +681,6 @@ function buildCPU48(){
     }
   });
   forceNewRow();
-
   section("RAM 48 × 8  (384 D-latch)",4800,function(){
     for(i=0;i<48;i++){
       beginGroup(140);
@@ -639,8 +694,7 @@ function buildCPU48(){
     }
   });
   forceNewRow();
-
-  section("TAG MEMORY 48 × 8  (384 D-latch)",4800,function(){
+  section("TAG MEM 48 × 8",4800,function(){
     for(i=0;i<48;i++){
       beginGroup(140);
       TAGS.push([]);
@@ -653,7 +707,6 @@ function buildCPU48(){
     }
   });
   forceNewRow();
-
   section("READ MUX B  8 × 64:1",4800,function(){
     for(b=0;b<8;b++){
       beginGroup(400);
@@ -662,8 +715,7 @@ function buildCPU48(){
         var t=AND(tagDec[i],RAM[i][b].o);
         acc=(acc===null)?t:OR(acc,t);
       }
-      srcB[b]=acc;
-      endGroup();
+      srcB[b]=acc;endGroup();
     }
   });
   section("READ MUX C  8 × 64:1",4800,function(){
@@ -674,46 +726,37 @@ function buildCPU48(){
         var t=AND(dataDec[i],RAM[i][b].o);
         acc=(acc===null)?t:OR(acc,t);
       }
-      srcC[b]=acc;
-      endGroup();
+      srcC[b]=acc;endGroup();
     }
   });
   forceNewRow();
-
   var opR=new Array(24);
   section("SET · MOV · LINK",900,function(){
     var r0=[];for(b=0;b<8;b++)r0.push(D[b].o);
-    opR[1]=r0;
-    opR[2]=srcB.slice();
-    var r2=[];
-    for(b=0;b<8;b++) r2.push(b<4?srcC[b]:srcB[b]);
+    opR[1]=r0;opR[2]=srcB.slice();
+    var r2=[];for(b=0;b<8;b++) r2.push(b<4?srcC[b]:srcB[b]);
     opR[3]=r2;
   });
   section("ADD · SUB",1600,function(){
-    opR[4]=add8(srcB,srcC);
-    opR[5]=sub8(srcB,srcC);
+    opR[4]=add8(srcB,srcC);opR[5]=sub8(srcB,srcC);
   });
   section("MUL · DIV",2000,function(){
     opR[6]=mul4low([srcB[0],srcB[1],srcB[2],srcB[3]],[srcC[0],srcC[1],srcC[2],srcC[3]]);
     opR[7]=div4([srcB[0],srcB[1],srcB[2],srcB[3]],[srcC[0],srcC[1],srcC[2],srcC[3]]);
   });
   forceNewRow();
-
   section("AND · OR · XOR · NOT",1400,function(){
     var aR=[],oR=[],xR=[],nR=[];
     for(b=0;b<8;b++){
-      aR.push(AND(srcB[b],srcC[b]));
-      oR.push(OR(srcB[b],srcC[b]));
-      xR.push(XOR(srcB[b],srcC[b]));
-      nR.push(NOT(srcB[b]));
+      aR.push(AND(srcB[b],srcC[b]));oR.push(OR(srcB[b],srcC[b]));
+      xR.push(XOR(srcB[b],srcC[b]));nR.push(NOT(srcB[b]));
     }
     opR[8]=aR;opR[9]=oR;opR[10]=xR;opR[11]=nR;
   });
   section("SHL · SHR · INC · DEC · NEG",1600,function(){
     var lR=[],rR=[];
     for(b=0;b<8;b++){
-      lR.push(b===0?K0:srcB[b-1]);
-      rR.push(b===7?K0:srcB[b+1]);
+      lR.push(b===0?K0:srcB[b-1]);rR.push(b===7?K0:srcB[b+1]);
     }
     opR[12]=lR;opR[13]=rR;
     opR[14]=add8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]);
@@ -722,13 +765,11 @@ function buildCPU48(){
     opR[16]=addN(nB,[K1,K0,K0,K0,K0,K0,K0,K0],K0,8).sum;
   });
   section("CLR · DELAY",400,function(){
-    var z=[K0,K0,K0,K0,K0,K0,K0,K0];
-    opR[17]=z;opR[18]=z;
+    var z=[K0,K0,K0,K0,K0,K0,K0,K0];opR[17]=z;opR[18]=z;
   });
   opR[0]=[K0,K0,K0,K0,K0,K0,K0,K0];
   forceNewRow();
-
-  section("OUTPUT MUX  (opcode → result)",3200,function(){
+  section("OUTPUT MUX",3200,function(){
     for(b=0;b<8;b++){
       beginGroup(400);
       var acc=null;
@@ -737,12 +778,10 @@ function buildCPU48(){
         var t=AND(opDec[i],opR[i][b]);
         acc=(acc===null)?t:OR(acc,t);
       }
-      finalR[b]=acc;
-      endGroup();
+      finalR[b]=acc;endGroup();
     }
   });
   forceNewRow();
-
   section("WRITE ENABLE",1600,function(){
     var delayActive=OR(OR(delayReg[0].o,delayReg[1].o),OR(delayReg[2].o,delayReg[3].o));
     var runOk=AND(runEdge,NOT(delayActive));
@@ -762,12 +801,10 @@ function buildCPU48(){
     }
   });
   forceNewRow();
-
   var byteBits=[[],[],[],[]];
   for(i=0;i<4;i++) for(b=0;b<8;b++) byteBits[i].push(RAM[i][b].o);
-
   var charSels=[];
-  section("CHAR DETECT  byte 0..3  (36 char × 4 byte)",4000,function(){
+  section("CHAR DETECT",4000,function(){
     for(var bi=0;bi<4;bi++){
       beginGroup(1000);
       for(var ci=0;ci<SUPPORTED.length;ci++){
@@ -778,21 +815,16 @@ function buildCPU48(){
           var bv=(cval>>b)&1;
           bits.push(bv?byteBits[bi][b]:NOT(byteBits[bi][b]));
         }
-        var a1=AND(bits[0],bits[1]);
-        var a2=AND(bits[2],bits[3]);
-        var a3=AND(bits[4],bits[5]);
-        var a4=AND(bits[6],bits[7]);
-        var a5=AND(a1,a2);
-        var a6=AND(a3,a4);
-        charSels.push(AND(a5,a6));
+        var a1=AND(bits[0],bits[1]);var a2=AND(bits[2],bits[3]);
+        var a3=AND(bits[4],bits[5]);var a4=AND(bits[6],bits[7]);
+        charSels.push(AND(AND(a1,a2),AND(a3,a4)));
         endGroup();
       }
       endGroup();
     }
   });
   forceNewRow();
-
-  section("SCREEN LOGIC  4 quadrant × 8×8 pixel",7000,function(){
+  section("SCREEN LOGIC",7000,function(){
     for(var bi=0;bi<4;bi++){
       beginGroup(7000);
       for(r=0;r<8;r++){
@@ -806,14 +838,10 @@ function buildCPU48(){
             if(fbit===K0) continue;
             contribs.push(AND(sel,fbit));
           }
-          if(contribs.length===0){
-            endGroup();
-            continue;
-          }
+          if(contribs.length===0){endGroup();continue;}
           var acc=contribs[0];
           for(var k=1;k<contribs.length;k++) acc=OR(acc,contribs[k]);
-          var qr=(bi>=2)?8:0;
-          var qc=(bi&1)?8:0;
+          var qr=(bi>=2)?8:0;var qc=(bi&1)?8:0;
           rewireLed(screenLeds[qr+r][qc+c],acc);
           endGroup();
         }
@@ -823,15 +851,145 @@ function buildCPU48(){
     }
   });
   forceNewRow();
-
-  for(i=0;i<48;i++){
-    for(b=0;b<8;b++){
-      rewireLed(ramViewLeds[i][7-b],RAM[i][b].o);
-    }
-  }
+  for(i=0;i<48;i++) for(b=0;b<8;b++) rewireLed(ramViewLeds[i][7-b],RAM[i][b].o);
+  globalRAM=RAM;
 }
 
-function computeBounds(){
+function buildQueue(){
+  var QADDR=new Array(6),QORD=new Array(6);
+  var CLRQo,QUEUEo,RUNQo,QCLKo;
+  var queuePrev,clrqPrev,runqPrev,queueEdge,clrqEdge,runqEdge;
+  var slots=[],ptr=[],ptrSel=[],qAddr=[],qOut=new Array(8);
+  var i,b,s;
+  var qDec;
+
+  section("QUEUE ADDR (6)",700,function(){
+    for(i=5;i>=0;i--) QADDR[i]=sw("QA"+i);
+    beginGroup(200);
+    for(i=5;i>=0;i--) led(QADDR[i].o,"#a060ff","QA"+i,22);
+    endGroup();
+  });
+  section("QUEUE ORDER (6)",700,function(){
+    for(i=5;i>=0;i--) QORD[i]=sw("QO"+i);
+    beginGroup(200);
+    for(i=5;i>=0;i--) led(QORD[i].o,"#4a9eff","QO"+i,22);
+    endGroup();
+  });
+  section("QUEUE ACTION",700,function(){
+    CLRQo=sw("CLR_Q").o;QUEUEo=sw("QUEUE").o;RUNQo=sw("RUN_Q").o;
+    beginGroup(240);
+    led(CLRQo,"#ff4d4d","CQ",22);led(QUEUEo,"#39d353","Q",22);
+    led(RUNQo,"#ffb020","RQ",22);endGroup();
+  });
+  section("QCLK",240,function(){ QCLKo=osc(4,"QCLK").o; });
+  forceNewRow();
+  section("QUEUE EDGE DETECT",900,function(){
+    queuePrev=LAT(0);setLat(queuePrev,QUEUEo,QCLKo);
+    clrqPrev=LAT(0);setLat(clrqPrev,CLRQo,QCLKo);
+    runqPrev=LAT(0);setLat(runqPrev,RUNQo,QCLKo);
+    queueEdge=AND(QUEUEo,NOT(queuePrev.o));
+    clrqEdge=AND(CLRQo,NOT(clrqPrev.o));
+    runqEdge=AND(RUNQo,NOT(runqPrev.o));
+  });
+  forceNewRow();
+  section("QUEUE STORAGE  8 × 7 D-latch",900,function(){
+    for(s=0;s<8;s++){
+      beginGroup(90);
+      var slot={addr:[],valid:null};
+      for(b=0;b<6;b++) slot.addr.push(LAT(0));
+      slot.valid=LAT(0);
+      slots.push(slot);
+      endGroup();
+    }
+  });
+  forceNewRow();
+  section("QUEUE PUSH & CLEAR",1400,function(){
+    var cum=K1;
+    for(s=0;s<8;s++){
+      beginGroup(130);
+      var valid=slots[s].valid.o;
+      var nValid=NOT(valid);
+      var push=AND(AND(queueEdge,cum),nValid);
+      var en=OR(push,clrqEdge);
+      setLat(slots[s].valid,AND(push,K1),en);
+      for(b=0;b<6;b++) setLat(slots[s].addr[b],QADDR[b].o,push);
+      cum=AND(cum,valid);
+      endGroup();
+    }
+  });
+  forceNewRow();
+  section("QUEUE DISPLAY",700,function(){
+    for(s=0;s<8;s++){
+      beginGroup(280);
+      for(b=5;b>=0;b--) led(slots[s].addr[b].o,"#a060ff","s"+s+"b"+b,22);
+      led(slots[s].valid.o,"#39d353","v"+s,22);
+      endGroup();
+    }
+  });
+  forceNewRow();
+  section("QUEUE POINTER",600,function(){
+    for(i=0;i<3;i++) ptr[i]=LAT(0);
+    var inc=AND(QCLKo,RUNQo);
+    var next=addN([ptr[0].o,ptr[1].o,ptr[2].o],[K1,K0,K0],K0,3).sum;
+    for(i=0;i<3;i++){
+      var d=OR(AND(runqEdge,K0),AND(NOT(runqEdge),next[i]));
+      setLat(ptr[i],d,OR(inc,runqEdge));
+    }
+    beginGroup(120);
+    for(i=2;i>=0;i--) led(ptr[i].o,"#ffb020","p"+i,22);
+    endGroup();
+  });
+  section("POINTER DECODE 3→8",1200,function(){
+    var np0=NOT(ptr[0].o),np1=NOT(ptr[1].o),np2=NOT(ptr[2].o);
+    for(s=0;s<8;s++){
+      beginGroup(140);
+      var b0=(s&1)?ptr[0].o:np0;
+      var b1=(s&2)?ptr[1].o:np1;
+      var b2=(s&4)?ptr[2].o:np2;
+      ptrSel.push(AND(AND(b0,b1),b2));
+      endGroup();
+    }
+  });
+  forceNewRow();
+  section("QUEUE ADDR MUX",1200,function(){
+    for(b=0;b<6;b++){
+      beginGroup(400);
+      var acc=null;
+      for(s=0;s<8;s++){
+        var t=AND(ptrSel[s],slots[s].addr[b].o);
+        acc=(acc===null)?t:OR(acc,t);
+      }
+      qAddr.push(acc);
+      endGroup();
+    }
+  });
+  section("QUEUE ADDR DECODE",2400,function(){
+    qDec=dec6([qAddr[0],qAddr[1],qAddr[2],qAddr[3],qAddr[4],qAddr[5]]);
+  });
+  forceNewRow();
+  section("QUEUE READ MUX",5000,function(){
+    for(b=0;b<8;b++){
+      beginGroup(600);
+      var acc=null;
+      for(var r=0;r<48;r++){
+        var t=AND(qDec[r],globalRAM[r][b].o);
+        acc=(acc===null)?t:OR(acc,t);
+      }
+      qOut[b]=acc;
+      endGroup();
+    }
+  });
+  section("QUEUE OUT (8 LED)",300,function(){
+    for(b=7;b>=0;b--) led(qOut[b],"#ffb020","qb"+b,26);
+  });
+}
+
+function loadProject(){
+  reset();
+  buildCPU48();
+  buildQueue();
+  var b=document.createElementNS(NS,"g");
+  // bounds & title
   var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
   function ext(x1,y1,x2,y2){
     if(x1<minX)minX=x1;if(y1<minY)minY=y1;
@@ -839,36 +997,22 @@ function computeBounds(){
   }
   for(var i=0;i<gates.length;i++){var g=gates[i];ext(g.px-6,g.py-6,g.px+50,g.py+44);}
   for(var i=0;i<sws.length;i++){var s=sws[i];ext(s.px-5,s.py-5,s.px+70,s.py+86);}
-  for(var i=0;i<leds.length;i++){var l=leds[i];var rr=l.sz?l.sz*0.4:10;ext(l.px-rr-3,l.py-rr-3,l.px+rr+3,l.py+rr+3);}
-  return {x1:minX,y1:minY,x2:maxX,y2:maxY};
-}
-function drawBox(){
-  var b=computeBounds();
-  if(!isFinite(b.x1))return;
-  var pad=70;
-  vp.insertBefore(E("rect",{
-    x:b.x1-pad,y:b.y1-pad,width:(b.x2-b.x1)+pad*2,height:(b.y2-b.y1)+pad*2,
-    fill:"none",stroke:"#222","stroke-width":3
-  }),vp.firstChild);
-}
-function addLabels(){
-  var b=computeBounds();
-  if(!isFinite(b.x1))return;
-  label("CPU 48  ·  48-byte RAM + 48-byte TAG  ·  384+384 D-latch  ·  16×16 font screen",
-    (b.x1+b.x2)/2,b.y1-50,18,"#222");
-}
-function loadProject(){
-  reset();
-  buildCPU48();
-  addLabels();
-  renderAll();
-  drawBox();
+  for(var i=0;i<leds.length;i++){var l=leds[i];var r=l.sz?l.sz*0.4:10;ext(l.px-r-3,l.py-r-3,l.px+r+3,l.py+r+3);}
+  if(isFinite(minX)){
+    var pad=70;
+    lS.insertBefore(E("rect",{
+      x:minX-pad,y:minY-pad,width:(maxX-minX)+pad*2,height:(maxY-minY)+pad*2,
+      fill:"none",stroke:"#222","stroke-width":3
+    }),lS.firstChild);
+    labels.push({t:"CPU 48  ·  48-byte RAM  ·  queue  ·  16×16 font screen",
+      x:Math.round((minX+maxX)/2),y:minY-50,s:18,c:"#222"});
+  }
   simulate();
-  updateVisual();
+  renderFrame();
 }
 
 var view={x:0,y:0,k:1};
-var MIN_K=0.001,MAX_K=30;
+var MIN_K=0.0008,MAX_K=30;
 function applyView(){vp.setAttribute("transform","translate("+view.x+","+view.y+") scale("+view.k+")");}
 function setZoomAt(nk,cx,cy){
   nk=Math.min(MAX_K,Math.max(MIN_K,nk));
@@ -947,7 +1091,11 @@ document.getElementById("cheatBar").addEventListener("click",function(){
 });
 
 loadProject();
-setInterval(function(){tickOsc();simulate();updateVisual();},60);
+setInterval(function(){tickOsc();simulate();},60);
+requestAnimationFrame(function loop(){
+  renderFrame();
+  requestAnimationFrame(loop);
+});
 })();
 </script>
 </body>
