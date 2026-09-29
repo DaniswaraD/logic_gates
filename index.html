@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 48</title>
+<title>CPU 48 Q-Exec</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
@@ -13,7 +13,7 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 #title{position:fixed;top:10px;left:12px;z-index:10;font-size:14px;font-weight:700;color:#222;background:#fff;padding:4px 8px;border:2px solid #333}
 #help{position:fixed;bottom:10px;left:12px;font-size:11px;color:#888;z-index:10}
 #lod{position:fixed;bottom:10px;right:78px;font-size:11px;color:#666;z-index:10;background:#fff;padding:2px 6px;border:1px solid #ccc}
-#cheat{position:fixed;top:10px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:360px;font-size:11px;line-height:1.5}
+#cheat{position:fixed;top:10px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:380px;font-size:11px;line-height:1.5}
 #cheat .bar{background:#333;color:#fff;padding:6px 10px;font-weight:700;font-size:11px;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 #cheat .bar .btn{font-size:16px;font-weight:700;padding:0 6px}
 #cheat .body{padding:10px;max-height:80vh;overflow:auto}
@@ -27,42 +27,33 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 </style>
 </head>
 <body>
-<div id="title">CPU 48</div>
+<div id="title">CPU 48 Q-Exec</div>
 <div id="lod">LOD: full</div>
 <div id="cheat" class="min">
   <div class="bar" id="cheatBar"><span>CHEAT SHEET</span><span class="btn" id="cheatMin">+</span></div>
   <div class="body">
-    <div class="hdr">OPCODE (5 bit)</div>
-    <div class="row"><span class="c">00000</span>NOP</div>
-    <div class="row"><span class="c">00001</span>SET   RAM[A]=D</div>
-    <div class="row"><span class="c">00010</span>MOV   A=RAM[B]</div>
-    <div class="row"><span class="c">00011</span>LINK  (B&amp;F0)|(C&amp;0F)</div>
-    <div class="row"><span class="c">00100</span>ADD</div>
-    <div class="row"><span class="c">00101</span>SUB</div>
-    <div class="row"><span class="c">00110</span>MUL</div>
-    <div class="row"><span class="c">00111</span>DIV</div>
-    <div class="row"><span class="c">01000</span>AND</div>
-    <div class="row"><span class="c">01001</span>OR</div>
-    <div class="row"><span class="c">01010</span>XOR</div>
-    <div class="row"><span class="c">01011</span>NOT</div>
-    <div class="row"><span class="c">01100</span>SHL</div>
-    <div class="row"><span class="c">01101</span>SHR</div>
-    <div class="row"><span class="c">01110</span>INC</div>
-    <div class="row"><span class="c">01111</span>DEC</div>
-    <div class="row"><span class="c">10000</span>NEG</div>
-    <div class="row"><span class="c">10001</span>CLR   RAM[A]=0</div>
-    <div class="row"><span class="c">10010</span>DELAY</div>
+    <div class="hdr">PROGRAM FORMAT (4 byte per instruksi)</div>
+    <div class="row">RAM[A+0] = OPCODE (5 bit)</div>
+    <div class="row">RAM[A+1] = DATA (8 bit)</div>
+    <div class="row">RAM[A+2] = TAG (8 bit)</div>
+    <div class="row">RAM[A+3] = DEST (6 bit)</div>
+    <div class="hdr">CONTOH TAMPILKAN "HI" LALU "LOL"</div>
+    <div class="row">Instruksi 1 di RAM[0..3]: SET 'H' ke byte 0</div>
+    <div class="row">Instruksi 2 di RAM[4..7]: SET 'I' ke byte 1</div>
+    <div class="row">Instruksi 3 di RAM[8..11]: DELAY 4</div>
+    <div class="row">Instruksi 4 di RAM[12..15]: CLR byte 0</div>
+    <div class="row">Instruksi 5 di RAM[16..19]: CLR byte 1</div>
+    <div class="row">Instruksi 6 di RAM[20..23]: SET 'L' ke byte 0</div>
+    <div class="row">Instruksi 7 di RAM[24..27]: SET 'O' ke byte 1</div>
+    <div class="row">Instruksi 8 di RAM[28..31]: SET 'L' ke byte 2</div>
     <div class="hdr">QUEUE</div>
-    <div class="row">Set QA · toggle QUEUE → slot</div>
-    <div class="row">RUN_Q → eksekusi urut</div>
-    <div class="row">CLR_Q → hapus queue</div>
-    <div class="hdr">SCREEN 16×16</div>
-    <div class="row">RAM byte 0..3 = 4 kotak (TL TR BL BR)</div>
-    <div class="row">Font: space · 0-9 · A-Z</div>
-    <div class="hdr">CONTOH 4+3=7</div>
-    <div class="row">SET byte0=4 · SET byte1=3</div>
-    <div class="row">ADD → byte2 · ADD byte2+0x30 → byte2</div>
-    <div class="row">MOV byte2→byte0 → screen tampil '7'</div>
+    <div class="row">QA = start address · QUEUE = tambah slot</div>
+    <div class="row">RUN_Q = jalankan semua slot berurutan</div>
+    <div class="row">CLR_Q = kosongkan queue</div>
+    <div class="hdr">CARA RUN</div>
+    <div class="row">1. Set switch untuk tulis program ke RAM</div>
+    <div class="row">2. Queue address 0, 4, 8, 12, ... (setiap 4 byte)</div>
+    <div class="row">3. Toggle RUN_Q 0→1 → jalan otomatis</div>
   </div>
 </div>
 <div id="zoomCtrl">
@@ -70,7 +61,7 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
   <button id="zoomOut">−</button>
   <button id="zoomReset">⟲</button>
 </div>
-<div id="help">scroll = zoom · drag = pan · pinch = zoom · dblclick = reset</div>
+<div id="help">scroll = zoom · drag = pan · pinch = zoom</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 <script>
 (function(){
@@ -256,9 +247,7 @@ function gateBody(t){
   }
   return "M0,0 L34,0 L34,30 L0,30 Z";
 }
-
 function clearLayer(g){ while(g.firstChild) g.removeChild(g.firstChild); }
-
 function renderSection(s){
   var rect=E("rect",{x:s.x,y:s.y,width:s.w,height:s.h,fill:"#fafafa",stroke:"#d4d4d4","stroke-width":0.5,"stroke-dasharray":"4 3"});
   lS.appendChild(rect);
@@ -321,9 +310,9 @@ function renderSwitch(s){
         setTimeout(function(){
           for(var q=0;q<sws.length;q++){
             var o=sws[q];
-            if(o!==s && !o.osc && o.label!=="DESTRUCT" && o.label!=="RUN") o.v=0;
+            if(o!==s && !o.osc && o.label!=="DESTRUCT") o.v=0;
           }
-        },400);
+        },800);
       }
       if(s.label==="DESTRUCT" && s.v){
         for(var q=0;q<gates.length;q++){
@@ -359,15 +348,6 @@ function renderWire(sx,sy,dx,dy,on,mxo){
   var line=E("path",{d:path,fill:"none",stroke:on?"#111":"#cfcfcf","stroke-width":on?1.5:1,"stroke-linecap":"round","stroke-linejoin":"round"});
   lW.appendChild(line);
 }
-
-/* ---- VIEWPORT-CULLED RENDERER ----
-   Only draws items intersecting the current viewport.
-   LOD (level-of-detail) progressively drops layers when zoomed out:
-     lod > 0.03  →  wires
-     lod > 0.08  →  gates
-     lod > 0.10  →  switches
-     lod > 0.12  →  LEDs
-   The circuit always simulates regardless of rendering. */
 function renderFrame(){
   var r = svg.getBoundingClientRect();
   var vx1 = -view.x / view.k;
@@ -376,12 +356,7 @@ function renderFrame(){
   var vy2 = vy1 + r.height / view.k;
   var lod = view.k;
   var pad = 40;
-
-  clearLayer(lW); clearLayer(lG); clearLayer(lL); clearLayer(lU);
-
-  // Sections - always render (few, cheap)
-  clearLayer(lS);
-  // Bingkai luar 4:3
+  clearLayer(lW); clearLayer(lG); clearLayer(lL); clearLayer(lU); clearLayer(lS);
   if(frame43) lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:frame43.w,height:frame43.h,
     fill:"none",stroke:"#aaa","stroke-width":0.4,"vector-effect":"non-scaling-stroke"}));
   for(var i=0;i<sectionsData.length;i++){
@@ -389,8 +364,6 @@ function renderFrame(){
     if(s.x+s.w < vx1 || s.x > vx2 || s.y+s.h < vy1 || s.y > vy2) continue;
     renderSection(s);
   }
-
-  // Wires
   if(lod > 0.03){
     for(var i=0;i<wires.length;i++){
       var w=wires[i];
@@ -405,8 +378,6 @@ function renderFrame(){
       renderWire(sx,sy,dx,dy,w.s.v,w.mx);
     }
   }
-
-  // Gates
   if(lod > 0.08){
     for(var i=0;i<gates.length;i++){
       var g=gates[i];
@@ -415,8 +386,6 @@ function renderFrame(){
       renderGate(g);
     }
   }
-
-  // Switches
   if(lod > 0.10){
     for(var i=0;i<sws.length;i++){
       var s=sws[i];
@@ -425,8 +394,6 @@ function renderFrame(){
       renderSwitch(s);
     }
   }
-
-  // LEDs
   if(lod > 0.12){
     for(var i=0;i<leds.length;i++){
       var l=leds[i];
@@ -436,19 +403,15 @@ function renderFrame(){
       renderLed(l);
     }
   }
-
-  // Labels
   for(var i=0;i<labels.length;i++){
     var L=labels[i];
     if(L.x+300 < vx1 || L.x-300 > vx2 || L.y+50 < vy1 || L.y-50 > vy2) continue;
     renderLabel(L);
   }
-
   var lodText = lod > 0.12 ? "full" : lod > 0.08 ? "no-LED" : lod > 0.05 ? "gates" : lod > 0.03 ? "wires" : "sections";
   var el=document.getElementById("lod");
   if(el.textContent !== "LOD: "+lodText) el.textContent = "LOD: "+lodText;
 }
-
 function evalComb(g){
   var a=g.i[0]?g.i[0].v:0,b=g.i[1]?g.i[1].v:0;
   switch(g.t){
@@ -495,7 +458,6 @@ function tickOsc(){
     if(s.osc){s.t++;if(s.t>=s.period){s.t=0;s.v=s.v?0:1;}}
   }
 }
-
 function addN(a,b,cin,n){
   var c=cin||K0,s=[];
   for(var i=0;i<n;i++){
@@ -541,15 +503,11 @@ function dec6(bits){
   var high3=[NOT(bits[3]),NOT(bits[4]),NOT(bits[5])];
   var lowOut=[],highOut=[];
   for(var v=0;v<8;v++){
-    var b0=(v&1)?bits[0]:low3[0];
-    var b1=(v&2)?bits[1]:low3[1];
-    var b2=(v&4)?bits[2]:low3[2];
+    var b0=(v&1)?bits[0]:low3[0],b1=(v&2)?bits[1]:low3[1],b2=(v&4)?bits[2]:low3[2];
     lowOut.push(AND(AND(b0,b1),b2));
   }
   for(var v=0;v<8;v++){
-    var b3=(v&1)?bits[3]:high3[0];
-    var b4=(v&2)?bits[4]:high3[1];
-    var b5=(v&4)?bits[5]:high3[2];
+    var b3=(v&1)?bits[3]:high3[0],b4=(v&2)?bits[4]:high3[1],b5=(v&4)?bits[5]:high3[2];
     highOut.push(AND(AND(b3,b4),b5));
   }
   var out=[];
@@ -561,21 +519,17 @@ function dec5(bits){
   var high2=[NOT(bits[3]),NOT(bits[4])];
   var lowOut=[],highOut=[];
   for(var v=0;v<8;v++){
-    var b0=(v&1)?bits[0]:low3[0];
-    var b1=(v&2)?bits[1]:low3[1];
-    var b2=(v&4)?bits[2]:low3[2];
+    var b0=(v&1)?bits[0]:low3[0],b1=(v&2)?bits[1]:low3[1],b2=(v&4)?bits[2]:low3[2];
     lowOut.push(AND(AND(b0,b1),b2));
   }
   for(var v=0;v<4;v++){
-    var b3=(v&1)?bits[3]:high2[0];
-    var b4=(v&2)?bits[4]:high2[1];
+    var b3=(v&1)?bits[3]:high2[0],b4=(v&2)?bits[4]:high2[1];
     highOut.push(AND(b3,b4));
   }
   var out=[];
   for(var i=0;i<32;i++) out.push(AND(highOut[(i>>3)&3],lowOut[i&7]));
   return out;
 }
-
 function buildCPU48(){
   var OP=new Array(5),D=new Array(8),T=new Array(8),A=new Array(6);
   var WRo,RDo,RUNo,CLRo,LDo,CLKo,DESTo;
@@ -635,25 +589,15 @@ function buildCPU48(){
   forceNewRow();
   section("SCREEN 16 × 16",620,function(){
     for(r=0;r<16;r++){
-      beginGroup(600);
-      screenLeds.push([]);
-      for(c=0;c<16;c++){
-        beginGroup(34);
-        screenLeds[r].push(ledPending("#111","",22));
-        endGroup();
-      }
+      beginGroup(600);screenLeds.push([]);
+      for(c=0;c<16;c++){beginGroup(34);screenLeds[r].push(ledPending("#111","",22));endGroup();}
       endGroup();
     }
   });
   section("RAM VIEW 48 × 8",320,function(){
     for(b=0;b<48;b++){
-      beginGroup(300);
-      ramViewLeds.push([]);
-      for(i=7;i>=0;i--){
-        beginGroup(34);
-        ramViewLeds[b].push(ledPending("#ffb020","",22));
-        endGroup();
-      }
+      beginGroup(300);ramViewLeds.push([]);
+      for(i=7;i>=0;i--){beginGroup(34);ramViewLeds[b].push(ledPending("#ffb020","",22));endGroup();}
       endGroup();
     }
   });
@@ -690,51 +634,33 @@ function buildCPU48(){
     }
   });
   forceNewRow();
-  section("RAM 48 × 8  (384 D-latch)",4800,function(){
+  section("RAM 48 × 8",4800,function(){
     for(i=0;i<48;i++){
-      beginGroup(140);
-      RAM.push([]);
-      for(b=0;b<8;b++){
-        beginGroup(18);
-        RAM[i].push(LAT(0));
-        endGroup();
-      }
+      beginGroup(140);RAM.push([]);
+      for(b=0;b<8;b++){beginGroup(18);RAM[i].push(LAT(0));endGroup();}
       endGroup();
     }
   });
   forceNewRow();
   section("TAG MEM 48 × 8",4800,function(){
     for(i=0;i<48;i++){
-      beginGroup(140);
-      TAGS.push([]);
-      for(b=0;b<8;b++){
-        beginGroup(18);
-        TAGS[i].push(LAT(0));
-        endGroup();
-      }
+      beginGroup(140);TAGS.push([]);
+      for(b=0;b<8;b++){beginGroup(18);TAGS[i].push(LAT(0));endGroup();}
       endGroup();
     }
   });
   forceNewRow();
-  section("READ MUX B  8 × 64:1",4800,function(){
+  section("READ MUX B",4800,function(){
     for(b=0;b<8;b++){
-      beginGroup(400);
-      var acc=null;
-      for(i=0;i<48;i++){
-        var t=AND(tagDec[i],RAM[i][b].o);
-        acc=(acc===null)?t:OR(acc,t);
-      }
+      beginGroup(400);var acc=null;
+      for(i=0;i<48;i++){var t=AND(tagDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}
       srcB[b]=acc;endGroup();
     }
   });
-  section("READ MUX C  8 × 64:1",4800,function(){
+  section("READ MUX C",4800,function(){
     for(b=0;b<8;b++){
-      beginGroup(400);
-      var acc=null;
-      for(i=0;i<48;i++){
-        var t=AND(dataDec[i],RAM[i][b].o);
-        acc=(acc===null)?t:OR(acc,t);
-      }
+      beginGroup(400);var acc=null;
+      for(i=0;i<48;i++){var t=AND(dataDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}
       srcC[b]=acc;endGroup();
     }
   });
@@ -764,9 +690,7 @@ function buildCPU48(){
   });
   section("SHL · SHR · INC · DEC · NEG",1600,function(){
     var lR=[],rR=[];
-    for(b=0;b<8;b++){
-      lR.push(b===0?K0:srcB[b-1]);rR.push(b===7?K0:srcB[b+1]);
-    }
+    for(b=0;b<8;b++){lR.push(b===0?K0:srcB[b-1]);rR.push(b===7?K0:srcB[b+1]);}
     opR[12]=lR;opR[13]=rR;
     opR[14]=add8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]);
     opR[15]=sub8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]);
@@ -780,8 +704,7 @@ function buildCPU48(){
   forceNewRow();
   section("OUTPUT MUX",3200,function(){
     for(b=0;b<8;b++){
-      beginGroup(400);
-      var acc=null;
+      beginGroup(400);var acc=null;
       for(i=0;i<19;i++){
         if(!opR[i]) continue;
         var t=AND(opDec[i],opR[i][b]);
@@ -862,15 +785,57 @@ function buildCPU48(){
   forceNewRow();
   for(i=0;i<48;i++) for(b=0;b<8;b++) rewireLed(ramViewLeds[i][7-b],RAM[i][b].o);
   globalRAM=RAM;
+
+  /* Simpan referensi untuk swap */
+  window.__cpuRefs = {
+    OP:OP, D:D, T:T, A:A, RUNo:RUNo, WRo:WRo,
+    opDec:opDec, destDec:destDec, tagDec:tagDec, dataDec:dataDec,
+    srcB:srcB, srcC:srcC, finalR:finalR, delayReg:delayReg,
+    gateCount: gates.length
+  };
+}
+function swapInRange(oldN, newN, maxG){
+  for(var w=0;w<wires.length;w++){
+    var wo=wires[w];
+    if(wo.s===oldN){
+      if(wo.g){
+        var idx=gates.indexOf(wo.g);
+        if(idx>=0 && idx<maxG) wo.s=newN;
+      } else if(wo.l){
+        wo.s=newN;
+      }
+    }
+  }
+  for(var g=0;g<maxG;g++){
+    var gi=gates[g].i;
+    for(var j=0;j<gi.length;j++){
+      if(gi[j]===oldN) gi[j]=newN;
+    }
+  }
+}
+
+function readRAM(addrBits){
+  var dec=dec6(addrBits);
+  var out=[];
+  for(var b=0;b<8;b++){
+    var acc=null;
+    for(var i=0;i<48;i++){
+      var t=AND(dec[i],globalRAM[i][b].o);
+      acc=(acc===null)?t:OR(acc,t);
+    }
+    out.push(acc);
+  }
+  return out;
 }
 
 function buildQueue(){
   var QADDR=new Array(6),QORD=new Array(6);
   var CLRQo,QUEUEo,RUNQo,QCLKo;
-  var queuePrev,clrqPrev,runqPrev,queueEdge,clrqEdge,runqEdge;
-  var slots=[],ptr=[],ptrSel=[],qAddr=[],qOut=new Array(8);
+  var queuePrev,clrqPrev,runqPrev,qclkPrev;
+  var queueEdge,clrqEdge,runqEdge,qclkEdge;
+  var slots=[],ptr=[],ptrSel=[],qAddr=[];
+  var visLogic=[],visLeds=[];
   var i,b,s;
-  var qDec;
 
   section("QUEUE ADDR (6)",700,function(){
     for(i=5;i>=0;i--) QADDR[i]=sw("QA"+i);
@@ -890,18 +855,22 @@ function buildQueue(){
     led(CLRQo,"#ff4d4d","CQ",22);led(QUEUEo,"#39d353","Q",22);
     led(RUNQo,"#ffb020","RQ",22);endGroup();
   });
-  section("QCLK",240,function(){ QCLKo=osc(4,"QCLK").o; });
+  section("QCLK",240,function(){ QCLKo=osc(12,"QCLK").o; });
   forceNewRow();
-  section("QUEUE EDGE DETECT",900,function(){
+
+  section("QUEUE EDGE DETECT",1400,function(){
     queuePrev=LAT(0);setLat(queuePrev,QUEUEo,QCLKo);
     clrqPrev=LAT(0);setLat(clrqPrev,CLRQo,QCLKo);
     runqPrev=LAT(0);setLat(runqPrev,RUNQo,QCLKo);
+    qclkPrev=LAT(0);setLat(qclkPrev,QCLKo,QCLKo);
     queueEdge=AND(QUEUEo,NOT(queuePrev.o));
     clrqEdge=AND(CLRQo,NOT(clrqPrev.o));
     runqEdge=AND(RUNQo,NOT(runqPrev.o));
+    qclkEdge=AND(QCLKo,NOT(qclkPrev.o));
   });
   forceNewRow();
-  section("QUEUE STORAGE  8 × 7 D-latch",900,function(){
+
+  section("QUEUE STORAGE 8 × 7",900,function(){
     for(s=0;s<8;s++){
       beginGroup(90);
       var slot={addr:[],valid:null};
@@ -911,7 +880,6 @@ function buildQueue(){
       endGroup();
     }
   });
-  forceNewRow();
   section("QUEUE PUSH & CLEAR",1400,function(){
     var cum=K1;
     for(s=0;s<8;s++){
@@ -927,22 +895,14 @@ function buildQueue(){
     }
   });
   forceNewRow();
-  section("QUEUE DISPLAY",700,function(){
-    for(s=0;s<8;s++){
-      beginGroup(280);
-      for(b=5;b>=0;b--) led(slots[s].addr[b].o,"#a060ff","s"+s+"b"+b,22);
-      led(slots[s].valid.o,"#39d353","v"+s,22);
-      endGroup();
-    }
-  });
-  forceNewRow();
-  section("QUEUE POINTER",600,function(){
+
+  section("QUEUE POINTER (3-bit)",700,function(){
     for(i=0;i<3;i++) ptr[i]=LAT(0);
-    var inc=AND(QCLKo,RUNQo);
     var next=addN([ptr[0].o,ptr[1].o,ptr[2].o],[K1,K0,K0],K0,3).sum;
+    var incOn=qclkEdge;
     for(i=0;i<3;i++){
       var d=OR(AND(runqEdge,K0),AND(NOT(runqEdge),next[i]));
-      setLat(ptr[i],d,OR(inc,runqEdge));
+      setLat(ptr[i],d,incOn);
     }
     beginGroup(120);
     for(i=2;i>=0;i--) led(ptr[i].o,"#ffb020","p"+i,22);
@@ -960,7 +920,8 @@ function buildQueue(){
     }
   });
   forceNewRow();
-  section("QUEUE ADDR MUX",1200,function(){
+
+  section("QUEUE ADDR MUX (6 × 8:1)",1400,function(){
     for(b=0;b<6;b++){
       beginGroup(400);
       var acc=null;
@@ -972,45 +933,105 @@ function buildQueue(){
       endGroup();
     }
   });
-  section("QUEUE ADDR DECODE",2400,function(){
-    qDec=dec6([qAddr[0],qAddr[1],qAddr[2],qAddr[3],qAddr[4],qAddr[5]]);
-  });
-  forceNewRow();
-  section("QUEUE READ MUX",5000,function(){
-    for(b=0;b<8;b++){
-      beginGroup(600);
+
+  section("QUEUE VIS LOGIC  (48 cell)",3800,function(){
+    var slotDec=[];
+    for(s=0;s<8;s++){
+      beginGroup(400);
+      var ab=[slots[s].addr[0].o,slots[s].addr[1].o,slots[s].addr[2].o,
+              slots[s].addr[3].o,slots[s].addr[4].o,slots[s].addr[5].o];
+      slotDec.push(dec6(ab));
+      endGroup();
+    }
+    for(var p=0;p<48;p++){
+      beginGroup(380);
       var acc=null;
-      for(var r=0;r<48;r++){
-        var t=AND(qDec[r],globalRAM[r][b].o);
-        acc=(acc===null)?t:OR(acc,t);
+      for(s=0;s<8;s++){
+        var hit=AND(slotDec[s][p],slots[s].valid.o);
+        acc=(acc===null)?hit:OR(acc,hit);
       }
-      qOut[b]=acc;
+      visLogic.push(acc);
       endGroup();
     }
   });
-  section("QUEUE OUT (8 LED)",300,function(){
-    for(b=7;b>=0;b--) led(qOut[b],"#ffb020","qb"+b,26);
+  forceNewRow();
+
+  section("QUEUE VIS 48 × 1",1300,function(){
+    for(var p=0;p<48;p++){
+      beginGroup(28);
+      visLeds.push(led(visLogic[p],"#ff4d4d","",22));
+      endGroup();
+    }
+  });
+  forceNewRow();
+
+  /* EXECUTOR — fetch 4 bytes, mux dengan switch, swap node */
+  section("QUEUE EXECUTOR  (fetch · mux · swap)",9000,function(){
+    var aPlus1=addN(qAddr,[K1,K0,K0,K0,K0,K0],K0,6).sum;
+    var aPlus2=addN(aPlus1,[K1,K0,K0,K0,K0,K0],K0,6).sum;
+    var aPlus3=addN(aPlus2,[K1,K0,K0,K0,K0,K0],K0,6).sum;
+
+    var fetchOP = readRAM(qAddr);
+    var fetchDATA = readRAM(aPlus1);
+    var fetchTAG = readRAM(aPlus2);
+    var fetchDEST = readRAM(aPlus3);
+
+    var notRQ = NOT(RUNQo);
+
+    var effOP = [];
+    for(i=0;i<5;i++){
+      var a=AND(RUNQo,fetchOP[i]);
+      var bnd=AND(notRQ,window.__cpuRefs.OP[i].o);
+      effOP.push(OR(a,bnd));
+    }
+    var effD = [];
+    for(i=0;i<8;i++){
+      var a=AND(RUNQo,fetchDATA[i]);
+      var bnd=AND(notRQ,window.__cpuRefs.D[i].o);
+      effD.push(OR(a,bnd));
+    }
+    var effT = [];
+    for(i=0;i<8;i++){
+      var a=AND(RUNQo,fetchTAG[i]);
+      var bnd=AND(notRQ,window.__cpuRefs.T[i].o);
+      effT.push(OR(a,bnd));
+    }
+    var effA = [];
+    for(i=0;i<6;i++){
+      var a=AND(RUNQo,fetchDEST[i]);
+      var bnd=AND(notRQ,window.__cpuRefs.A[i].o);
+      effA.push(OR(a,bnd));
+    }
+
+    var effRUN = OR(AND(RUNQo, qclkEdge), AND(notRQ, window.__cpuRefs.RUNo));
+    var effWR = OR(RUNQo, AND(notRQ, window.__cpuRefs.WRo));
+
+    var maxG=window.__cpuRefs.gateCount;
+    for(i=0;i<5;i++) swapInRange(window.__cpuRefs.OP[i].o, effOP[i], maxG);
+    for(i=0;i<8;i++) swapInRange(window.__cpuRefs.D[i].o, effD[i], maxG);
+    for(i=0;i<8;i++) swapInRange(window.__cpuRefs.T[i].o, effT[i], maxG);
+    for(i=0;i<6;i++) swapInRange(window.__cpuRefs.A[i].o, effA[i], maxG);
+    swapInRange(window.__cpuRefs.RUNo, effRUN, maxG);
+    swapInRange(window.__cpuRefs.WRo, effWR, maxG);
   });
 }
 
-/* ---- RE-LAYOUT 4:3 ----
-   Hanya memindahkan posisi section (gerbang, saklar, LED, node kabel).
-   Logika / gerbang tidak diubah sama sekali. Bingkai luar dibuat
-   persis rasio 4:3 dengan luas sekecil mungkin. */
 function relayout43(){
   var GX=14,GY=16,M=40,TOP=90,RATIO=4/3,CG=90,RG=36;
   var secs=sectionsData,n=secs.length,i,k,maxW=0,totW=0,idx={};
   if(!n)return null;
   for(i=0;i<n;i++){idx[secs[i].title]=i;if(secs[i].w>maxW)maxW=secs[i].w;totW+=secs[i].w+GX;}
   var fixed=[],isFixed={},y=0,inW=0;
-  var INP=["OPCODE (5)","DATA (8)","TAG (8)","DEST ADDR (6)","ACTION","CLK","QUEUE ADDR (6)","QUEUE ORDER (6)","QUEUE ACTION","QCLK"];
+  var INP=["OPCODE (5)","DATA (8)","TAG (8)","DEST ADDR (6)","ACTION","CLK",
+           "QUEUE ADDR (6)","QUEUE ORDER (6)","QUEUE ACTION","QCLK"];
   for(k=0;k<INP.length;k++){var a=idx[INP[k]];if(a===undefined)continue;fixed.push({i:a,x:0,y:y});y+=secs[a].h+RG;if(secs[a].w>inW)inW=secs[a].w;}
-  var x0=inW+CG,sc=idx["SCREEN 16 × 16"],rv=idx["RAM VIEW 48 × 8"],qd=idx["QUEUE DISPLAY"],qo=idx["QUEUE OUT (8 LED)"];
+  var x0=inW+CG,sc=idx["SCREEN 16 × 16"],rv=idx["RAM VIEW 48 × 8"],qv=idx["QUEUE VIS 48 × 1"];
   if(sc!==undefined){
     fixed.push({i:sc,x:x0,y:0});
-    if(rv!==undefined)fixed.push({i:rv,x:x0+secs[sc].w+CG,y:0});
-    if(qd!==undefined)fixed.push({i:qd,x:x0,y:secs[sc].h+CG});
-    if(qo!==undefined)fixed.push({i:qo,x:x0+(qd!==undefined?secs[qd].w+CG:0),y:secs[sc].h+CG});
+    var xa=x0+secs[sc].w+CG;
+    if(rv!==undefined){fixed.push({i:rv,x:xa,y:0});}
+    var xb=xa+(rv!==undefined?secs[rv].w+CG:0);
+    if(qv!==undefined){fixed.push({i:qv,x:xb,y:0});}
   }
   for(k=0;k<fixed.length;k++)isFixed[fixed[k].i]=1;
   function pack(Wp){
@@ -1064,8 +1085,6 @@ function relayout43(){
   return {x:0,y:0,w:best.f.W,h:best.f.H};
 }
 
-/* Jalur kabel: tiap net dapat "lane" vertikal sendiri (tidak ada 2 net beda
-   berbagi garis vertikal yang sama & saling tumpang tindih). */
 function routeWires(){
   var STEP=2,buckets={},list=[],i,w;
   for(i=0;i<wires.length;i++){
@@ -1104,7 +1123,7 @@ function loadProject(){
   frame43=relayout43();
   routeWires();
   if(frame43){
-    labels.push({t:"CPU 48  ·  48-byte RAM  ·  queue  ·  16×16 font screen",
+    labels.push({t:"CPU 48  ·  4-byte instruction  ·  queue executor  ·  16×16 screen",
       x:Math.round(frame43.w/2),y:60,s:18,c:"#222"});
   }
   simulate();
