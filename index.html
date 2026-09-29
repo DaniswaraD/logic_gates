@@ -125,10 +125,11 @@ var K0={v:0,x:0,y:0,virtual:true},K1={v:1,x:0,y:0,virtual:true};
 var groupStack;
 var globalRAM=null;
 var sectionsData=[];
+var frame43=null;
 
 function reset(){
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  gates=[];sws=[];leds=[];labels=[];wires=[];sectionsData=[];
+  gates=[];sws=[];leds=[];labels=[];wires=[];sectionsData=[];frame43=null;
   groupStack=[{x:20,y:80,rowH:0,maxW:60000,maxXUsed:0,maxYUsed:0,gStart:0,sStart:0,lStart:0}];
   vp=E("g",{});svg.appendChild(vp);
   lS=E("g",{});lW=E("g",{});lG=E("g",{});lL=E("g",{});lU=E("g",{});
@@ -177,7 +178,8 @@ function section(title,maxW,fn){
   sectionsData.push({
     x:minX-pad, y:minY-pad-18,
     w:(maxX-minX)+2*pad, h:(maxY-minY)+2*pad+18,
-    title:title
+    title:title,
+    g0:g0,g1:gates.length,s0:s0,s1:sws.length,l0:l0,l1:leds.length
   });
 }
 function N(v,d){return{v:v|0,d:d|0};}
@@ -230,7 +232,7 @@ function ledPending(color,label_,size){
   var sz=size||22;
   var p=place(sz,sz);
   var ph={v:0,x:p.x-2,y:p.y,virtual:true};
-  var l={i:ph,v:0,c:color||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:label_||"",sz:sz,_ph:true};
+  var l={i:ph,v:0,c:color||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:label_||"",sz:sz,_ph:true,ph:ph};
   wires.push({s:ph,l:l});
   leds.push(l);return l;
 }
@@ -375,6 +377,9 @@ function renderFrame(){
 
   // Sections - always render (few, cheap)
   clearLayer(lS);
+  // Bingkai luar 4:3
+  if(frame43) lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:frame43.w,height:frame43.h,
+    fill:"none",stroke:"#222","stroke-width":3,"vector-effect":"non-scaling-stroke"}));
   for(var i=0;i<sectionsData.length;i++){
     var s=sectionsData[i];
     if(s.x+s.w < vx1 || s.x > vx2 || s.y+s.h < vy1 || s.y > vy2) continue;
@@ -984,28 +989,60 @@ function buildQueue(){
   });
 }
 
+/* ---- RE-LAYOUT 4:3 ----
+   Hanya memindahkan posisi section (gerbang, saklar, LED, node kabel).
+   Logika / gerbang tidak diubah sama sekali. Bingkai luar dibuat
+   persis rasio 4:3 dengan luas sekecil mungkin. */
+function relayout43(){
+  var GX=40,GY=50,M=80,TOP=120,RATIO=4/3;
+  var secs=sectionsData,n=secs.length,i,maxW=0,totW=0;
+  if(!n)return null;
+  for(i=0;i<n;i++){if(secs[i].w>maxW)maxW=secs[i].w;totW+=secs[i].w+GX;}
+  function pack(Wp){
+    var x=0,y=0,rowH=0,usedW=0,pos=[];
+    for(var j=0;j<n;j++){
+      var s=secs[j];
+      if(x>0&&x+s.w>Wp){y+=rowH+GY;x=0;rowH=0;}
+      pos.push({x:x,y:y});
+      x+=s.w+GX;
+      if(x-GX>usedW)usedW=x-GX;
+      if(s.h>rowH)rowH=s.h;
+    }
+    return {pos:pos,w:usedW,h:y+rowH};
+  }
+  function fit(p){
+    var wN=p.w+2*M,hN=p.h+TOP+M,W,H;
+    if(wN/hN<RATIO){H=hN;W=hN*RATIO;}else{W=wN;H=wN/RATIO;}
+    return {W:W,H:H};
+  }
+  var best=null,bestArea=Infinity;
+  for(var t=0;t<=400;t++){
+    var Wp=maxW*Math.pow(totW/maxW,t/400);
+    var p=pack(Wp),f=fit(p),a=f.W*f.H;
+    if(a<bestArea){bestArea=a;best={p:p,f:f};}
+  }
+  for(i=0;i<n;i++){
+    var s=secs[i],nx=M+best.p.pos[i].x,ny=TOP+best.p.pos[i].y;
+    var dx=nx-s.x,dy=ny-s.y,k;
+    for(k=s.g0;k<s.g1;k++){var g=gates[k];g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
+    for(k=s.s0;k<s.s1;k++){var q=sws[k];q.px+=dx;q.py+=dy;q.o.x+=dx;q.o.y+=dy;}
+    for(k=s.l0;k<s.l1;k++){
+      var l=leds[k];l.px+=dx;l.py+=dy;
+      if(l.ph){l.ph.x=l.px-(l.sz||22)*0.4-2;l.ph.y=l.py;}
+    }
+    s.x=nx;s.y=ny;
+  }
+  return {x:0,y:0,w:best.f.W,h:best.f.H};
+}
+
 function loadProject(){
   reset();
   buildCPU48();
   buildQueue();
-  var b=document.createElementNS(NS,"g");
-  // bounds & title
-  var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  function ext(x1,y1,x2,y2){
-    if(x1<minX)minX=x1;if(y1<minY)minY=y1;
-    if(x2>maxX)maxX=x2;if(y2>maxY)maxY=y2;
-  }
-  for(var i=0;i<gates.length;i++){var g=gates[i];ext(g.px-6,g.py-6,g.px+50,g.py+44);}
-  for(var i=0;i<sws.length;i++){var s=sws[i];ext(s.px-5,s.py-5,s.px+70,s.py+86);}
-  for(var i=0;i<leds.length;i++){var l=leds[i];var r=l.sz?l.sz*0.4:10;ext(l.px-r-3,l.py-r-3,l.px+r+3,l.py+r+3);}
-  if(isFinite(minX)){
-    var pad=70;
-    lS.insertBefore(E("rect",{
-      x:minX-pad,y:minY-pad,width:(maxX-minX)+pad*2,height:(maxY-minY)+pad*2,
-      fill:"none",stroke:"#222","stroke-width":3
-    }),lS.firstChild);
+  frame43=relayout43();
+  if(frame43){
     labels.push({t:"CPU 48  ·  48-byte RAM  ·  queue  ·  16×16 font screen",
-      x:Math.round((minX+maxX)/2),y:minY-50,s:18,c:"#222"});
+      x:Math.round(frame43.w/2),y:60,s:18,c:"#222"});
   }
   simulate();
   renderFrame();
