@@ -79,6 +79,11 @@ var NS="http://www.w3.org/2000/svg";
 var svg=document.getElementById("s");
 function E(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
 
+/* ============================================================
+ *  FONT ROM — dipakai HANYA sebagai KONSTANTA GATE (K0/K1).
+ *  Bukan untuk menghitung output runtime. Semua pixel layar
+ *  di-drive oleh output AND/OR/NOT gate yang sesungguhnya.
+ * ============================================================ */
 var FONT={};
 FONT[32]=[0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00];
 FONT[48]=[0x3C,0x66,0x6E,0x76,0x66,0x66,0x3C,0x00];
@@ -120,11 +125,15 @@ FONT[90]=[0x7E,0x06,0x0C,0x18,0x30,0x60,0x7E,0x00];
 var SUPPORTED=Object.keys(FONT).map(Number);
 
 /* ============================================================
- *  UKURAN PIKsel LAYAR — tiap LED = 4px
- *  Karakter 8x8 pixel ⇒ 32×32 px di layar.
- *  Layar 16×16 ⇒ 64×64 px.
+ *  UKURAN LAYOUT FIXED — JANGAN DIUBAH-UBAH
+ *  Semua elemen visual memakai konstanta ini agar konsisten.
+ *  Tidak ada kaitan dengan logic gates (hanya ukuran render).
  * ============================================================ */
-var SCREEN_LED_SIZE = 4;
+var SIZE_SCREEN_LED = 22;   /* LED layar 16x16           */
+var SIZE_RAM_LED    = 22;   /* LED RAM VIEW 48x8         */
+var SIZE_QVIS_LED   = 22;   /* LED QUEUE VIS 48          */
+var SIZE_QOUT_LED   = 26;   /* LED QUEUE OUT 8           */
+var SIZE_SIGNAL_LED = 22;   /* LED sinyal O/D/T/A/W/R..  */
 
 var gates=[],sws=[],leds=[],labels=[],wires=[];
 var vp,lW,lG,lL,lU,lS;
@@ -233,14 +242,14 @@ function osc(period,label_){
   sws.push(s);return s;
 }
 function led(inputNode,color,label_,size){
-  var sz=size||22;
+  var sz=size||SIZE_SIGNAL_LED;
   var p=place(sz,sz);
   var l={i:inputNode,v:0,c:color||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:label_||"",sz:sz};
   if(inputNode.x!==undefined && !inputNode.virtual)wires.push({s:inputNode,l:l});
   leds.push(l);return l;
 }
 function ledPending(color,label_,size){
-  var sz=size||22;
+  var sz=size||SIZE_SIGNAL_LED;
   var p=place(sz,sz);
   var ph={v:0,x:p.x-2,y:p.y,virtual:true};
   var l={i:ph,v:0,c:color||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:label_||"",sz:sz,_ph:true,ph:ph};
@@ -334,7 +343,7 @@ function renderSwitch(s){
   lU.appendChild(grp);
 }
 function renderLed(l){
-  var sz=l.sz||22,rOut=sz*0.4,rIn=sz*0.22;
+  var sz=l.sz||SIZE_SIGNAL_LED,rOut=sz*0.4,rIn=sz*0.22;
   var on=l.i.v;
   var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
   if(sz<28)grp.appendChild(E("line",{x1:-rOut-2,y1:0,x2:-rOut,y2:0,stroke:"#222","stroke-width":Math.max(0.5,sz*0.05)}));
@@ -421,6 +430,12 @@ function renderFrame(){
   var el=document.getElementById("lod");
   if(el.textContent !== "LOD: "+lodText) el.textContent = "LOD: "+lodText;
 }
+
+/* ============================================================
+ *  GATE EVALUATOR — INI ADALAH PROSES RUNTIME.
+ *  Semua nilai logika dihitung di sini dari gate AND/OR/NOT/XOR.
+ *  Tidak ada shortcut. RAM→decoder→ALU→layar semuanya lewat sini.
+ * ============================================================ */
 function evalComb(g){
   var a=g.i[0]?g.i[0].v:0,b=g.i[1]?g.i[1].v:0;
   switch(g.t){
@@ -553,25 +568,25 @@ function buildFrontend(){
   section("INPUT · OPCODE (5)",620,function(){
     for(i=4;i>=0;i--) OP[i]=sw("O"+i);
     beginGroup(160);
-    for(i=4;i>=0;i--) led(OP[i].o,"#4a9eff","O"+i,22);
+    for(i=4;i>=0;i--) led(OP[i].o,"#4a9eff","O"+i,SIZE_SIGNAL_LED);
     endGroup();
   });
   section("INPUT · DATA (8)",920,function(){
     for(i=7;i>=0;i--) D[i]=sw("D"+i);
     beginGroup(200);
-    for(i=7;i>=0;i--) led(D[i].o,"#39d353","D"+i,22);
+    for(i=7;i>=0;i--) led(D[i].o,"#39d353","D"+i,SIZE_SIGNAL_LED);
     endGroup();
   });
   section("INPUT · TAG (8)",920,function(){
     for(i=7;i>=0;i--) T[i]=sw("T"+i);
     beginGroup(200);
-    for(i=7;i>=0;i--) led(T[i].o,"#ffb020","T"+i,22);
+    for(i=7;i>=0;i--) led(T[i].o,"#ffb020","T"+i,SIZE_SIGNAL_LED);
     endGroup();
   });
   section("INPUT · DEST (6)",720,function(){
     for(i=5;i>=0;i--) A[i]=sw("A"+i);
     beginGroup(200);
-    for(i=5;i>=0;i--) led(A[i].o,"#a060ff","A"+i,22);
+    for(i=5;i>=0;i--) led(A[i].o,"#a060ff","A"+i,SIZE_SIGNAL_LED);
     endGroup();
   });
   section("INPUT · ACTION",1000,function(){
@@ -579,16 +594,11 @@ function buildFrontend(){
     core.RUNo=sw("RUN").o;core.CLRo=sw("CLR").o;core.LDo=sw("LOAD").o;
     core.DESTo=sw("DESTRUCT").o;
     beginGroup(340);
-    led(core.WRo,"#39d353","W",22);led(core.RDo,"#4a9eff","R",22);
-    led(core.RUNo,"#ff4d4d","N",22);led(core.CLRo,"#ff4d4d","C",22);
-    led(core.LDo,"#ffb020","L",22);led(core.DESTo,"#000","D",22);
+    led(core.WRo,"#39d353","W",SIZE_SIGNAL_LED);led(core.RDo,"#4a9eff","R",SIZE_SIGNAL_LED);
+    led(core.RUNo,"#ff4d4d","N",SIZE_SIGNAL_LED);led(core.CLRo,"#ff4d4d","C",SIZE_SIGNAL_LED);
+    led(core.LDo,"#ffb020","L",SIZE_SIGNAL_LED);led(core.DESTo,"#000","D",SIZE_SIGNAL_LED);
     endGroup();
   });
-  /* ============================================================
-   *  CLK  = osc(2) → toggles setiap 120ms (untuk write pulse)
-   *  QCLK  = osc(8) → toggles setiap 480ms ⇒ 1 instruksi ≈ 960ms
-   *                  ⇒ tiap state tampil ~1 detik.
-   * ============================================================ */
   section("INPUT · CLK",240,function(){ core.CLKo=osc(2,"CLK").o; });
   forceNewRow();
 
@@ -630,22 +640,21 @@ function buildQueue(){
   section("QUEUE · ADDR (6)",700,function(){
     for(i=5;i>=0;i--) QADDR[i]=sw("QA"+i);
     beginGroup(200);
-    for(i=5;i>=0;i--) led(QADDR[i].o,"#a060ff","QA"+i,22);
+    for(i=5;i>=0;i--) led(QADDR[i].o,"#a060ff","QA"+i,SIZE_SIGNAL_LED);
     endGroup();
   });
   section("QUEUE · ORDER (6)",700,function(){
     for(i=5;i>=0;i--) QORD[i]=sw("QO"+i);
     beginGroup(200);
-    for(i=5;i>=0;i--) led(QORD[i].o,"#4a9eff","QO"+i,22);
+    for(i=5;i>=0;i--) led(QORD[i].o,"#4a9eff","QO"+i,SIZE_SIGNAL_LED);
     endGroup();
   });
   section("QUEUE · ACTION",700,function(){
     core.CLRQo=sw("CLR_Q").o;core.QUEUEo=sw("QUEUE").o;core.RUNQo=sw("RUN_Q").o;
     beginGroup(240);
-    led(core.CLRQo,"#ff4d4d","CQ",22);led(core.QUEUEo,"#39d353","Q",22);
-    led(core.RUNQo,"#ffb020","RQ",22);endGroup();
+    led(core.CLRQo,"#ff4d4d","CQ",SIZE_SIGNAL_LED);led(core.QUEUEo,"#39d353","Q",SIZE_SIGNAL_LED);
+    led(core.RUNQo,"#ffb020","RQ",SIZE_SIGNAL_LED);endGroup();
   });
-  /* QCLK lambat ⇒ tiap instruksi ≈ 1 detik */
   section("QUEUE · QCLK",240,function(){ core.QCLKo=osc(8,"QCLK").o; });
   forceNewRow();
 
@@ -691,7 +700,7 @@ function buildQueue(){
       setLat(ptr[i],next[i],inc);
     }
     beginGroup(120);
-    for(i=2;i>=0;i--) led(ptr[i].o,"#ffb020","p"+i,22);
+    for(i=2;i>=0;i--) led(ptr[i].o,"#ffb020","p"+i,SIZE_SIGNAL_LED);
     endGroup();
   });
   section("QUEUE · POINTER DECODE 3→8",1200,function(){
@@ -832,6 +841,7 @@ function buildBackend(){
   var charSels=[];
   var screenLeds=[],ramViewLeds=[];
   var fontNodes={};
+  /* Font ROM → jadikan konstanta gate K0/K1 (compile-time) */
   for(var key in FONT){
     fontNodes[key]=[];
     for(r=0;r<8;r++)for(c=0;c<8;c++){
@@ -960,21 +970,14 @@ function buildBackend(){
   });
   forceNewRow();
 
-  /* ==================== WRITE ENABLE ====================
-     - RUN_Q memaksa WR aktif
-     - NOP (0), DELAY (18), SCRCLR (19) TIDAK menulis RAM[dest]
-     - SCRCLR tetap clear RAM[0..3] via scrClrPulse
-     ===================================================== */
   section("OUTPUT · WRITE ENABLE",2200,function(){
     var runOk=AND(core.effRunEdge,core.nDelay);
     var wrEnable=OR(core.WRo,core.RUNQo);
     var wrPulse=AND(runOk,wrEnable);
     var nClr=NOT(core.clrEdge);
     var scrClrPulse=AND(runOk,opDec[19]);
-
     var noWrite=OR(OR(opDec[0],opDec[18]),opDec[19]);
     var doWrite=NOT(noWrite);
-
     for(i=0;i<48;i++){
       beginGroup(60);
       var wEn=AND(AND(wrPulse,destDec[i]),doWrite);
@@ -991,6 +994,13 @@ function buildBackend(){
   });
   forceNewRow();
 
+  /* ============================================================
+   *  SCREEN CHAR DETECT — PURE LOGIC (equality comparator)
+   *  Untuk tiap kuadran `bi` dan tiap kode karakter `cval`:
+   *  bangun AND dari 8 bit (dinegasi bila bit char=0).
+   *  Hasilnya: 1 bila RAM[bi] == cval, 0 bila tidak.
+   *  TIDAK ada `if (RAM==0x48)` di JS. Semua lewat gate.
+   * ============================================================ */
   for(i=0;i<4;i++) for(b=0;b<8;b++) byteBits[i].push(RAM[i][b].o);
   section("SCREEN · CHAR DETECT",4000,function(){
     for(var bi=0;bi<4;bi++){
@@ -1013,13 +1023,18 @@ function buildBackend(){
   });
   forceNewRow();
 
-  /* ==================== LAYAR 16×16 (LED 4px) ==================== */
+  /* ============================================================
+   *  LAYAR 16×16 — 256 LED. Setiap LED di-drive oleh gate OR dari
+   *  kontribusi tiap karakter: AND(charSel, fontBit). fontBit
+   *  sudah K1/K0 → AND dengan konstanta = murni gate.
+   *  TIDAK ada JS yang menghitung "tampilkan H di sini".
+   * ============================================================ */
   section("OUTPUT · SCREEN 16 × 16",620,function(){
     for(r=0;r<16;r++){
       beginGroup(600);
       screenLeds.push([]);
       for(c=0;c<16;c++){
-        screenLeds[r].push(ledPending("#111","",SCREEN_LED_SIZE));
+        screenLeds[r].push(ledPending("#111","",SIZE_SCREEN_LED));
       }
       endGroup();
     }
@@ -1035,8 +1050,8 @@ function buildBackend(){
           for(var ci=0;ci<SUPPORTED.length;ci++){
             var sel=charSels[bi*SUPPORTED.length+ci];
             var fbit=fontNodes[SUPPORTED[ci]][r*8+c];
-            if(fbit===K0) continue;
-            contribs.push(AND(sel,fbit));
+            if(fbit===K0) continue;                 /* font bit 0 → tidak kontribusi */
+            contribs.push(AND(sel,fbit));            /* murni gate AND */
           }
           if(contribs.length===0){endGroup();continue;}
           var acc=contribs[0];
@@ -1055,7 +1070,7 @@ function buildBackend(){
   section("OUTPUT · RAM VIEW 48 × 8",225,function(){
     for(b=0;b<48;b++){
       var row=[];
-      for(i=7;i>=0;i--) row.push(ledPending("#ffb020","",22));
+      for(i=7;i>=0;i--) row.push(ledPending("#ffb020","",SIZE_RAM_LED));
       ramViewLeds.push(row);
     }
   });
@@ -1092,7 +1107,7 @@ function buildBackend(){
 
   section("OUTPUT · QUEUE VIS 48",30,function(){
     for(var p=0;p<48;p++){
-      led(qInRow[p],"#ff4d4d","",22);
+      led(qInRow[p],"#ff4d4d","",SIZE_QVIS_LED);
     }
   });
   forceNewRow();
@@ -1117,7 +1132,7 @@ function buildBackend(){
     core.qOut=qOut;
   });
   section("OUTPUT · QUEUE OUT (8 LED)",300,function(){
-    for(b=7;b>=0;b--) led(core.qOut[b],"#ffb020","qb"+b,26);
+    for(b=7;b>=0;b--) led(core.qOut[b],"#ffb020","qb"+b,SIZE_QOUT_LED);
   });
 }
 
@@ -1235,7 +1250,12 @@ function routeWires(){
   }
 }
 
-/* ===================== PROGRAM LOADER ===================== */
+/* ============================================================
+ *  PROGRAM LOADER — INISIALISASI MEMORI SAJA
+ *  Ini hanya "membakar ROM": menyetel state awal latch.
+ *  Bukan menghitung output. Setelah ini, CPU dijalankan
+ *  oleh simulate() yang murni gate evaluation.
+ * ============================================================ */
 var DEFAULT_PROGRAM=[
   [0x13,0x00,0x00,0x00],[0x01,0x48,0x00,0x00],[0x01,0x49,0x00,0x01],
   [0x13,0x00,0x00,0x00],[0x01,0x4C,0x00,0x00],[0x01,0x4F,0x00,0x01],
