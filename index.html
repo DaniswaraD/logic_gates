@@ -119,6 +119,13 @@ FONT[89]=[0x66,0x66,0x66,0x3C,0x18,0x18,0x18,0x00];
 FONT[90]=[0x7E,0x06,0x0C,0x18,0x30,0x60,0x7E,0x00];
 var SUPPORTED=Object.keys(FONT).map(Number);
 
+/* ============================================================
+ *  UKURAN PIKsel LAYAR — tiap LED = 4px
+ *  Karakter 8x8 pixel ⇒ 32×32 px di layar.
+ *  Layar 16×16 ⇒ 64×64 px.
+ * ============================================================ */
+var SCREEN_LED_SIZE = 4;
+
 var gates=[],sws=[],leds=[],labels=[],wires=[];
 var vp,lW,lG,lL,lU,lS;
 var K0={v:0,x:0,y:0,virtual:true},K1={v:1,x:0,y:0,virtual:true};
@@ -330,8 +337,8 @@ function renderLed(l){
   var sz=l.sz||22,rOut=sz*0.4,rIn=sz*0.22;
   var on=l.i.v;
   var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
-  if(sz<28)grp.appendChild(E("line",{x1:-rOut-2,y1:0,x2:-rOut,y2:0,stroke:"#222","stroke-width":1.2}));
-  grp.appendChild(E("circle",{cx:0,cy:0,r:rOut,fill:"#fff",stroke:"#222","stroke-width":sz>28?1.4:1}));
+  if(sz<28)grp.appendChild(E("line",{x1:-rOut-2,y1:0,x2:-rOut,y2:0,stroke:"#222","stroke-width":Math.max(0.5,sz*0.05)}));
+  grp.appendChild(E("circle",{cx:0,cy:0,r:rOut,fill:"#fff",stroke:"#222","stroke-width":sz>28?1.4:Math.max(0.3,sz*0.06)}));
   grp.appendChild(E("circle",{cx:0,cy:0,r:rIn,fill:on?l.c:"#e8e8e8"}));
   if(l.label && sz>=20){
     var t=E("text",{x:0,y:-rOut-3,"text-anchor":"middle","font-size":7,fill:"#555"});
@@ -577,6 +584,11 @@ function buildFrontend(){
     led(core.LDo,"#ffb020","L",22);led(core.DESTo,"#000","D",22);
     endGroup();
   });
+  /* ============================================================
+   *  CLK  = osc(2) → toggles setiap 120ms (untuk write pulse)
+   *  QCLK  = osc(8) → toggles setiap 480ms ⇒ 1 instruksi ≈ 960ms
+   *                  ⇒ tiap state tampil ~1 detik.
+   * ============================================================ */
   section("INPUT · CLK",240,function(){ core.CLKo=osc(2,"CLK").o; });
   forceNewRow();
 
@@ -633,7 +645,8 @@ function buildQueue(){
     led(core.CLRQo,"#ff4d4d","CQ",22);led(core.QUEUEo,"#39d353","Q",22);
     led(core.RUNQo,"#ffb020","RQ",22);endGroup();
   });
-  section("QUEUE · QCLK",240,function(){ core.QCLKo=osc(3,"QCLK").o; });
+  /* QCLK lambat ⇒ tiap instruksi ≈ 1 detik */
+  section("QUEUE · QCLK",240,function(){ core.QCLKo=osc(8,"QCLK").o; });
   forceNewRow();
 
   section("QUEUE · EDGE DETECT",900,function(){
@@ -848,36 +861,24 @@ function buildBackend(){
   section("CTRL · DATA DECODE 6→64",2400,function(){
     dataDec=dec6(core.finalData);
   });
-
-  /* ====================== DELAY (FIXED) ======================
-     - delayLoad hanya saat DELAY (opDec[18]) & effRunEdge & delayReg==0
-     - delayReg decrement tiap CLK, berhenti di 0
-     =========================================================== */
   section("CTRL · DELAY 4-bit",1200,function(){
     core.delayReg=[];
     for(i=0;i<4;i++) core.delayReg.push(LAT(0));
     var db=[core.delayReg[0].o,core.delayReg[1].o,core.delayReg[2].o,core.delayReg[3].o];
     var delayActive=OR(OR(db[0],db[1]),OR(db[2],db[3]));
     var nDelay=NOT(delayActive);
-
     var delayLoad=AND(opDec[18], AND(core.effRunEdge, nDelay));
     var nLoad=NOT(delayLoad);
-
-    /* -1 dalam two's complement 4-bit = 0b1111 */
     var negOne=[K1,K1,K1,K1];
-    var decBits=addN(db,negOne,K0,4).sum; /* db - 1 */
-
+    var decBits=addN(db,negOne,K0,4).sum;
     for(i=0;i<4;i++){
-      /* jika delayActive: decBits[i]; jika tidak: 0 */
       var keepBit=AND(delayActive, decBits[i]);
-      /* jika delayLoad: finalData[i]; jika tidak: keepBit */
       var dd=OR(AND(delayLoad,core.finalData[i]),AND(nLoad,keepBit));
       setLat(core.delayReg[i],dd,core.CLKo);
     }
     core.nDelay=nDelay;
   });
   forceNewRow();
-
   section("MUX · READ B  8 × 48:1",4800,function(){
     for(b=0;b<8;b++){
       beginGroup(400);
@@ -959,11 +960,11 @@ function buildBackend(){
   });
   forceNewRow();
 
-  /* ==================== WRITE ENABLE (FIXED) ====================
+  /* ==================== WRITE ENABLE ====================
      - RUN_Q memaksa WR aktif
-     - NOP (0), DELAY (18), SCRCLR (19) TIDAK menulis ke RAM[dest]
-       → mencegah DELAY/SCRCLR menghapus karakter di layar
-     ============================================================== */
+     - NOP (0), DELAY (18), SCRCLR (19) TIDAK menulis RAM[dest]
+     - SCRCLR tetap clear RAM[0..3] via scrClrPulse
+     ===================================================== */
   section("OUTPUT · WRITE ENABLE",2200,function(){
     var runOk=AND(core.effRunEdge,core.nDelay);
     var wrEnable=OR(core.WRo,core.RUNQo);
@@ -971,14 +972,12 @@ function buildBackend(){
     var nClr=NOT(core.clrEdge);
     var scrClrPulse=AND(runOk,opDec[19]);
 
-    /* Opcode yang BOLEH menulis dest: semua kecuali 0, 18, 19 */
     var noWrite=OR(OR(opDec[0],opDec[18]),opDec[19]);
     var doWrite=NOT(noWrite);
 
     for(i=0;i<48;i++){
       beginGroup(60);
       var wEn=AND(AND(wrPulse,destDec[i]),doWrite);
-      /* SCRCLR: tulis 0 ke RAM[0..3] */
       if(i<4) wEn=OR(wEn,scrClrPulse);
       var en=OR(wEn,core.clrEdge);
       for(b=0;b<8;b++){
@@ -1014,12 +1013,13 @@ function buildBackend(){
   });
   forceNewRow();
 
+  /* ==================== LAYAR 16×16 (LED 4px) ==================== */
   section("OUTPUT · SCREEN 16 × 16",620,function(){
     for(r=0;r<16;r++){
       beginGroup(600);
       screenLeds.push([]);
       for(c=0;c<16;c++){
-        screenLeds[r].push(ledPending("#111","",22));
+        screenLeds[r].push(ledPending("#111","",SCREEN_LED_SIZE));
       }
       endGroup();
     }
@@ -1237,9 +1237,9 @@ function routeWires(){
 
 /* ===================== PROGRAM LOADER ===================== */
 var DEFAULT_PROGRAM=[
-  [0x01,0x48,0x00,0x00],[0x01,0x49,0x00,0x01],[0x01,0x48,0x00,0x00],
-  [0x01,0x4C,0x00,0x00],[0x01,0x4F,0x00,0x01],[0x01,0x4C,0x00,0x02],
-  [0x13,0x00,0x00,0x00],[0x13,0x00,0x00,0x00]
+  [0x13,0x00,0x00,0x00],[0x01,0x48,0x00,0x00],[0x01,0x49,0x00,0x01],
+  [0x13,0x00,0x00,0x00],[0x01,0x4C,0x00,0x00],[0x01,0x4F,0x00,0x01],
+  [0x01,0x4C,0x00,0x02],[0x13,0x00,0x00,0x00]
 ];
 var NOOP_INSTR=[0x01,0x00,0x00,0x2F];
 
