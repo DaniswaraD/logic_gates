@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 48</title>
+<title>CPU 64</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
@@ -31,7 +31,7 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 </style>
 </head>
 <body>
-<div id="title">CPU 48</div>
+<div id="title">CPU 64</div>
 <div id="lod">LOD: full</div>
 <div id="err"></div>
 <div id="projSel"><label>BUILT-IN:</label><select id="projDropdown"></select></div>
@@ -67,12 +67,146 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 <div class="row"><span class="c">1C</span>SPSHOW</div>
 <div class="row"><span class="c">1D</span>SPHIDE</div>
 <div class="row"><span class="c">1E</span>SCROLL</div>
+<div class="hdr">INSTRUCTION FORMAT (4 byte)</div>
+<div class="row">byte0 = OPCODE</div>
+<div class="row">byte1 = DATA (value / jump target)</div>
+<div class="row">byte2 = TAG  (src address for MOV/ALU)</div>
+<div class="row">byte3 = DEST (dst address)</div>
 </div>
 </div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll = zoom · drag = pan · pinch = zoom</div>
+<div id="help">scroll = zoom · drag = pan · pinch = zoom · dblclick = reset</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
-<script src="projects.js" onerror="window.__projFailed=true"></script>
+
+<script>
+window.BUILTIN_PROJECTS = {
+version: 7,
+projects: [
+{id:"hello-walk",name:"HELLO WALK",description:"Scroll HELLO W",program:[
+[0x1E,0x48,0x00,0x00],[0x1E,0x45,0x00,0x00],[0x1E,0x4C,0x00,0x00],[0x1E,0x4C,0x00,0x00],
+[0x1E,0x4F,0x00,0x00],[0x1E,0x20,0x00,0x00],[0x1E,0x57,0x00,0x00],[0x10,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"ticker",name:"TICKER",description:"Scroll digits 0123456",program:[
+[0x1E,0x30,0x00,0x00],[0x1E,0x31,0x00,0x00],[0x1E,0x32,0x00,0x00],[0x1E,0x33,0x00,0x00],
+[0x1E,0x34,0x00,0x00],[0x1E,0x35,0x00,0x00],[0x1E,0x36,0x00,0x00],[0x10,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"marquee",name:"MARQUEE",description:"Scroll ABCDEFG",program:[
+[0x1E,0x41,0x00,0x00],[0x1E,0x42,0x00,0x00],[0x1E,0x43,0x00,0x00],[0x1E,0x44,0x00,0x00],
+[0x1E,0x45,0x00,0x00],[0x1E,0x46,0x00,0x00],[0x1E,0x47,0x00,0x00],[0x10,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"wave",name:"WAVE",description:"HI LO scroll",program:[
+[0x1E,0x48,0x00,0x00],[0x1E,0x49,0x00,0x00],[0x1E,0x20,0x00,0x00],[0x1E,0x4C,0x00,0x00],
+[0x1E,0x4F,0x00,0x00],[0x1E,0x20,0x00,0x00],[0x1E,0x20,0x00,0x00],[0x10,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"banner",name:"BANNER",description:"COOL! banner",program:[
+[0x1E,0x43,0x00,0x00],[0x1E,0x4F,0x00,0x00],[0x1E,0x4F,0x00,0x00],[0x1E,0x4C,0x00,0x00],
+[0x1E,0x21,0x00,0x00],[0x1E,0x20,0x00,0x00],[0x1E,0x21,0x00,0x00],[0x10,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"runner",name:"RUNNER",description:"Sprite runs right and wraps",program:[
+[0x16,0x00,0x00,0x00],
+[0x17,0x08,0x00,0x00],
+[0x1C,0x00,0x00,0x00],
+[0x18,0x00,0x00,0x00],
+[0x12,0x01,0x00,0x00],
+[0x10,0x03,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"bounce",name:"BOUNCE",description:"Sprite climbs vertically and wraps",program:[
+[0x16,0x0E,0x00,0x00],
+[0x17,0x0F,0x00,0x00],
+[0x1C,0x00,0x00,0x00],
+[0x1B,0x00,0x00,0x00],
+[0x12,0x01,0x00,0x00],
+[0x10,0x03,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"stairway",name:"STAIRWAY",description:"Diagonal up-right sprite",program:[
+[0x16,0x02,0x00,0x00],
+[0x17,0x0C,0x00,0x00],
+[0x1C,0x00,0x00,0x00],
+[0x18,0x00,0x00,0x00],
+[0x1B,0x00,0x00,0x00],
+[0x12,0x01,0x00,0x00],
+[0x10,0x03,0x00,0x00],
+[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"zigzag",name:"ZIGZAG",description:"Diagonal down-right sprite",program:[
+[0x16,0x00,0x00,0x00],
+[0x17,0x00,0x00,0x00],
+[0x1C,0x00,0x00,0x00],
+[0x18,0x00,0x00,0x00],
+[0x1A,0x00,0x00,0x00],
+[0x12,0x01,0x00,0x00],
+[0x10,0x03,0x00,0x00],
+[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"joystick",name:"JOYSTICK",description:"Show sprite, move with joystick buttons",program:[
+[0x16,0x0E,0x00,0x00],
+[0x17,0x08,0x00,0x00],
+[0x1C,0x00,0x00,0x00],
+[0x10,0x03,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"sprite-scroll",name:"SPRITE SCROLL",description:"Sprite + scroll HI!",program:[
+[0x16,0x0E,0x00,0x00],
+[0x17,0x08,0x00,0x00],
+[0x1C,0x00,0x00,0x00],
+[0x1E,0x48,0x00,0x00],
+[0x1E,0x49,0x00,0x00],
+[0x1E,0x21,0x00,0x00],
+[0x10,0x03,0x00,0x00],
+[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+
+{id:"joy-run",name:"JOY RUN",description:"Sprite runs + joystick override",program:[
+[0x16,0x00,0x00,0x00],
+[0x17,0x08,0x00,0x00],
+[0x1C,0x00,0x00,0x00],
+[0x18,0x00,0x00,0x00],
+[0x12,0x01,0x00,0x00],
+[0x10,0x03,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
+[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]}
+]};
+</script>
+
 <script>
 (function(){
 "use strict";
@@ -83,7 +217,7 @@ function showErr(msg){
 var el=document.getElementById("err");
 el.style.display="block";
 el.textContent="ERROR: "+msg;
-console.error("CPU48 error:",msg);
+console.error("CPU64 error:",msg);
 }
 window.addEventListener("error",function(e){showErr(e.message+" @ line "+e.lineno);});
 
@@ -133,9 +267,11 @@ var SIZE_LED=22;
 var SCR_W=28,SCR_H=16;
 var CHAR_COLS=7,CHAR_ROWS=4;
 var DISPLAY_CELLS=28;
-var RAM_SIZE=64;
+var RAM_SIZE=128;
 var QUEUE_START=32;
-var QUEUE_SLOTS=8;
+var QUEUE_SLOTS=16;
+var ADDR_BITS=7;
+var PTR_BITS=4;
 
 var OP_NOP=0x00,OP_SET=0x01,OP_MOV=0x02,OP_ADD=0x04,OP_SUB=0x05,OP_MUL=0x06,OP_DIV=0x07,
 OP_AND=0x08,OP_OR=0x09,OP_XOR=0x0A,OP_NOT=0x0B,OP_INC=0x0C,OP_DEC=0x0D,
@@ -387,6 +523,18 @@ acc=(acc===null)?s:AND(acc,s);
 }
 return acc;
 }
+function makeDecoder(bits){
+var n=bits.length;
+if(n===0)return [K1];
+if(n===1){return [NOT(bits[0]),bits[0]];}
+var half=n>>1;
+var low=makeDecoder(bits.slice(0,half));
+var high=makeDecoder(bits.slice(half));
+var out=[];
+var lmask=(1<<half)-1;
+for(var i=0;i<(1<<n);i++){out.push(AND(high[i>>half],low[i&lmask]));}
+return out;
+}
 function decodeOps(opBits){
 var dec={};
 for(var i=0;i<ALL_OPS.length;i++){dec[ALL_OPS[i]]=eqN(opBits,ALL_OPS[i],8);}
@@ -419,10 +567,10 @@ beginGroup(260);
 for(i=7;i>=0;i--)led(T[i].o,"#ffb020","T"+i,SIZE_LED);
 endGroup();
 });
-section("INPUT · ADDR (6)",720,function(){
-for(i=5;i>=0;i--)A[i]=sw("A"+i);
-beginGroup(200);
-for(i=5;i>=0;i--)led(A[i].o,"#a060ff","A"+i,SIZE_LED);
+section("INPUT · ADDR (7)",840,function(){
+for(i=6;i>=0;i--)A[i]=sw("A"+i);
+beginGroup(240);
+for(i=6;i>=0;i--)led(A[i].o,"#a060ff","A"+i,SIZE_LED);
 endGroup();
 });
 section("INPUT · ACTION",1000,function(){
@@ -457,7 +605,7 @@ section("INPUT · CLK",240,function(){core.CLKo=osc(2,"CLK").o;});
 forceNewRow();
 core.OP=OP;core.D=D;core.T=T;core.A=A;
 core.RAM=[];core.TAGS=[];
-section("STORAGE · RAM 64 × 8",6400,function(){
+section("STORAGE · RAM "+RAM_SIZE+" × 8",12800,function(){
 for(i=0;i<RAM_SIZE;i++){
 beginGroup(140);core.RAM.push([]);
 for(var b=0;b<8;b++){beginGroup(18);core.RAM[i].push(LAT(0));endGroup();}
@@ -465,7 +613,7 @@ endGroup();
 }
 });
 forceNewRow();
-section("STORAGE · TAG MEM 64 × 8",6400,function(){
+section("STORAGE · TAG MEM "+RAM_SIZE+" × 8",12800,function(){
 for(i=0;i<RAM_SIZE;i++){
 beginGroup(140);core.TAGS.push([]);
 for(var b=0;b<8;b++){beginGroup(18);core.TAGS[i].push(LAT(0));endGroup();}
@@ -476,19 +624,13 @@ forceNewRow();
 }
 
 function buildQueue(){
-var QADDR=[],QORD=[];
+var QADDR=[];
 var slots=[],ptr=[],ptrSel=[],qAddr=[];
 var i,b,s;
-section("QUEUE · ADDR (6)",700,function(){
-for(i=5;i>=0;i--)QADDR[i]=sw("QA"+i);
-beginGroup(200);
-for(i=5;i>=0;i--)led(QADDR[i].o,"#a060ff","QA"+i,SIZE_LED);
-endGroup();
-});
-section("QUEUE · ORDER (6)",700,function(){
-for(i=5;i>=0;i--)QORD[i]=sw("QO"+i);
-beginGroup(200);
-for(i=5;i>=0;i--)led(QORD[i].o,"#4a9eff","QO"+i,SIZE_LED);
+section("QUEUE · ADDR (7)",840,function(){
+for(i=6;i>=0;i--)QADDR[i]=sw("QA"+i);
+beginGroup(240);
+for(i=6;i>=0;i--)led(QADDR[i].o,"#a060ff","QA"+i,SIZE_LED);
 endGroup();
 });
 section("QUEUE · ACTION",700,function(){
@@ -509,55 +651,58 @@ core.queueEdge=AND(core.QUEUEo,NOT(core.queuePrev.o));
 core.clrqEdge=AND(core.CLRQo,NOT(core.clrqPrev.o));
 });
 forceNewRow();
-section("QUEUE · STORAGE",900,function(){
-for(s=0;s<8;s++){
+section("QUEUE · STORAGE",1800,function(){
+for(s=0;s<QUEUE_SLOTS;s++){
 beginGroup(90);
 var slot={addr:[],valid:null};
-for(b=0;b<6;b++)slot.addr.push(LAT(0));
+for(b=0;b<ADDR_BITS;b++)slot.addr.push(LAT(0));
 slot.valid=LAT(0);
 slots.push(slot);
 endGroup();
 }
 });
-section("QUEUE · PUSH",1400,function(){
+section("QUEUE · PUSH",2400,function(){
 var cum=K1;
-for(s=0;s<8;s++){
+for(s=0;s<QUEUE_SLOTS;s++){
 beginGroup(130);
 var valid=slots[s].valid.o;
 var nValid=NOT(valid);
 var push=AND(AND(core.queueEdge,cum),nValid);
 var en=OR(push,core.clrqEdge);
 setLat(slots[s].valid,AND(push,K1),en);
-for(b=0;b<6;b++)setLat(slots[s].addr[b],QADDR[b].o,push);
+for(b=0;b<ADDR_BITS;b++)setLat(slots[s].addr[b],QADDR[b].o,push);
 cum=AND(cum,valid);
 endGroup();
 }
 });
 forceNewRow();
-section("QUEUE · POINTER",600,function(){
-for(i=0;i<3;i++)ptr[i]=LAT(0);
+section("QUEUE · POINTER",700,function(){
+for(i=0;i<PTR_BITS;i++)ptr[i]=LAT(0);
 core.ptr=ptr;
-beginGroup(120);
-for(i=2;i>=0;i--)led(ptr[i].o,"#ffb020","p"+i,SIZE_LED);
+beginGroup(160);
+for(i=PTR_BITS-1;i>=0;i--)led(ptr[i].o,"#ffb020","p"+i,SIZE_LED);
 endGroup();
 });
-section("QUEUE · PT DECODE",1200,function(){
-var np0=NOT(ptr[0].o),np1=NOT(ptr[1].o),np2=NOT(ptr[2].o);
-for(s=0;s<8;s++){
+section("QUEUE · PT DECODE",2400,function(){
+var np=[];
+for(i=0;i<PTR_BITS;i++)np.push(NOT(ptr[i].o));
+for(s=0;s<QUEUE_SLOTS;s++){
 beginGroup(140);
-var b0=(s&1)?ptr[0].o:np0;
-var b1=(s&2)?ptr[1].o:np1;
-var b2=(s&4)?ptr[2].o:np2;
-ptrSel.push(AND(AND(b0,b1),b2));
+var acc=K1;
+for(i=0;i<PTR_BITS;i++){
+var bv=(s>>i)&1?ptr[i].o:np[i];
+acc=AND(acc,bv);
+}
+ptrSel.push(acc);
 endGroup();
 }
 });
 forceNewRow();
-section("QUEUE · ADDR MUX",1200,function(){
-for(b=0;b<6;b++){
-beginGroup(400);
+section("QUEUE · ADDR MUX",2400,function(){
+for(b=0;b<ADDR_BITS;b++){
+beginGroup(500);
 var acc=null;
-for(s=0;s<8;s++){var t=AND(ptrSel[s],slots[s].addr[b].o);acc=(acc===null)?t:OR(acc,t);}
+for(s=0;s<QUEUE_SLOTS;s++){var t=AND(ptrSel[s],slots[s].addr[b].o);acc=(acc===null)?t:OR(acc,t);}
 qAddr.push(acc);
 endGroup();
 }
@@ -571,21 +716,21 @@ function buildExecutor(){
 var i;
 var RAM=core.RAM;
 var qDec;
-section("FETCH · Q DECODE",2400,function(){qDec=dec6helper(core.qAddr);});
+section("FETCH · Q DECODE",4800,function(){qDec=makeDecoder(core.qAddr);});
 forceNewRow();
 var qOp=[],qData=[],qTag=[],qDest=[];
-section("FETCH · OPCODE",3200,function(){
+section("FETCH · OPCODE",6400,function(){
 for(var bb=0;bb<8;bb++){
-beginGroup(400);
+beginGroup(800);
 var acc=null;
 for(var j=0;j<RAM_SIZE;j++){var t=AND(qDec[j],RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}
 qOp.push(acc);
 endGroup();
 }
 });
-section("FETCH · DATA",3200,function(){
+section("FETCH · DATA",6400,function(){
 for(var bb=0;bb<8;bb++){
-beginGroup(400);
+beginGroup(800);
 var acc=null;
 for(var j=0;j<RAM_SIZE;j++){var src=(j>=1)?qDec[j-1]:K0;var t=AND(src,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}
 qData.push(acc);
@@ -593,18 +738,18 @@ endGroup();
 }
 });
 forceNewRow();
-section("FETCH · TAG",3200,function(){
+section("FETCH · TAG",6400,function(){
 for(var bb=0;bb<8;bb++){
-beginGroup(400);
+beginGroup(800);
 var acc=null;
 for(var j=0;j<RAM_SIZE;j++){var src=(j>=2)?qDec[j-2]:K0;var t=AND(src,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}
 qTag.push(acc);
 endGroup();
 }
 });
-section("FETCH · ADDR",2400,function(){
-for(var bb=0;bb<6;bb++){
-beginGroup(400);
+section("FETCH · ADDR",4800,function(){
+for(var bb=0;bb<ADDR_BITS;bb++){
+beginGroup(800);
 var acc=null;
 for(var j=0;j<RAM_SIZE;j++){var src=(j>=3)?qDec[j-3]:K0;var t=AND(src,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}
 qDest.push(acc);
@@ -615,39 +760,23 @@ forceNewRow();
 var muxSel=core.RUNQo;
 var nMuxSel=NOT(muxSel);
 var finalOp=[],finalData=[],finalTag=[],finalDest=[];
-section("MUX · OPCODE",1000,function(){
-for(i=0;i<8;i++){beginGroup(140);finalOp.push(OR(AND(muxSel,qOp[i]),AND(nMuxSel,core.OP[i].o)));endGroup();}
+section("MUX · OPCODE",1600,function(){
+for(i=0;i<8;i++){beginGroup(200);finalOp.push(OR(AND(muxSel,qOp[i]),AND(nMuxSel,core.OP[i].o)));endGroup();}
 });
-section("MUX · DATA",1000,function(){
-for(i=0;i<8;i++){beginGroup(140);finalData.push(OR(AND(muxSel,qData[i]),AND(nMuxSel,core.D[i].o)));endGroup();}
+section("MUX · DATA",1600,function(){
+for(i=0;i<8;i++){beginGroup(200);finalData.push(OR(AND(muxSel,qData[i]),AND(nMuxSel,core.D[i].o)));endGroup();}
 });
-section("MUX · TAG",1000,function(){
-for(i=0;i<8;i++){beginGroup(140);finalTag.push(OR(AND(muxSel,qTag[i]),AND(nMuxSel,core.T[i].o)));endGroup();}
+section("MUX · TAG",1600,function(){
+for(i=0;i<8;i++){beginGroup(200);finalTag.push(OR(AND(muxSel,qTag[i]),AND(nMuxSel,core.T[i].o)));endGroup();}
 });
-section("MUX · ADDR",800,function(){
-for(i=0;i<6;i++){beginGroup(140);finalDest.push(OR(AND(muxSel,qDest[i]),AND(nMuxSel,core.A[i].o)));endGroup();}
+section("MUX · ADDR",1400,function(){
+for(i=0;i<ADDR_BITS;i++){beginGroup(200);finalDest.push(OR(AND(muxSel,qDest[i]),AND(nMuxSel,core.A[i].o)));endGroup();}
 });
 core.finalOp=finalOp;
 core.finalData=finalData;
 core.finalTag=finalTag;
 core.finalDest=finalDest;
 forceNewRow();
-}
-
-function dec6helper(bits){
-var low3=[NOT(bits[0]),NOT(bits[1]),NOT(bits[2])];
-var high3=[NOT(bits[3]),NOT(bits[4]),NOT(bits[5])];
-var lowOut=[],highOut=[];
-for(var v=0;v<8;v++){
-var b0=(v&1)?bits[0]:low3[0];var b1=(v&2)?bits[1]:low3[1];var b2=(v&4)?bits[2]:low3[2];
-lowOut.push(AND(AND(b0,b1),b2));
-}
-for(var v=0;v<8;v++){
-var b3=(v&1)?bits[3]:high3[0];var b4=(v&2)?bits[4]:high3[1];var b5=(v&4)?bits[5]:high3[2];
-highOut.push(AND(AND(b3,b4),b5));
-}
-var out=[];for(var i=0;i<64;i++)out.push(AND(highOut[i>>3],lowOut[i&7]));
-return out;
 }
 
 function buildBackend(){
@@ -674,11 +803,11 @@ core.clrEdge=AND(core.CLRo,NOT(core.clrPrev.o));
 var nRunQ=NOT(core.RUNQo);
 core.effRunEdge=OR(AND(nRunQ,core.runEdge),AND(core.RUNQo,core.CLKo));
 });
-section("CTRL · OPCODE DEC",5500,function(){opDec=decodeOps(core.finalOp);});
-section("CTRL · DEST DEC",2400,function(){destDec=dec6helper(core.finalDest);});
+section("CTRL · OPCODE DEC",12000,function(){opDec=decodeOps(core.finalOp);});
+section("CTRL · DEST DEC",4800,function(){destDec=makeDecoder(core.finalDest);});
 forceNewRow();
-section("CTRL · TAG DEC",2400,function(){tagDec=dec6helper(core.finalTag);});
-section("CTRL · DATA DEC",2400,function(){dataDec=dec6helper(core.finalData);});
+section("CTRL · TAG DEC",4800,function(){tagDec=makeDecoder(core.finalTag);});
+section("CTRL · DATA DEC",4800,function(){dataDec=makeDecoder(core.finalData);});
 section("CTRL · DELAY",1200,function(){
 core.delayReg=[];
 for(i=0;i<4;i++)core.delayReg.push(LAT(0));
@@ -697,17 +826,17 @@ setLat(core.delayReg[i],dd,core.CLKo);
 core.nDelay=nDelay;
 });
 forceNewRow();
-section("MUX · READ B",6400,function(){
+section("MUX · READ B",12000,function(){
 for(b=0;b<8;b++){
-beginGroup(500);
+beginGroup(1000);
 var acc=null;
 for(i=0;i<RAM_SIZE;i++){var t=AND(tagDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}
 srcB[b]=acc;endGroup();
 }
 });
-section("MUX · READ C",6400,function(){
+section("MUX · READ C",12000,function(){
 for(b=0;b<8;b++){
-beginGroup(500);
+beginGroup(1000);
 var acc=null;
 for(i=0;i<RAM_SIZE;i++){var t=AND(dataDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}
 srcC[b]=acc;endGroup();
@@ -719,7 +848,7 @@ var srcBAny=K0;
 for(b=0;b<8;b++)srcBAny=OR(srcBAny,srcB[b]);
 core.srcBZero=NOT(srcBAny);
 });
-section("QUEUE · PT UPDATE",1800,function(){
+section("QUEUE · PT UPDATE",3600,function(){
 var runEdge=core.effRunEdge;
 var jmpBase=opDec[OP_JMP];
 var jzBase=AND(opDec[OP_JZ],core.srcBZero);
@@ -728,9 +857,11 @@ var jumpOp=OR(OR(jmpBase,jzBase),jnzBase);
 var jmpEn=AND(jumpOp,runEdge);
 var incEn=AND(core.QCLKo,core.RUNQo);
 var en=OR(jmpEn,incEn);
-var ptrNow=[core.ptr[0].o,core.ptr[1].o,core.ptr[2].o];
-var incVal=addN(ptrNow,[K1,K0,K0],K0,3).sum;
-for(i=0;i<3;i++){
+var ptrNow=[];
+for(i=0;i<PTR_BITS;i++)ptrNow.push(core.ptr[i].o);
+var incOne=[K1];for(i=1;i<PTR_BITS;i++)incOne.push(K0);
+var incVal=addN(ptrNow,incOne,K0,PTR_BITS).sum;
+for(i=0;i<PTR_BITS;i++){
 var jv=core.finalData[i];
 var v=OR(AND(jmpEn,jv),AND(NOT(jmpEn),incVal[i]));
 setLat(core.ptr[i],v,en);
@@ -759,9 +890,9 @@ opR[OP_DEC]=sub8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]);
 });
 section("ALU · CLR",200,function(){opR[OP_CLR]=[K0,K0,K0,K0,K0,K0,K0,K0];});
 forceNewRow();
-section("OUTPUT MUX",3400,function(){
+section("OUTPUT MUX",5000,function(){
 for(b=0;b<8;b++){
-beginGroup(500);
+beginGroup(700);
 var acc=null;
 for(var kk in opR){
 var opv=parseInt(kk,10);
@@ -774,7 +905,7 @@ endGroup();
 }
 });
 forceNewRow();
-section("OUTPUT · WRITE EN",3200,function(){
+section("OUTPUT · WRITE EN",6400,function(){
 var runOk=AND(core.effRunEdge,core.nDelay);
 var wrEnable=OR(core.WRo,core.RUNQo);
 var wrPulse=AND(runOk,wrEnable);
@@ -885,9 +1016,9 @@ var syNow=[syBits[0].o,syBits[1].o,syBits[2].o,syBits[3].o];
 core.syK=[syNow,addN(syNow,[K1,K0,K0,K0],K0,4).sum,addN(syNow,[K0,K1,K0,K0],K0,4).sum,addN(syNow,[K1,K1,K0,K0],K0,4).sum];
 });
 forceNewRow();
-section("SCREEN · CHAR DET",9000,function(){
+section("SCREEN · CHAR DET",12000,function(){
 for(var ci=0;ci<DISPLAY_CELLS;ci++){
-beginGroup(1400);
+beginGroup(2000);
 var cellSels=[];
 for(var si=0;si<SUPPORTED.length;si++){
 var cval=SUPPORTED[si];
@@ -915,11 +1046,11 @@ for(c=0;c<SCR_W;c++){screenLeds[r].push(ledPending("#111","",SIZE_LED));}
 endGroup();
 }
 });
-section("SCREEN · FONT RENDER",9000,function(){
+section("SCREEN · FONT RENDER",12000,function(){
 for(r=0;r<SCR_H;r++){
-beginGroup(3000);
+beginGroup(4000);
 for(c=0;c<SCR_W;c++){
-beginGroup(2000);
+beginGroup(2500);
 var ci=(c/4)|0;
 var cj=(r/4)|0;
 var k=cj*CHAR_COLS+ci;
@@ -989,21 +1120,22 @@ for(var addr=0;addr<RAM_SIZE;addr++){
 for(var bb=0;bb<8;bb++){rewireLed(ramViewRows[7-bb][addr],RAM[addr][bb].o);}
 }
 var qSlotDec=[];
-section("QUEUE · SLOT DEC",4000,function(){
-for(var s=0;s<8;s++){
+section("QUEUE · SLOT DEC",10000,function(){
+for(var s=0;s<QUEUE_SLOTS;s++){
 beginGroup(700);
-var ab=[core.slots[s].addr[0].o,core.slots[s].addr[1].o,core.slots[s].addr[2].o,core.slots[s].addr[3].o,core.slots[s].addr[4].o,core.slots[s].addr[5].o];
-qSlotDec.push(dec6helper(ab));
+var ab=[];
+for(b=0;b<ADDR_BITS;b++)ab.push(core.slots[s].addr[b].o);
+qSlotDec.push(makeDecoder(ab));
 endGroup();
 }
 });
 forceNewRow();
 var qInRow=[];
-section("QUEUE · VIS LOGIC",5000,function(){
+section("QUEUE · VIS LOGIC",9000,function(){
 for(var p=0;p<RAM_SIZE;p++){
-beginGroup(800);
+beginGroup(1200);
 var acc=null;
-for(var s=0;s<8;s++){var hit=AND(qSlotDec[s][p],core.slots[s].valid.o);acc=(acc===null)?hit:OR(acc,hit);}
+for(var s=0;s<QUEUE_SLOTS;s++){var hit=AND(qSlotDec[s][p],core.slots[s].valid.o);acc=(acc===null)?hit:OR(acc,hit);}
 qInRow.push(acc);
 endGroup();
 }
@@ -1014,12 +1146,12 @@ for(var p=0;p<RAM_SIZE;p++)led(qInRow[p],"#ff4d4d","",SIZE_LED);
 });
 forceNewRow();
 var qDec2;
-section("QUEUE · ADDR DEC",2400,function(){qDec2=dec6helper(core.qAddr);});
+section("QUEUE · ADDR DEC",4800,function(){qDec2=makeDecoder(core.qAddr);});
 forceNewRow();
-section("QUEUE · READ MUX",6400,function(){
+section("QUEUE · READ MUX",12000,function(){
 var qOut=[];
 for(b=0;b<8;b++){
-beginGroup(600);
+beginGroup(1000);
 var acc=null;
 for(var rr=0;rr<RAM_SIZE;rr++){var t=AND(qDec2[rr],RAM[rr][b].o);acc=(acc===null)?t:OR(acc,t);}
 qOut.push(acc);
@@ -1033,11 +1165,6 @@ for(b=7;b>=0;b--)led(core.qOut[b],"#ffb020","qb"+b,SIZE_LED);
 forceNewRow();
 }
 
-var DEFAULT_PROGRAM=[
-[0x1E,0x48,0x00,0x00],[0x1E,0x45,0x00,0x00],[0x1E,0x4C,0x00,0x00],
-[0x1E,0x4C,0x00,0x00],[0x1E,0x4F,0x00,0x00],[0x1E,0x20,0x00,0x00],
-[0x1E,0x57,0x00,0x00],[0x10,0x00,0x00,0x00]
-];
 var NOOP_INSTR=[0x00,0x00,0x00,0x00];
 
 function writeRamByte(arr,addr,val){for(var b=0;b<8;b++)arr[addr][b].prev=(val>>b)&1;}
@@ -1045,12 +1172,26 @@ function writeRamByte(arr,addr,val){for(var b=0;b<8;b++)arr[addr][b].prev=(val>>
 function clearMemory(){
 var i,b;
 for(i=0;i<RAM_SIZE;i++)for(b=0;b<8;b++){core.RAM[i][b].prev=0;core.TAGS[i][b].prev=0;}
-for(var s=0;s<8;s++){for(b=0;b<6;b++)core.slots[s].addr[b].prev=0;core.slots[s].valid.prev=0;}
-if(core.ptr)for(i=0;i<3;i++){core.ptr[i].prev=0;core.ptr[i].prevEn=0;}
+for(var s=0;s<QUEUE_SLOTS;s++){
+for(b=0;b<ADDR_BITS;b++)core.slots[s].addr[b].prev=0;
+core.slots[s].valid.prev=0;core.slots[s].valid.prevEn=0;
+}
+if(core.ptr)for(i=0;i<PTR_BITS;i++){core.ptr[i].prev=0;core.ptr[i].prevEn=0;}
 if(core.delayReg)for(i=0;i<4;i++){core.delayReg[i].prev=0;core.delayReg[i].prevEn=0;}
 if(core.sxBits)for(i=0;i<5;i++){core.sxBits[i].prev=0;core.sxBits[i].prevEn=0;}
 if(core.syBits)for(i=0;i<4;i++){core.syBits[i].prev=0;core.syBits[i].prevEn=0;}
 if(core.sprVis){core.sprVis.prev=0;core.sprVis.prevEn=0;}
+// Reset edge detector LATs (fix bug: state carried over antar project)
+if(core.queuePrev){core.queuePrev.prev=0;core.queuePrev.prevEn=0;}
+if(core.clrqPrev){core.clrqPrev.prev=0;core.clrqPrev.prevEn=0;}
+if(core.runqPrev){core.runqPrev.prev=0;core.runqPrev.prevEn=0;}
+if(core.runPrev){core.runPrev.prev=0;core.runPrev.prevEn=0;}
+if(core.clrPrev){core.clrPrev.prev=0;core.clrPrev.prevEn=0;}
+if(core.upPrev){core.upPrev.prev=0;core.upPrev.prevEn=0;}
+if(core.dnPrev){core.dnPrev.prev=0;core.dnPrev.prevEn=0;}
+if(core.lfPrev){core.lfPrev.prev=0;core.lfPrev.prevEn=0;}
+if(core.rtPrev){core.rtPrev.prev=0;core.rtPrev.prevEn=0;}
+if(core.ptPrev){core.ptPrev.prev=0;core.ptPrev.prevEn=0;}
 }
 function loadProgram(program){
 clearMemory();
@@ -1062,8 +1203,8 @@ var ins=padded[i];
 writeRamByte(core.RAM,addr,ins[0]&0xFF);
 writeRamByte(core.RAM,addr+1,ins[1]&0xFF);
 writeRamByte(core.RAM,addr+2,ins[2]&0xFF);
-writeRamByte(core.RAM,addr+3,ins[3]&0x3F);
-for(var b=0;b<6;b++)core.slots[i].addr[b].prev=(addr>>b)&1;
+writeRamByte(core.RAM,addr+3,ins[3]&0xFF);
+for(var b=0;b<ADDR_BITS;b++)core.slots[i].addr[b].prev=(addr>>b)&1;
 core.slots[i].valid.prev=1;
 addr+=4;
 }
@@ -1073,7 +1214,7 @@ var box=document.getElementById("projSel");
 var dd=document.getElementById("projDropdown");
 if(!window.BUILTIN_PROJECTS||!window.BUILTIN_PROJECTS.projects||!window.BUILTIN_PROJECTS.projects.length){
 box.style.display="none";
-loadProgram(DEFAULT_PROGRAM);
+loadProgram([NOOP_INSTR.slice()]);
 return;
 }
 var list=window.BUILTIN_PROJECTS.projects;
@@ -1122,8 +1263,8 @@ var secs=sectionsData,n=secs.length,i,k,maxW=0,totW=0,idx={};
 if(!n)return null;
 for(i=0;i<n;i++){idx[secs[i].title]=i;if(secs[i].w>maxW)maxW=secs[i].w;totW+=secs[i].w+GX;}
 var fixed=[],isFixed={},y=0,inW=0;
-var INP=["INPUT · OPCODE (8)","INPUT · DATA (8)","INPUT · TAG (8)","INPUT · ADDR (6)","INPUT · ACTION","INPUT · JOYSTICK","INPUT · CLK",
-"QUEUE · ADDR (6)","QUEUE · ORDER (6)","QUEUE · ACTION","QUEUE · QCLK"];
+var INP=["INPUT · OPCODE (8)","INPUT · DATA (8)","INPUT · TAG (8)","INPUT · ADDR (7)","INPUT · ACTION","INPUT · JOYSTICK","INPUT · CLK",
+"QUEUE · ADDR (7)","QUEUE · ACTION","QUEUE · QCLK"];
 for(k=0;k<INP.length;k++){
 var a=idx[INP[k]];
 if(a===undefined)continue;
@@ -1188,25 +1329,25 @@ return {x:0,y:0,w:best.f.W,h:best.f.H};
 function loadProject(){
 try{
 reset();
-console.log("CPU48: buildFrontend");
+console.log("CPU64: buildFrontend");
 buildFrontend();
-console.log("CPU48: buildQueue, gates="+gates.length);
+console.log("CPU64: buildQueue, gates="+gates.length);
 buildQueue();
-console.log("CPU48: buildExecutor, gates="+gates.length);
+console.log("CPU64: buildExecutor, gates="+gates.length);
 buildExecutor();
-console.log("CPU48: buildBackend start, gates="+gates.length);
+console.log("CPU64: buildBackend start, gates="+gates.length);
 buildBackend();
-console.log("CPU48: buildBackend done, gates="+gates.length+", wires="+wires.length+", sws="+sws.length+", leds="+leds.length);
+console.log("CPU64: buildBackend done, gates="+gates.length+", wires="+wires.length+", sws="+sws.length+", leds="+leds.length);
 frame43=relayout43();
-console.log("CPU48: relayout done, frame=",frame43);
+console.log("CPU64: relayout done, frame=",frame43);
 routeWires();
-console.log("CPU48: routeWires done");
+console.log("CPU64: routeWires done");
 initProjectSelector();
-console.log("CPU48: init done, sections="+sectionsData.length);
+console.log("CPU64: init done, sections="+sectionsData.length);
 simulate();
-console.log("CPU48: simulate done");
+console.log("CPU64: simulate done");
 renderFrame();
-console.log("CPU48: renderFrame done");
+console.log("CPU64: renderFrame done");
 }catch(e){
 showErr((e&&e.message)||String(e));
 console.error(e);
@@ -1286,7 +1427,13 @@ cheatMin.textContent=cheatEl.classList.contains("min")?"+":"−";
 });
 loadProject();
 setInterval(function(){tickOsc();simulate();},80);
-requestAnimationFrame(function loop(){renderFrame();requestAnimationFrame(loop);});
+var lastRender=0;
+requestAnimationFrame(function loop(t){
+requestAnimationFrame(loop);
+if(t-lastRender<33)return;
+lastRender=t;
+renderFrame();
+});
 })();
 </script>
 </body>
