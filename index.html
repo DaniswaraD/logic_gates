@@ -56,29 +56,28 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 <div class="row"><span class="c">11</span>CLR</div>
 <div class="row"><span class="c">12</span>DELAY</div>
 <div class="row"><span class="c">13</span>SCRCLR</div>
-<div class="row"><span class="c">14</span>JZ    if RAM[tag]==0</div>
+<div class="row"><span class="c">14</span>JZ</div>
 <div class="row"><span class="c">15</span>JNZ</div>
-<div class="row"><span class="c">16</span>SPX   spriteX=data</div>
-<div class="row"><span class="c">17</span>SPY   spriteY=data</div>
+<div class="row"><span class="c">16</span>SPX</div>
+<div class="row"><span class="c">17</span>SPY</div>
 <div class="row"><span class="c">18</span>SPX+</div>
 <div class="row"><span class="c">19</span>SPX-</div>
 <div class="row"><span class="c">1A</span>SPY+</div>
 <div class="row"><span class="c">1B</span>SPY-</div>
 <div class="row"><span class="c">1C</span>SPSHOW</div>
 <div class="row"><span class="c">1D</span>SPHIDE</div>
-<div class="row"><span class="c">1E</span>SCROLL data (shift display)</div>
-<div class="row"><span class="c">1F</span>CMP   set flag if RAM[tag]==data</div>
-<div class="row"><span class="c">20</span>JEQ   jump if flag set</div>
-<div class="row"><span class="c">21</span>JNE   jump if flag clear</div>
+<div class="row"><span class="c">1E</span>SCROLL data</div>
+<div class="row"><span class="c">1F</span>CMP   flag if RAM[tag]==data</div>
+<div class="row"><span class="c">20</span>JEQ   jump if flag</div>
+<div class="row"><span class="c">21</span>JNE   jump if !flag</div>
 <div class="row"><span class="c">23</span>SPXR  spriteX = RAM[addr]</div>
 <div class="row"><span class="c">24</span>SPYR  spriteY = RAM[addr]</div>
 <div class="hdr">MEMORY MAP</div>
-<div class="row">RAM 0..27   display 28 cell (7x4 chars)</div>
+<div class="row">RAM 0..27   display 28 cell</div>
 <div class="row">RAM 28..31  user data</div>
 <div class="row">RAM 32..63  queue 8 slot x 4 byte</div>
 <div class="hdr">BUTTONS</div>
 <div class="row">UP DOWN LEFT RIGHT POINT</div>
-<div class="row">POINT toggle sprite visibility</div>
 </div>
 </div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
@@ -683,6 +682,15 @@ core.finalDest=finalDest;
 forceNewRow();
 }
 
+function BIT_EQUAL(aBits,bBits){
+var acc=null;
+for(var i=0;i<8;i++){
+var e=NOT(XOR(aBits[i],bBits[i]));
+acc=(acc===null)?e:AND(acc,e);
+}
+return acc;
+}
+
 function buildBackend(){
 var i,b,c,r;
 var opDec,destDec,tagDec,dataDec;
@@ -747,6 +755,13 @@ srcC[b]=acc;endGroup();
 }
 });
 forceNewRow();
+
+section("CTRL · TAG ZERO FLAG",400,function(){
+var srcBAny=K0;
+for(b=0;b<8;b++)srcBAny=OR(srcBAny,srcB[b]);
+core.srcBZero=NOT(srcBAny);
+});
+
 section("CTRL · CMP FLAG",900,function(){
 var cmpBase=opDec[OP_CMP];
 var eq=BIT_EQUAL(srcB,dataDec);
@@ -869,7 +884,7 @@ var decEn=AND(runEdge,opDec[OP_SPXM]);
 incEn=OR(incEn,core.rtEdge);
 decEn=OR(decEn,core.lfEdge);
 var sxNow=[sxBits[0].o,sxBits[1].o,sxBits[2].o,sxBits[3].o,sxBits[4].o];
-var srcX=[AND(srcB[0],K1),AND(srcB[1],K1),AND(srcB[2],K1),AND(srcB[3],K1),AND(srcB[4],K1)];
+var srcX=[srcB[0],srcB[1],srcB[2],srcB[3],srcB[4]];
 var incVal=addN(sxNow,[K1,K0,K0,K0,K0],K0,5).sum;
 var decVal=subN(sxNow,[K1,K0,K0,K0,K0],5);
 var en=OR(OR(OR(setEn,readEn),incEn),decEn);
@@ -890,7 +905,7 @@ var decEn=AND(runEdge,opDec[OP_SPYM]);
 incEn=OR(incEn,core.dnEdge);
 decEn=OR(decEn,core.upEdge);
 var syNow=[syBits[0].o,syBits[1].o,syBits[2].o,syBits[3].o];
-var srcY=[AND(srcB[0],K1),AND(srcB[1],K1),AND(srcB[2],K1),AND(srcB[3],K1)];
+var srcY=[srcB[0],srcB[1],srcB[2],srcB[3]];
 var incVal=addN(syNow,[K1,K0,K0,K0],K0,4).sum;
 var decVal=subN(syNow,[K1,K0,K0,K0],4);
 var en=OR(OR(OR(setEn,readEn),incEn),decEn);
@@ -1090,15 +1105,6 @@ section("OUTPUT · QUEUE OUT",8*(SIZE_LED+GAPX)+GAPX,function(){
 for(b=7;b>=0;b--)led(core.qOut[b],"#ffb020","qb"+b,SIZE_LED);
 });
 forceNewRow();
-}
-
-function BIT_EQUAL(aBits,bBits){
-var acc=null;
-for(var i=0;i<8;i++){
-var e=NOT(XOR(aBits[i],bBits[i]));
-acc=(acc===null)?e:AND(acc,e);
-}
-return acc;
 }
 
 function relayout43(){
