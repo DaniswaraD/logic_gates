@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v3.7</title>
+<title>CPU 64 v4.0</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
@@ -30,48 +30,44 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 </style>
 </head>
 <body>
-<div id="title">CPU 64 v3.7</div>
+<div id="title">CPU 64 v4.0</div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="cheat" class="min">
-<div class="bar" id="cheatBar"><span>CHEAT SHEET · v3.7</span><span class="btn" id="cheatMin">+</span></div>
+<div class="bar" id="cheatBar"><span>CHEAT SHEET · v4.0</span><span class="btn" id="cheatMin">+</span></div>
 <div class="body">
 <div class="hdr">OPCODE</div>
 <div class="row"><span class="c">00</span>NOP</div>
 <div class="row"><span class="c">01</span>SET   RAM[DEST]=DATA</div>
 <div class="row"><span class="c">02</span>MOV   RAM[DEST]=RAM[TAG]</div>
-<div class="row"><span class="c">04</span>ADD   RAM[DEST]=RAM[TAG]+RAM[DATA]</div>
-<div class="row"><span class="c">05</span>SUB   RAM[DEST]=RAM[TAG]-RAM[DATA]</div>
+<div class="row"><span class="c">04</span>ADD</div><div class="row"><span class="c">05</span>SUB</div>
 <div class="row"><span class="c">06</span>MUL</div><div class="row"><span class="c">07</span>DIV</div>
 <div class="row"><span class="c">08</span>AND</div><div class="row"><span class="c">09</span>OR</div>
 <div class="row"><span class="c">0A</span>XOR</div><div class="row"><span class="c">0B</span>NOT</div>
 <div class="row"><span class="c">0C</span>INC</div><div class="row"><span class="c">0D</span>DEC</div>
-<div class="row"><span class="c">10</span>JMP DATA=queue slot</div>
-<div class="row"><span class="c">11</span>CLR</div>
-<div class="row"><span class="c">12</span>DELAY n</div>
-<div class="row"><span class="c">13</span>SCRCLR</div>
-<div class="row"><span class="c">14</span>JZ    if RAM[TAG]==0</div>
-<div class="row"><span class="c">15</span>JNZ   if RAM[TAG]!=0</div>
+<div class="row"><span class="c">10</span>JMP</div><div class="row"><span class="c">11</span>CLR</div>
+<div class="row"><span class="c">12</span>DELAY</div><div class="row"><span class="c">13</span>SCRCLR</div>
+<div class="row"><span class="c">14</span>JZ</div><div class="row"><span class="c">15</span>JNZ</div>
 <div class="row"><span class="c">16-1B</span>SPX/SPY/SPX±/SPY±</div>
 <div class="row"><span class="c">1C</span>SPSHOW</div><div class="row"><span class="c">1D</span>SPHIDE</div>
 <div class="row"><span class="c">1E</span>SCROLL</div>
-<div class="hdr">TEXT & FONT</div>
+<div class="hdr">TEXT</div>
 <div class="row"><span class="c">1F</span>HOME</div>
-<div class="row"><span class="c">20</span>CUR   (DATA=col, TAG=row)</div>
-<div class="row"><span class="c">21</span>CHR   put char(DATA), advance</div>
-<div class="row"><span class="c">22</span>NL</div>
-<div class="row"><span class="c">23</span>CLRLN</div>
-<div class="row"><span class="c">24</span>SCLR</div>
-<div class="row"><span class="c">25</span>FILL</div>
-<div class="row"><span class="c">26</span>SHL</div><div class="row"><span class="c">27</span>SHR</div>
-<div class="row"><span class="c">28</span>HALT</div>
+<div class="row"><span class="c">20</span>CUR</div>
+<div class="row"><span class="c">21</span>CHR</div><div class="row"><span class="c">22</span>NL</div>
+<div class="row"><span class="c">23</span>CLRLN</div><div class="row"><span class="c">24</span>SCLR</div>
+<div class="row"><span class="c">25</span>FILL</div><div class="row"><span class="c">26</span>SHL</div>
+<div class="row"><span class="c">27</span>SHR</div><div class="row"><span class="c">28</span>HALT</div>
 <div class="row"><span class="c">29</span>POKE  RAM[RAM[TAG]]=DATA</div>
-<div class="row"><span class="c">2A</span>FONT  mode 0/1/2/3</div>
-<div class="hdr">STORAGE (non-volatile 128B)</div>
+<div class="row"><span class="c">2A</span>FONT</div>
 <div class="row"><span class="c">2B</span>STORER RAM[DEST]=storage[DATA]</div>
 <div class="row"><span class="c">2C</span>STOREW storage[DATA]=RAM[TAG]</div>
+<div class="hdr">NEW v4.0</div>
+<div class="row"><span class="c">2D</span>JOY   RAM[DEST]=joystick bits</div>
+<div class="row"><span class="c">2E</span>PEEK  RAM[DEST]=RAM[RAM[TAG]]</div>
+<div class="row"><span class="c">2F</span>STOREI RAM[DEST]=storage[RAM[TAG]]</div>
+<div class="row"><span class="c">30</span>POKER RAM[RAM[TAG]]=RAM[DATA]</div>
 <div class="hdr">FORMAT: [OP, DATA, TAG, DEST]</div>
-<div class="hdr">LOD: zoom out maksimal = wire saja</div>
 </div>
 </div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
@@ -80,88 +76,151 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 
 <script>
 window.BUILTIN_PROJECTS = {
-version: 14,
+version: 15,
 projects: [
-{id:"doom-lite",name:"DOOM LITE",description:"Enemy + crosshair, storage RMW",program:[
-[0x01,0x1F,0x00,0x22],
-[0x01,0x00,0x00,0x20],
-[0x01,0x01,0x00,0x21],
-[0x2C,0x64,0x20,0x00],
-[0x16,0x0E,0x00,0x00],
-[0x17,0x07,0x00,0x00],
-[0x1C,0x00,0x00,0x00],
-[0x2B,0x64,0x00,0x20],
-[0x29,0x20,0x20,0x00],
-[0x04,0x21,0x20,0x20],
-[0x08,0x22,0x20,0x20],
-[0x29,0x40,0x20,0x00],
-[0x2C,0x64,0x20,0x00],
-[0x12,0x03,0x00,0x00],
-[0x10,0x07,0x00,0x00],
-[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
-[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+// MAZE — maze scroller dengan storage + joystick
+// Storage 0..31 = 4 pattern row maze (8 chars tiap row)
+{id:"maze",name:"MAZE SCROLLER",description:"UP/DOWN scroll maze, karakter @ tetap di tengah",storage:[
+// Row 0: all floor
+[0,32],[1,32],[2,32],[3,32],[4,32],[5,32],[6,32],[7,32],
+// Row 1: wall with gap at col 7
+[8,35],[9,35],[10,35],[11,35],[12,35],[13,35],[14,35],[15,32],
+// Row 2: all floor
+[16,32],[17,32],[18,32],[19,32],[20,32],[21,32],[22,32],[23,32],
+// Row 3: wall with gap at col 0
+[24,32],[25,35],[26,35],[27,35],[28,35],[29,35],[30,35],[31,35]
+],program:[
+[0x01,35,0,40],
+[0x01,32,0,41],
+[0x01,64,0,42],
+[0x01,8,0,60],
+[0x01,24,0,61],
+[0x01,32,0,62],
+[0x01,31,0,63],
+[0x01,0,0,32],
+[0x2F,0,32,33],
+[0x30,33,32,0],
+[0x0C,0,32,32],
+[0x05,62,32,35],
+[0x15,8,35,0],
+[0x01,64,0,19],
+[0x2D,0,0,34],
+[0x01,1,0,35],
+[0x08,35,34,35],
+[0x14,36,35,0],
+[0x04,60,36,36],
+[0x08,63,36,36],
+[0x01,0,0,32],
+[0x04,60,32,35],
+[0x2E,35,0,33],
+[0x30,33,32,0],
+[0x0C,0,32,32],
+[0x05,61,32,35],
+[0x15,21,35,0],
+[0x01,0,0,37],
+[0x04,37,36,35],
+[0x2F,35,0,33],
+[0x04,61,37,35],
+[0x30,33,35,0],
+[0x0C,0,37,37],
+[0x05,60,37,35],
+[0x15,28,35,0],
+[0x01,64,0,19],
+[0x01,2,0,35],
+[0x08,35,34,35],
+[0x14,56,35,0],
+[0x05,60,36,36],
+[0x08,63,36,36],
+[0x01,0,0,32],
+[0x2E,32,0,33],
+[0x04,60,32,35],
+[0x30,33,35,0],
+[0x0C,0,32,32],
+[0x05,61,32,35],
+[0x15,42,35,0],
+[0x01,0,0,37],
+[0x04,37,36,35],
+[0x2F,35,0,33],
+[0x30,33,37,0],
+[0x0C,0,37,37],
+[0x05,60,37,35],
+[0x15,49,35,0],
+[0x01,64,0,19],
+[0x10,14,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+]},
 
+// PING-PONG: sprite bolak-balik, kontrol UP/DOWN menggerakkan crosshair
+{id:"pingpong",name:"PING-PONG",description:"Sprite bolak-balik vertikal",program:[
+[0x01,0,0,60],  // pos = 0
+[0x01,1,0,61],  // dir = 1
+[0x01,15,0,62], // mask = 15
+[0x16,14,0,0],  // SPX 14
+[0x17,0,0,0],   // SPY 0
+[0x1C,0,0,0],   // SHOW
+[0x04,61,60,60],// pos += dir
+[0x08,62,60,60],// pos &= 15
+[0x17,0,0,0],   // SPY pos
+[0x12,1,0,0],
+[0x10,6,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+]},
+
+// STORAGE COUNTER (persistent)
 {id:"storage-counter",name:"STORAGE COUNTER",description:"Persistent counter via storage",program:[
-[0x13,0x00,0x00,0x00],
-[0x01,0x30,0x00,0x41],
-[0x01,0x09,0x00,0x42],
-[0x2B,0x00,0x00,0x40],
-[0x1F,0x00,0x00,0x00],
-[0x20,0x00,0x01,0x00],
-[0x04,0x41,0x40,0x43],
-[0x21,0x43,0x00,0x00],
-[0x12,0x04,0x00,0x00],
-[0x0C,0x40,0x00,0x40],
-[0x08,0x42,0x40,0x40],
-[0x2C,0x00,0x40,0x00],
-[0x1F,0x00,0x00,0x00],
-[0x10,0x05,0x00,0x00],
-[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
-[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
+[0x13,0,0,0],
+[0x01,48,0,65],
+[0x01,9,0,66],
+[0x2B,0,0,64],
+[0x1F,0,0,0],
+[0x20,0,1,0],
+[0x04,65,64,67],
+[0x21,67,0,0],
+[0x12,4,0,0],
+[0x0C,0,64,64],
+[0x08,66,64,64],
+[0x2C,0,64,0],
+[0x1F,0,0,0],
+[0x10,5,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+]},
 
-{id:"big-cpu",name:"BIG CPU 64",description:"Big font marquee",program:[
-[0x13,0x00,0x00,0x00],[0x2A,0x02,0x00,0x00],[0x20,0x00,0x01,0x00],
-[0x1E,0x43,0x00,0x00],[0x1E,0x50,0x00,0x00],[0x1E,0x55,0x00,0x00],[0x1E,0x20,0x00,0x00],
-[0x1E,0x36,0x00,0x00],[0x1E,0x34,0x00,0x00],[0x1E,0x21,0x00,0x00],[0x1E,0x20,0x00,0x00],
-[0x12,0x03,0x00,0x00],[0x10,0x03,0x00,0x00],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
-
-{id:"bold-walk",name:"BOLD WALK",description:"Small bold marquee",program:[
-[0x13,0x00,0x00,0x00],[0x2A,0x01,0x00,0x00],[0x20,0x00,0x02,0x00],
-[0x1E,0x42,0x00,0x00],[0x1E,0x4F,0x00,0x00],[0x1E,0x4C,0x00,0x00],[0x1E,0x44,0x00,0x00],
-[0x1E,0x20,0x00,0x00],[0x1E,0x57,0x00,0x00],[0x1E,0x41,0x00,0x00],[0x1E,0x4C,0x00,0x00],
-[0x1E,0x4B,0x00,0x00],[0x1E,0x20,0x00,0x00],
-[0x12,0x03,0x00,0x00],[0x10,0x03,0x00,0x00],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
-
+// TYPEWRITER
 {id:"typewriter",name:"TYPEWRITER",description:"CHR + NL demo",program:[
-[0x13,0x00,0x00,0x00],[0x2A,0x00,0x00,0x00],[0x1F,0x00,0x00,0x00],
-[0x21,0x43,0x00,0x00],[0x21,0x50,0x00,0x00],[0x21,0x55,0x00,0x00],[0x21,0x20,0x00,0x00],
-[0x21,0x36,0x00,0x00],[0x21,0x34,0x00,0x00],
-[0x22,0x00,0x00,0x00],
-[0x21,0x52,0x00,0x00],[0x21,0x45,0x00,0x00],[0x21,0x41,0x00,0x00],[0x21,0x44,0x00,0x00],[0x21,0x59,0x00,0x00],
-[0x12,0x0A,0x00,0x00],[0x10,0x00,0x00,0x00],
-[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
+[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],
+[0x21,67,0,0],[0x21,80,0,0],[0x21,85,0,0],[0x21,32,0,0],
+[0x21,54,0,0],[0x21,52,0,0],
+[0x22,0,0,0],
+[0x21,82,0,0],[0x21,69,0,0],[0x21,65,0,0],[0x21,68,0,0],[0x21,89,0,0],
+[0x12,10,0,0],[0x10,0,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+]},
 
-{id:"mix-font",name:"MIXED FONT",description:"Small + Big",program:[
-[0x13,0x00,0x00,0x00],[0x2A,0x00,0x00,0x00],[0x1F,0x00,0x00,0x00],
-[0x21,0x43,0x00,0x00],[0x21,0x50,0x00,0x00],[0x21,0x55,0x00,0x00],[0x21,0x36,0x00,0x00],[0x21,0x34,0x00,0x00],
-[0x2A,0x02,0x00,0x00],[0x20,0x00,0x01,0x00],
-[0x21,0x48,0x00,0x00],[0x21,0x49,0x00,0x00],
-[0x12,0x0A,0x00,0x00],[0x10,0x00,0x00,0x00],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
+// BIG marquee
+{id:"big-cpu",name:"BIG CPU",description:"Big font marquee",program:[
+[0x13,0,0,0],[0x2A,2,0,0],[0x20,0,1,0],
+[0x1E,67,0,0],[0x1E,80,0,0],[0x1E,85,0,0],[0x1E,32,0,0],
+[0x1E,54,0,0],[0x1E,52,0,0],[0x1E,33,0,0],[0x1E,32,0,0],
+[0x12,3,0,0],[0x10,3,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+]},
 
-{id:"bounce",name:"BOUNCE",description:"Sprite vertical wrap",program:[
-[0x16,0x0E,0x00,0x00],[0x17,0x0F,0x00,0x00],[0x1C,0x00,0x00,0x00],
-[0x1B,0x00,0x00,0x00],[0x12,0x01,0x00,0x00],[0x10,0x03,0x00,0x00],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
+// BOLD walk
+{id:"bold-walk",name:"BOLD WALK",description:"Small bold marquee",program:[
+[0x13,0,0,0],[0x2A,1,0,0],[0x20,0,2,0],
+[0x1E,66,0,0],[0x1E,79,0,0],[0x1E,76,0,0],[0x1E,68,0,0],
+[0x1E,32,0,0],[0x1E,87,0,0],[0x1E,65,0,0],[0x1E,76,0,0],
+[0x1E,75,0,0],[0x1E,32,0,0],
+[0x12,3,0,0],[0x10,3,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+]},
 
+// JOY SPRITE
 {id:"joy-sprite",name:"JOY SPRITE",description:"Sprite dikontrol joystick",program:[
-[0x16,0x0E,0x00,0x00],[0x17,0x07,0x00,0x00],[0x1C,0x00,0x00,0x00],
-[0x10,0x03,0x00,0x00],
+[0x16,14,0,0],[0x17,7,0,0],[0x1C,0,0,0],[0x10,3,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]}
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+]}
 ]};
 </script>
 
@@ -191,7 +250,7 @@ for(var _k in FONT){var _g=FONT[_k],_b=[];for(var _r=0;_r<4;_r++){var _w=_g[_r];
 var SUPPORTED=Object.keys(FONT).map(Number);
 
 var SIZE_LED=22,SCR_W=32,SCR_H=16,CHAR_COLS=8,CHAR_ROWS=4,DISPLAY_CELLS=32;
-var RAM_SIZE=128,STORE_SIZE=128,QUEUE_START=32,QUEUE_SLOTS=20,ADDR_BITS=7,PTR_BITS=5;
+var RAM_SIZE=256,STORE_SIZE=128,QUEUE_START=64,QUEUE_SLOTS=64,ADDR_BITS=8,PTR_BITS=6;
 
 var OP_NOP=0x00,OP_SET=0x01,OP_MOV=0x02,OP_ADD=0x04,OP_SUB=0x05,OP_MUL=0x06,OP_DIV=0x07,
 OP_AND=0x08,OP_OR=0x09,OP_XOR=0x0A,OP_NOT=0x0B,OP_INC=0x0C,OP_DEC=0x0D,
@@ -200,13 +259,14 @@ OP_SPX=0x16,OP_SPY=0x17,OP_SPXP=0x18,OP_SPXM=0x19,OP_SPYP=0x1A,OP_SPYM=0x1B,
 OP_SPSHOW=0x1C,OP_SPHIDE=0x1D,OP_SCROLL=0x1E,
 OP_HOME=0x1F,OP_CUR=0x20,OP_CHR=0x21,OP_NL=0x22,OP_CLRLN=0x23,
 OP_SCLR=0x24,OP_FILL=0x25,OP_SHL=0x26,OP_SHR=0x27,OP_HALT=0x28,OP_POKE=0x29,
-OP_FONT=0x2A,OP_STORER=0x2B,OP_STOREW=0x2C;
+OP_FONT=0x2A,OP_STORER=0x2B,OP_STOREW=0x2C,
+OP_JOY=0x2D,OP_PEEK=0x2E,OP_STOREI=0x2F,OP_POKER=0x30;
 
 var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,
 OP_NOT,OP_INC,OP_DEC,OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,
 OP_SPX,OP_SPY,OP_SPXP,OP_SPXM,OP_SPYP,OP_SPYM,OP_SPSHOW,OP_SPHIDE,OP_SCROLL,
 OP_HOME,OP_CUR,OP_CHR,OP_NL,OP_CLRLN,OP_SCLR,OP_FILL,OP_SHL,OP_SHR,OP_HALT,OP_POKE,
-OP_FONT,OP_STORER,OP_STOREW];
+OP_FONT,OP_STORER,OP_STOREW,OP_JOY,OP_PEEK,OP_STOREI,OP_POKER];
 
 var gates=[],sws=[],leds=[],wires=[],sectionsData=[],frame43=null;
 var vp,lW,lG,lL,lU,lS;
@@ -316,99 +376,33 @@ grp.appendChild(E("circle",{cx:0,cy:0,r:rI,fill:on?l.c:"#e8e8e8"}));
 if(l.label&&sz>=20){var t=E("text",{x:0,y:-rO-3,"text-anchor":"middle","font-size":7,fill:"#555"});t.textContent=l.label;grp.appendChild(t);}
 lL.appendChild(grp);
 }
-
-// ==== renderWire (v3.7): mode minimal = garis diagonal langsung ====
 function renderWire(sx,sy,dx,dy,on,mx,simple){
 var path;
-if(simple){
-path="M"+sx+","+sy+"L"+dx+","+dy;
-}else if(Math.abs(sy-dy)<3){
-path="M"+sx+","+sy+"H"+dx;
-}else{
-var m=(mx===undefined)?sx+(dx-sx)/2:mx;
-path="M"+sx+","+sy+"H"+m+"V"+dy+"H"+dx;
-}
+if(simple){path="M"+sx+","+sy+"L"+dx+","+dy;}
+else if(Math.abs(sy-dy)<3){path="M"+sx+","+sy+"H"+dx;}
+else{var m=(mx===undefined)?sx+(dx-sx)/2:mx;path="M"+sx+","+sy+"H"+m+"V"+dy+"H"+dx;}
 var sw2=simple?(on?0.9:0.35):(on?1.5:1);
 var st=simple?(on?"#444":"#dcdcdc"):(on?"#111":"#cfcfcf");
 lW.appendChild(E("path",{d:path,fill:"none",stroke:st,"stroke-width":sw2}));
 }
-
-// ==== renderFrame (v3.7): LOD — zoom out maksimal = wire saja ====
 function renderFrame(){
 if(!vp)return;
 var r=svg.getBoundingClientRect();
 var vx1=-view.x/view.k,vy1=-view.y/view.k,vx2=vx1+r.width/view.k,vy2=vy1+r.height/view.k;
 var lod=view.k,pad=40;
-
-// LOD tiers
-var minimal      = lod < 0.015;   // hanya wire
-var showSections = lod > 0.020;
-var showGates    = lod > 0.060;
-var showSwitches = lod > 0.080;
-var showLeds     = lod > 0.100;
-
+var minimal=lod<0.015;
+var showSections=lod>0.020;
+var showGates=lod>0.060;
+var showSwitches=lod>0.080;
+var showLeds=lod>0.100;
 clearLayer(lW);clearLayer(lG);clearLayer(lL);clearLayer(lU);clearLayer(lS);
-
-if(frame43 && lod > 0.010){
-lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:frame43.w,height:frame43.h,fill:"none",stroke:"#aaa","stroke-width":0.4}));
+if(frame43&&lod>0.010){lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:frame43.w,height:frame43.h,fill:"none",stroke:"#aaa","stroke-width":0.4}));}
+if(showSections){for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];if(s.x+s.w<vx1||s.x>vx2||s.y+s.h<vy1||s.y>vy2)continue;renderSection(s);}}
+for(var i=0;i<wires.length;i++){var w=wires[i];var sx=w.s.x,sy=w.s.y;if(sx===undefined||sy===undefined)continue;var dx,dy;if(w.l){dx=w.l.px-(w.l.sz||22)*0.4-2;dy=w.l.py;}else{dx=w.g.px-6;dy=w.g.py+w.py;}var mxw=(w.mx===undefined?sx:w.mx);var minx=Math.min(sx,dx,mxw),maxx=Math.max(sx,dx,mxw);var miny=Math.min(sy,dy),maxy=Math.max(sy,dy);if(maxx<vx1-pad||minx>vx2+pad||maxy<vy1-pad||miny>vy2+pad)continue;renderWire(sx,sy,dx,dy,w.s.v,w.mx,minimal);}
+if(showGates){for(var i=0;i<gates.length;i++){var g=gates[i];if(g.px+50<vx1-pad||g.px>vx2+pad)continue;if(g.py+44<vy1-pad||g.py>vy2+pad)continue;renderGate(g);}}
+if(showSwitches){for(var i=0;i<sws.length;i++){var s=sws[i];if(s.px+70<vx1-pad||s.px>vx2+pad)continue;if(s.py+86<vy1-pad||s.py>vy2+pad)continue;renderSwitch(s);}}
+if(showLeds){for(var i=0;i<leds.length;i++){var l=leds[i];var rad=(l.sz||22)*0.5+4;if(l.px+rad<vx1||l.px-rad>vx2)continue;if(l.py+rad<vy1||l.py-rad>vy2)continue;renderLed(l);}}
 }
-
-// SECTIONS
-if(showSections){
-for(var i=0;i<sectionsData.length;i++){
-var s=sectionsData[i];
-if(s.x+s.w<vx1||s.x>vx2||s.y+s.h<vy1||s.y>vy2)continue;
-renderSection(s);
-}
-}
-
-// WIRES (selalu)
-for(var i=0;i<wires.length;i++){
-var w=wires[i];
-var sx=w.s.x,sy=w.s.y;
-if(sx===undefined||sy===undefined)continue;
-var dx,dy;
-if(w.l){dx=w.l.px-(w.l.sz||22)*0.4-2;dy=w.l.py;}
-else{dx=w.g.px-6;dy=w.g.py+w.py;}
-var mxw=(w.mx===undefined?sx:w.mx);
-var minx=Math.min(sx,dx,mxw),maxx=Math.max(sx,dx,mxw);
-var miny=Math.min(sy,dy),maxy=Math.max(sy,dy);
-if(maxx<vx1-pad||minx>vx2+pad||maxy<vy1-pad||miny>vy2+pad)continue;
-renderWire(sx,sy,dx,dy,w.s.v,w.mx,minimal);
-}
-
-// GATES
-if(showGates){
-for(var i=0;i<gates.length;i++){
-var g=gates[i];
-if(g.px+50<vx1-pad||g.px>vx2+pad)continue;
-if(g.py+44<vy1-pad||g.py>vy2+pad)continue;
-renderGate(g);
-}
-}
-
-// SWITCHES
-if(showSwitches){
-for(var i=0;i<sws.length;i++){
-var s=sws[i];
-if(s.px+70<vx1-pad||s.px>vx2+pad)continue;
-if(s.py+86<vy1-pad||s.py>vy2+pad)continue;
-renderSwitch(s);
-}
-}
-
-// LEDS
-if(showLeds){
-for(var i=0;i<leds.length;i++){
-var l=leds[i];
-var rad=(l.sz||22)*0.5+4;
-if(l.px+rad<vx1||l.px-rad>vx2)continue;
-if(l.py+rad<vy1||l.py-rad>vy2)continue;
-renderLed(l);
-}
-}
-}
-
 function evalComb(g){var a=g.i[0]?g.i[0].v:0,b=g.i[1]?g.i[1].v:0;switch(g.t){case "AND":return a&b;case "OR":return a|b;case "NOT":return a?0:1;case "XOR":return a^b;}return 0;}
 function simulate(){
 var iter,i,g;
@@ -441,7 +435,7 @@ var OP=[],D=[],T=[],A=[],i;
 section("INPUT · OPCODE (8)",920,function(){for(i=7;i>=0;i--)OP[i]=sw("O"+i);beginGroup(260);for(i=7;i>=0;i--)led(OP[i].o,"#4a9eff","O"+i);endGroup();});
 section("INPUT · DATA (8)",920,function(){for(i=7;i>=0;i--)D[i]=sw("D"+i);beginGroup(260);for(i=7;i>=0;i--)led(D[i].o,"#39d353","D"+i);endGroup();});
 section("INPUT · TAG (8)",920,function(){for(i=7;i>=0;i--)T[i]=sw("T"+i);beginGroup(260);for(i=7;i>=0;i--)led(T[i].o,"#ffb020","T"+i);endGroup();});
-section("INPUT · ADDR (7)",840,function(){for(i=6;i>=0;i--)A[i]=sw("A"+i);beginGroup(240);for(i=6;i>=0;i--)led(A[i].o,"#a060ff","A"+i);endGroup();});
+section("INPUT · ADDR (8)",920,function(){for(i=7;i>=0;i--)A[i]=sw("A"+i);beginGroup(260);for(i=7;i>=0;i--)led(A[i].o,"#a060ff","A"+i);endGroup();});
 section("INPUT · ACTION",1000,function(){
 core.WRo=sw("WR").o;core.RDo=sw("RD").o;core.RUNo=sw("RUN").o;core.CLRo=sw("CLR").o;core.DESTo=sw("DESTRUCT").o;
 beginGroup(340);led(core.WRo,"#39d353","W");led(core.RDo,"#4a9eff","R");led(core.RUNo,"#ff4d4d","N");led(core.CLRo,"#ff4d4d","C");led(core.DESTo,"#000","D");endGroup();
@@ -450,10 +444,10 @@ section("INPUT · CLK",240,function(){core.CLKo=osc(1,"CLK").o;});
 forceNewRow();
 core.OP=OP;core.D=D;core.T=T;core.A=A;
 core.RAM=[];
-section("STORAGE · RAM 128×8",12800,function(){for(i=0;i<RAM_SIZE;i++){beginGroup(140);core.RAM.push([]);for(var b=0;b<8;b++){beginGroup(18);core.RAM[i].push(LAT(0));endGroup();}endGroup();}});
+section("STORAGE · RAM 256×8",24000,function(){for(i=0;i<RAM_SIZE;i++){beginGroup(140);core.RAM.push([]);for(var b=0;b<8;b++){beginGroup(18);core.RAM[i].push(LAT(0));endGroup();}endGroup();}});
 forceNewRow();
 core.STORE=[];
-section("STORAGE · FLASH 128×8 (non-volatile)",12800,function(){for(i=0;i<STORE_SIZE;i++){beginGroup(140);core.STORE.push([]);for(var b=0;b<8;b++){beginGroup(18);core.STORE[i].push(LAT(0));endGroup();}endGroup();}});
+section("STORAGE · FLASH 128×8",12800,function(){for(i=0;i<STORE_SIZE;i++){beginGroup(140);core.STORE.push([]);for(var b=0;b<8;b++){beginGroup(18);core.STORE[i].push(LAT(0));endGroup();}endGroup();}});
 forceNewRow();
 }
 
@@ -465,14 +459,8 @@ var anchor=place(gridW,gridH);
 var bx=anchor.x, by=anchor.y;
 function mk(lb,px,py){var s={v:0,o:N(0,0),px:px,py:py,label:lb,osc:false};s.o.x=px+44;s.o.y=py+20;sws.push(s);return s;}
 section("INPUT · JOYSTICK",gridW+8,function(){
-var up_px = bx + bw + g;
-var mid_px = bx + bw + g;
-var left_px = bx;
-var right_px = bx + 2*(bw+g);
-var down_px = bx + bw + g;
-var top_py = by;
-var mid_py = by + bh + g;
-var bot_py = by + 2*(bh+g);
+var up_px=bx+bw+g, mid_px=bx+bw+g, left_px=bx, right_px=bx+2*(bw+g), down_px=bx+bw+g;
+var top_py=by, mid_py=by+bh+g, bot_py=by+2*(bh+g);
 core.BTN_UP=mk("UP",up_px,top_py);
 core.BTN_LEFT=mk("LEFT",left_px,mid_py);
 core.BTN_POINT=mk("POINT",mid_px,mid_py);
@@ -484,7 +472,7 @@ forceNewRow();
 
 function buildQueue(){
 var QADDR=[],slots=[],ptr=[],ptrSel=[],qAddr=[],i,b,s;
-section("QUEUE · ADDR (7)",840,function(){for(i=6;i>=0;i--)QADDR[i]=sw("QA"+i);beginGroup(240);for(i=6;i>=0;i--)led(QADDR[i].o,"#a060ff","QA"+i);endGroup();});
+section("QUEUE · ADDR (8)",920,function(){for(i=7;i>=0;i--)QADDR[i]=sw("QA"+i);beginGroup(260);for(i=7;i>=0;i--)led(QADDR[i].o,"#a060ff","QA"+i);endGroup();});
 section("QUEUE · ACTION",900,function(){
 core.CLRQo=sw("CLR_Q").o;core.QUEUEo=sw("QUEUE").o;core.RUNQo=sw("RUN_Q").o;
 beginGroup(340);led(core.CLRQo,"#ff4d4d","CQ");led(core.QUEUEo,"#39d353","Q");led(core.RUNQo,"#ffb020","RQ");endGroup();
@@ -521,21 +509,21 @@ forceNewRow();
 
 function buildExecutor(){
 var i,RAM=core.RAM,qDec;
-section("FETCH · Q DEC",2400,function(){qDec=makeDecoder(core.qAddr);});
+section("FETCH · Q DEC",4800,function(){qDec=makeDecoder(core.qAddr);});
 forceNewRow();
 var qOp=[],qData=[],qTag=[],qDest=[];
-section("FETCH · OP",3200,function(){for(var bb=0;bb<8;bb++){beginGroup(600);var acc=null;for(var j=0;j<RAM_SIZE;j++){var t=AND(qDec[j],RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qOp.push(acc);endGroup();}});
-section("FETCH · DATA",3200,function(){for(var bb=0;bb<8;bb++){beginGroup(600);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=1)?qDec[j-1]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qData.push(acc);endGroup();}});
+section("FETCH · OP",6400,function(){for(var bb=0;bb<8;bb++){beginGroup(1000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var t=AND(qDec[j],RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qOp.push(acc);endGroup();}});
+section("FETCH · DATA",6400,function(){for(var bb=0;bb<8;bb++){beginGroup(1000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=1)?qDec[j-1]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qData.push(acc);endGroup();}});
 forceNewRow();
-section("FETCH · TAG",3200,function(){for(var bb=0;bb<8;bb++){beginGroup(600);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=2)?qDec[j-2]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qTag.push(acc);endGroup();}});
-section("FETCH · ADDR",2400,function(){for(var bb=0;bb<ADDR_BITS;bb++){beginGroup(600);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=3)?qDec[j-3]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qDest.push(acc);endGroup();}});
+section("FETCH · TAG",6400,function(){for(var bb=0;bb<8;bb++){beginGroup(1000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=2)?qDec[j-2]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qTag.push(acc);endGroup();}});
+section("FETCH · ADDR",6400,function(){for(var bb=0;bb<ADDR_BITS;bb++){beginGroup(1000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=3)?qDec[j-3]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qDest.push(acc);endGroup();}});
 forceNewRow();
 var ms=core.RUNQo;var nms=NOT(ms);
 var fOp=[],fData=[],fTag=[],fDest=[];
 section("MUX · OP",1600,function(){for(i=0;i<8;i++){beginGroup(200);fOp.push(OR(AND(ms,qOp[i]),AND(nms,core.OP[i].o)));endGroup();}});
 section("MUX · DATA",1600,function(){for(i=0;i<8;i++){beginGroup(200);fData.push(OR(AND(ms,qData[i]),AND(nms,core.D[i].o)));endGroup();}});
 section("MUX · TAG",1600,function(){for(i=0;i<8;i++){beginGroup(200);fTag.push(OR(AND(ms,qTag[i]),AND(nms,core.T[i].o)));endGroup();}});
-section("MUX · ADDR",1400,function(){for(i=0;i<ADDR_BITS;i++){beginGroup(200);fDest.push(OR(AND(ms,qDest[i]),AND(nms,core.A[i].o)));endGroup();}});
+section("MUX · ADDR",1600,function(){for(i=0;i<ADDR_BITS;i++){beginGroup(200);fDest.push(OR(AND(ms,qDest[i]),AND(nms,core.A[i].o)));endGroup();}});
 core.finalOp=fOp;core.finalData=fData;core.finalTag=fTag;core.finalDest=fDest;
 forceNewRow();
 }
@@ -555,11 +543,11 @@ core.clrEdge=AND(core.CLRo,NOT(core.clrPrev.o));
 var nq=NOT(core.RUNQo);
 core.effRunEdge=OR(AND(nq,core.runEdge),AND(core.RUNQo,core.CLKo));
 });
-section("CTRL · OP DEC",16000,function(){opDec=decodeOps(core.finalOp);});
-section("CTRL · DEST DEC",4800,function(){destDec=makeDecoder(core.finalDest);});
+section("CTRL · OP DEC",32000,function(){opDec=decodeOps(core.finalOp);});
+section("CTRL · DEST DEC",9600,function(){destDec=makeDecoder(core.finalDest);});
 forceNewRow();
-section("CTRL · TAG DEC",4800,function(){tagDec=makeDecoder(core.finalTag);});
-section("CTRL · DATA DEC",4800,function(){dataDec=makeDecoder(core.finalData);});
+section("CTRL · TAG DEC",9600,function(){tagDec=makeDecoder(core.finalTag);});
+section("CTRL · DATA DEC",9600,function(){dataDec=makeDecoder(core.finalData);});
 
 var cCol=[],cRow=[];
 section("CURSOR · COL (3)",700,function(){for(i=0;i<3;i++)cCol.push(LAT(0));});
@@ -570,11 +558,7 @@ var fontMode=[LAT(0),LAT(0)];
 core.fontMode=fontMode;
 section("FONT · MODE",600,function(){
 var fontA=AND(core.effRunEdge,opDec[OP_FONT]);
-for(i=0;i<2;i++){
-var v=core.finalData[i];
-var nv=OR(AND(fontA,v),AND(NOT(fontA),fontMode[i].o));
-setLat(fontMode[i],nv,fontA);
-}
+for(i=0;i<2;i++){var v=core.finalData[i];var nv=OR(AND(fontA,v),AND(NOT(fontA),fontMode[i].o));setLat(fontMode[i],nv,fontA);}
 });
 forceNewRow();
 
@@ -589,26 +573,30 @@ var delayRise=AND(opDec[OP_DELAY],NOT(core.delayOpPrev.o));
 var dLoad=AND(delayRise,core.effRunEdge);
 var nLoad=NOT(dLoad);
 var decBits=addN(db,[K1,K1,K1,K1],K0,4).sum;
-for(i=0;i<4;i++){
-var keep=AND(dAct,decBits[i]);
-var dd=OR(AND(dLoad,core.finalData[i]),AND(nLoad,keep));
-setLat(core.delayReg[i],dd,core.effRunEdge);
-}
+for(i=0;i<4;i++){var keep=AND(dAct,decBits[i]);var dd=OR(AND(dLoad,core.finalData[i]),AND(nLoad,keep));setLat(core.delayReg[i],dd,core.effRunEdge);}
 setLat(core.delayOpPrev,opDec[OP_DELAY],core.effRunEdge);
-core.nDelay=nDelay;
-core.delayRise=delayRise;
+core.nDelay=nDelay;core.delayRise=delayRise;
 });
 forceNewRow();
 
-section("MUX · READ B (TAG)",12000,function(){for(b=0;b<8;b++){beginGroup(1000);var acc=null;for(i=0;i<RAM_SIZE;i++){var t=AND(tagDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}srcB[b]=acc;endGroup();}});
-section("MUX · READ C (DATA)",12000,function(){for(b=0;b<8;b++){beginGroup(1000);var acc=null;for(i=0;i<RAM_SIZE;i++){var t=AND(dataDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}srcC[b]=acc;endGroup();}});
+section("MUX · READ B (TAG)",24000,function(){for(b=0;b<8;b++){beginGroup(2000);var acc=null;for(i=0;i<RAM_SIZE;i++){var t=AND(tagDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}srcB[b]=acc;endGroup();}});
+section("MUX · READ C (DATA)",24000,function(){for(b=0;b<8;b++){beginGroup(2000);var acc=null;for(i=0;i<RAM_SIZE;i++){var t=AND(dataDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}srcC[b]=acc;endGroup();}});
 forceNewRow();
 section("CTRL · TAG ZERO",400,function(){var a=K0;for(b=0;b<8;b++)a=OR(a,srcB[b]);core.srcBZero=NOT(a);});
 
+// Indirect address decoder from srcB (8 bits)
 var pokeDec;
-section("POKE · INDIRECT DEC",4800,function(){pokeDec=makeDecoder([srcB[0],srcB[1],srcB[2],srcB[3],srcB[4],srcB[5],srcB[6]]);});
+section("INDIRECT ADDR DEC",9600,function(){pokeDec=makeDecoder([srcB[0],srcB[1],srcB[2],srcB[3],srcB[4],srcB[5],srcB[6],srcB[7]]);});
 core.pokeDec=pokeDec;
 
+// JOY byte
+var joyByte=[];
+section("JOY · READ",500,function(){
+joyByte.push(core.BTN_UP.o,core.BTN_DOWN.o,core.BTN_LEFT.o,core.BTN_RIGHT.o,core.BTN_POINT.o,K0,K0,K0);
+});
+core.joyByte=joyByte;
+
+// STORER: read storage[DATA] to storRead (immediate DATA)
 var storRead=[];
 section("STORER · READ MUX",12000,function(){
 for(b=0;b<8;b++){beginGroup(1000);var acc=null;
@@ -617,12 +605,42 @@ storRead[b]=acc;endGroup();}
 });
 core.storRead=storRead;
 
+// STOREI: read storage[RAM[TAG]] to storeiRead (indirect via srcB)
+var storeiRead=[];
+section("STOREI · READ MUX",12000,function(){
+for(b=0;b<8;b++){beginGroup(1000);var acc=null;
+for(i=0;i<STORE_SIZE;i++){var t=AND(pokeDec[i],core.STORE[i][b].o);acc=(acc===null)?t:OR(acc,t);}
+storeiRead[b]=acc;endGroup();}
+});
+core.storeiRead=storeiRead;
+
+// PEEK: read RAM[RAM[TAG]] to peekRead (indirect via srcB)
+var peekRead=[];
+section("PEEK · READ MUX",24000,function(){
+for(b=0;b<8;b++){beginGroup(2000);var acc=null;
+for(i=0;i<RAM_SIZE;i++){var t=AND(pokeDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}
+peekRead[b]=acc;endGroup();}
+});
+core.peekRead=peekRead;
+
+// STOREW: storage[DATA]=RAM[TAG]
 section("STOREW · WRITE",12000,function(){
 var storAct=AND(AND(core.effRunEdge,core.nDelay),opDec[OP_STOREW]);
 for(i=0;i<STORE_SIZE;i++){
 beginGroup(80);
 var we=AND(storAct,dataDec[i]);
 for(b=0;b<8;b++)setLat(core.STORE[i][b],srcB[b],we);
+endGroup();
+}
+});
+
+// POKER: RAM[RAM[TAG]] = RAM[DATA]
+section("POKER · WRITE",24000,function(){
+var pokerAct=AND(AND(core.effRunEdge,core.nDelay),opDec[OP_POKER]);
+for(i=0;i<RAM_SIZE;i++){
+beginGroup(100);
+var we=AND(pokerAct,pokeDec[i]);
+for(b=0;b<8;b++)setLat(RAM[i][b],srcC[b],we);
 endGroup();
 }
 });
@@ -665,6 +683,13 @@ section("ALU · LOGIC",1400,function(){var aR=[],oR=[],xR=[],nR=[];for(b=0;b<8;b
 section("ALU · INC·DEC",1600,function(){opR[OP_INC]=add8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]);opR[OP_DEC]=sub8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]);});
 section("ALU · CLR",200,function(){opR[OP_CLR]=[K0,K0,K0,K0,K0,K0,K0,K0];});
 section("ALU · SHL·SHR",1600,function(){var shl=[K0],shr=[K0];for(b=0;b<7;b++)shl.push(srcB[b]);for(b=1;b<8;b++)shr.push(srcB[b]);opR[OP_SHL]=shl;opR[OP_SHR]=shr;});
+// JOY / PEEK / STOREI / STORER add to opR
+section("ALU · INDIRECT",1000,function(){
+opR[OP_JOY]=joyByte.slice();
+opR[OP_PEEK]=peekRead.slice();
+opR[OP_STOREI]=storeiRead.slice();
+opR[OP_STORER]=storRead.slice();
+});
 forceNewRow();
 section("OUTPUT MUX",5000,function(){
 for(b=0;b<8;b++){beginGroup(700);var acc=null;
@@ -722,7 +747,7 @@ setLat(cRow[i],v2,anyOp);
 }
 });
 
-section("OUTPUT · WRITE EN",18000,function(){
+section("OUTPUT · WRITE EN",32000,function(){
 var runOk=AND(core.effRunEdge,core.nDelay);
 var wrEnable=OR(core.WRo,core.RUNQo);
 var wrPulse=AND(runOk,wrEnable);
@@ -756,6 +781,7 @@ noWrite=OR(noWrite,opDec[OP_FILL]);
 noWrite=OR(noWrite,opDec[OP_HALT]);
 noWrite=OR(noWrite,opDec[OP_FONT]);
 noWrite=OR(noWrite,opDec[OP_STOREW]);
+noWrite=OR(noWrite,opDec[OP_POKER]);
 var doWrite=NOT(noWrite);
 
 var cellBit0=cCol[0].o;
@@ -770,8 +796,7 @@ var SPACE=[K0,K0,K0,K0,K0,K1,K0,K0];
 
 var rowMatchList=[];
 for(i=0;i<32;i++){
-var rsRow=(i>>3)&3;
-var rbRow=(i>>2)&1;
+var rsRow=(i>>3)&3;var rbRow=(i>>2)&1;
 var rs0=(rsRow&1)?cRow[0].o:NOT(cRow[0].o);
 var rs1=(rsRow&2)?cRow[1].o:NOT(cRow[1].o);
 var rowSmall=AND(rs0,rs1);
@@ -938,14 +963,8 @@ if(!anyS&&!anyB)continue;
 var mS=charSels[ci_small][si];
 var mB=charSels[ci_big][si];
 var tS=K0,tB=K0;
-if(anyS){
-var bitS = v_sn ? (v_sb ? K1 : nbold) : (v_sb ? bold : K0);
-tS = AND(AND(mS, nbig), bitS);
-}
-if(anyB){
-var bitB = v_bn ? (v_bb ? K1 : nbold) : (v_bb ? bold : K0);
-tB = AND(AND(mB, big), bitB);
-}
+if(anyS){var bitS=v_sn?(v_sb?K1:nbold):(v_sb?bold:K0);tS=AND(AND(mS,nbig),bitS);}
+if(anyB){var bitB=v_bn?(v_bb?K1:nbold):(v_bb?bold:K0);tB=AND(AND(mB,big),bitB);}
 var term=OR(tS,tB);
 acc=(acc===null)?term:OR(acc,term);
 }
@@ -991,9 +1010,12 @@ forceNewRow();
 
 var NOOP=[0x00,0x00,0x00,0x00];
 function writeRamByte(arr,addr,val){for(var b=0;b<8;b++)arr[addr][b].prev=(val>>b)&1;}
+function writeStoreByte(addr,val){for(var b=0;b<8;b++)core.STORE[addr][b].prev=(val>>b)&1;}
+
 function clearMemory(){
 var i,b;
 for(i=0;i<RAM_SIZE;i++)for(b=0;b<8;b++){core.RAM[i][b].prev=0;core.RAM[i][b].prevEn=0;}
+// STORE not reset (non-volatile)
 for(var s=0;s<QUEUE_SLOTS;s++){for(b=0;b<ADDR_BITS;b++)core.slots[s].addr[b].prev=0;core.slots[s].valid.prev=0;core.slots[s].valid.prevEn=0;}
 if(core.ptr)for(i=0;i<PTR_BITS;i++){core.ptr[i].prev=0;core.ptr[i].prevEn=0;}
 if(core.delayReg)for(i=0;i<4;i++){core.delayReg[i].prev=0;core.delayReg[i].prevEn=0;}
@@ -1015,8 +1037,10 @@ if(core.lfPrev){core.lfPrev.prev=0;core.lfPrev.prevEn=0;}
 if(core.rtPrev){core.rtPrev.prev=0;core.rtPrev.prevEn=0;}
 if(core.ptPrev){core.ptPrev.prev=0;core.ptPrev.prevEn=0;}
 }
-function loadProgram(prog){
+function loadProgram(proj){
 clearMemory();
+var prog=proj.program||proj;
+if(proj.storage){for(var k=0;k<proj.storage.length;k++){writeStoreByte(proj.storage[k][0],proj.storage[k][1]);}}
 var pad=(prog||[]).slice(0,QUEUE_SLOTS);
 while(pad.length<QUEUE_SLOTS)pad.push(NOOP.slice());
 var addr=QUEUE_START;
@@ -1038,13 +1062,13 @@ if(sws[i].label==="RUN_Q"){sws[i].v=1;}
 }
 function initProj(){
 var box=document.getElementById("projSel");var dd=document.getElementById("projDropdown");
-if(!window.BUILTIN_PROJECTS||!window.BUILTIN_PROJECTS.projects||!window.BUILTIN_PROJECTS.projects.length){box.style.display="none";loadProgram([NOOP.slice()]);autoStart();return;}
+if(!window.BUILTIN_PROJECTS||!window.BUILTIN_PROJECTS.projects||!window.BUILTIN_PROJECTS.projects.length){box.style.display="none";loadProgram({program:[NOOP.slice()]});autoStart();return;}
 var list=window.BUILTIN_PROJECTS.projects;
 while(dd.firstChild)dd.removeChild(dd.firstChild);
 for(var i=0;i<list.length;i++){var o=document.createElement("option");o.value=list[i].id;o.textContent=list[i].name;o.title=list[i].description||"";dd.appendChild(o);}
-dd.onchange=function(){for(var j=0;j<list.length;j++){if(list[j].id===dd.value){loadProgram(list[j].program);autoStart();simulate();return;}}};
+dd.onchange=function(){for(var j=0;j<list.length;j++){if(list[j].id===dd.value){loadProgram(list[j]);autoStart();simulate();return;}}};
 box.style.display="flex";
-loadProgram(list[0].program);
+loadProgram(list[0]);
 autoStart();
 }
 function routeWires(){
@@ -1061,7 +1085,7 @@ var secs=sectionsData,n=secs.length,i,k,maxW=0,totW=0,idx={};
 if(!n)return null;
 for(i=0;i<n;i++){idx[secs[i].title]=i;if(secs[i].w>maxW)maxW=secs[i].w;totW+=secs[i].w+GX;}
 var fixed=[],isFix={},y=0,inW=0;
-var INP=["INPUT · OPCODE (8)","INPUT · DATA (8)","INPUT · TAG (8)","INPUT · ADDR (7)","INPUT · ACTION","INPUT · CLK","QUEUE · ADDR (7)","QUEUE · ACTION","QUEUE · QCLK"];
+var INP=["INPUT · OPCODE (8)","INPUT · DATA (8)","INPUT · TAG (8)","INPUT · ADDR (8)","INPUT · ACTION","INPUT · CLK","QUEUE · ADDR (8)","QUEUE · ACTION","QUEUE · QCLK"];
 for(k=0;k<INP.length;k++){var a=idx[INP[k]];if(a===undefined)continue;fixed.push({i:a,x:0,y:y});y+=secs[a].h+RG;if(secs[a].w>inW)inW=secs[a].w;}
 var x0=inW+CG;
 var sc=idx["SCREEN · GRID"],rv=idx["OUTPUT · RAM VIEW"],sv=idx["OUTPUT · STORAGE VIEW"],joy=idx["INPUT · JOYSTICK"];
