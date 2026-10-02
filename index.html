@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v4.1</title>
+<title>CPU 64 v4.2</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
@@ -30,11 +30,11 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 </style>
 </head>
 <body>
-<div id="title">CPU 64 v4.1</div>
+<div id="title">CPU 64 v4.2</div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="cheat" class="min">
-<div class="bar" id="cheatBar"><span>CHEAT SHEET · v4.1</span><span class="btn" id="cheatMin">+</span></div>
+<div class="bar" id="cheatBar"><span>CHEAT SHEET · v4.2</span><span class="btn" id="cheatMin">+</span></div>
 <div class="body">
 <div class="hdr">OPCODE</div>
 <div class="row"><span class="c">00</span>NOP</div>
@@ -57,9 +57,12 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 <div class="row"><span class="c">27</span>SHR</div><div class="row"><span class="c">28</span>HALT</div>
 <div class="row"><span class="c">29</span>POKE</div><div class="row"><span class="c">2A</span>FONT</div>
 <div class="row"><span class="c">2B</span>STORER</div><div class="row"><span class="c">2C</span>STOREW</div>
-<div class="hdr">NEW v4.1</div>
 <div class="row"><span class="c">2D</span>JOY</div><div class="row"><span class="c">2E</span>PEEK</div>
 <div class="row"><span class="c">2F</span>STOREI</div><div class="row"><span class="c">30</span>POKER</div>
+<div class="hdr">v4.2 NEW</div>
+<div class="row"><span class="c">31</span>RND   RAM[DEST]=LFSR byte (auto-advance)</div>
+<div class="row"><span class="c">32</span>SEED  LFSR &lt;- DATA (reset from constant)</div>
+<div class="hdr">FORMAT: [OP, DATA, TAG, DEST]</div>
 </div>
 </div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
@@ -68,72 +71,63 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 
 <script>
 window.BUILTIN_PROJECTS = {
-version: 16,
+version: 17,
 projects: [
-{id:"maze",name:"MAZE SCROLLER",description:"Tekan UP/DOWN, maze scroll",storage:[
+{id:"maze",name:"MAZE SCROLLER",description:"UP/DOWN scroll maze",storage:[
 [0,32],[1,32],[2,32],[3,32],[4,32],[5,32],[6,32],[7,32],
 [8,35],[9,35],[10,35],[11,35],[12,35],[13,35],[14,35],[15,32],
 [16,32],[17,32],[18,32],[19,32],[20,32],[21,32],[22,32],[23,32],
 [24,32],[25,35],[26,35],[27,35],[28,35],[29,35],[30,35],[31,35]
 ],program:[
-[0x01,35,0,40],
-[0x01,32,0,41],
-[0x01,64,0,42],
-[0x01,8,0,60],
-[0x01,24,0,61],
-[0x01,32,0,62],
-[0x01,31,0,63],
+[0x01,35,0,40],[0x01,32,0,41],[0x01,64,0,42],
+[0x01,8,0,60],[0x01,24,0,61],[0x01,32,0,62],[0x01,31,0,63],
 [0x01,0,0,32],
-[0x2F,0,32,33],
-[0x30,33,32,0],
-[0x0C,0,32,32],
-[0x05,62,32,35],
-[0x15,8,35,0],
+[0x2F,0,32,33],[0x30,33,32,0],[0x0C,0,32,32],[0x05,62,32,35],[0x15,8,35,0],
 [0x01,64,0,19],
 [0x2D,0,0,34],
-[0x01,1,0,35],
-[0x08,35,34,35],
-[0x14,36,35,0],
-[0x04,60,36,36],
-[0x08,63,36,36],
-[0x01,0,0,32],
-[0x04,60,32,35],
-[0x2E,35,0,33],
-[0x30,33,32,0],
-[0x0C,0,32,32],
-[0x05,61,32,35],
-[0x15,21,35,0],
-[0x01,0,0,37],
-[0x04,37,36,35],
-[0x2F,35,0,33],
-[0x04,61,37,35],
-[0x30,33,35,0],
-[0x0C,0,37,37],
-[0x05,60,37,35],
-[0x15,28,35,0],
+[0x01,1,0,35],[0x08,35,34,35],[0x14,36,35,0],
+[0x04,60,36,36],[0x08,63,36,36],[0x01,0,0,32],
+[0x04,60,32,35],[0x2E,35,0,33],[0x30,33,32,0],[0x0C,0,32,32],[0x05,61,32,35],[0x15,21,35,0],
+[0x01,0,0,37],[0x04,37,36,35],[0x2F,35,0,33],[0x04,61,37,35],[0x30,33,35,0],[0x0C,0,37,37],[0x05,60,37,35],[0x15,28,35,0],
 [0x01,64,0,19],
-[0x01,2,0,35],
-[0x08,35,34,35],
-[0x14,56,35,0],
-[0x05,60,36,36],
-[0x08,63,36,36],
-[0x01,0,0,32],
-[0x2E,32,0,33],
-[0x04,60,32,35],
-[0x30,33,35,0],
-[0x0C,0,32,32],
-[0x05,61,32,35],
-[0x15,42,35,0],
-[0x01,0,0,37],
-[0x04,37,36,35],
-[0x2F,35,0,33],
-[0x30,33,37,0],
-[0x0C,0,37,37],
-[0x05,60,37,35],
-[0x15,49,35,0],
-[0x01,64,0,19],
-[0x10,14,0,0],
+[0x01,2,0,35],[0x08,35,34,35],[0x14,56,35,0],
+[0x05,60,36,36],[0x08,63,36,36],[0x01,0,0,32],
+[0x2E,32,0,33],[0x04,60,32,35],[0x30,33,35,0],[0x0C,0,32,32],[0x05,61,32,35],[0x15,42,35,0],
+[0x01,0,0,37],[0x04,37,36,35],[0x2F,35,0,33],[0x30,33,37,0],[0x0C,0,37,37],[0x05,60,37,35],[0x15,49,35,0],
+[0x01,64,0,19],[0x10,14,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+]},
+
+{id:"starfield",name:"STARFIELD",description:"Titik acak di layar",program:[
+[0x01,1,0,60],              // seed
+[0x32,1,0,0],               // SEED 1
+[0x31,0,0,62],              // RND -> RAM[62]
+[0x08,63,62,62],            // AND RAM[62] & 31 -> posisi 0..31
+[0x01,46,0,61],             // DATA = '.' (46)
+[0x29,46,62,0],             // POKE '.' at RAM[RAM[62]]
+[0x12,1,0,0],
+[0x10,2,0,0],               // JMP 2
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+]},
+
+{id:"fireworks",name:"FIREWORKS",description:"Ledakan bintang acak + SCLR",program:[
+[0x13,0,0,0],               // SCRCLR
+[0x32,42,0,0],              // SEED 42
+[0x01,0,0,64],              // i = 0
+[0x31,0,0,62],              // RND
+[0x08,63,62,62],            // & 31
+[0x29,42,62,0],             // POKE '*' (42) di cell acak
+[0x0C,0,64,64],             // i++
+[0x05,10,64,65],            // i - 10
+[0x15,3,65,0],              // JNZ ke 3
+[0x12,8,0,0],               // DELAY
+[0x24,32,0,0],              // SCLR
+[0x24,32,0,0],
+[0x24,32,0,0],
+[0x24,32,0,0],
+[0x10,1,0,0],               // JMP 1
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
 
 {id:"pingpong",name:"PING-PONG",description:"Sprite bolak-balik",program:[
@@ -212,11 +206,11 @@ for(var _k in FONT){var _g=FONT[_k],_b=[];for(var _r=0;_r<4;_r++){var _w=_g[_r];
 var SUPPORTED=Object.keys(FONT).map(Number);
 
 var SIZE_LED=22,SCR_W=32,SCR_H=16,CHAR_COLS=8,CHAR_ROWS=4,DISPLAY_CELLS=32;
-var RAM_SIZE=512;         // <-- diperbesar dari 256
+var RAM_SIZE=512;
 var STORE_SIZE=128;
-var QUEUE_START=128;      // <-- digeser dari 64
+var QUEUE_START=128;
 var QUEUE_SLOTS=64;
-var ADDR_BITS=9;          // <-- 9 bit untuk alamat 0..511
+var ADDR_BITS=9;
 var PTR_BITS=6;
 
 var OP_NOP=0x00,OP_SET=0x01,OP_MOV=0x02,OP_ADD=0x04,OP_SUB=0x05,OP_MUL=0x06,OP_DIV=0x07,
@@ -227,13 +221,14 @@ OP_SPSHOW=0x1C,OP_SPHIDE=0x1D,OP_SCROLL=0x1E,
 OP_HOME=0x1F,OP_CUR=0x20,OP_CHR=0x21,OP_NL=0x22,OP_CLRLN=0x23,
 OP_SCLR=0x24,OP_FILL=0x25,OP_SHL=0x26,OP_SHR=0x27,OP_HALT=0x28,OP_POKE=0x29,
 OP_FONT=0x2A,OP_STORER=0x2B,OP_STOREW=0x2C,
-OP_JOY=0x2D,OP_PEEK=0x2E,OP_STOREI=0x2F,OP_POKER=0x30;
+OP_JOY=0x2D,OP_PEEK=0x2E,OP_STOREI=0x2F,OP_POKER=0x30,
+OP_RND=0x31,OP_SEED=0x32;
 
 var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,
 OP_NOT,OP_INC,OP_DEC,OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,
 OP_SPX,OP_SPY,OP_SPXP,OP_SPXM,OP_SPYP,OP_SPYM,OP_SPSHOW,OP_SPHIDE,OP_SCROLL,
 OP_HOME,OP_CUR,OP_CHR,OP_NL,OP_CLRLN,OP_SCLR,OP_FILL,OP_SHL,OP_SHR,OP_HALT,OP_POKE,
-OP_FONT,OP_STORER,OP_STOREW,OP_JOY,OP_PEEK,OP_STOREI,OP_POKER];
+OP_FONT,OP_STORER,OP_STOREW,OP_JOY,OP_PEEK,OP_STOREI,OP_POKER,OP_RND,OP_SEED];
 
 var gates=[],sws=[],leds=[],wires=[],sectionsData=[],frame43=null;
 var vp,lW,lG,lL,lU,lS;
@@ -483,7 +478,13 @@ section("FETCH · OP",12000,function(){for(var bb=0;bb<8;bb++){beginGroup(2000);
 section("FETCH · DATA",12000,function(){for(var bb=0;bb<8;bb++){beginGroup(2000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=1)?qDec[j-1]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qData.push(acc);endGroup();}});
 forceNewRow();
 section("FETCH · TAG",12000,function(){for(var bb=0;bb<8;bb++){beginGroup(2000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=2)?qDec[j-2]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qTag.push(acc);endGroup();}});
-section("FETCH · ADDR",12000,function(){for(var bb=0;bb<ADDR_BITS;bb++){beginGroup(2000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=3)?qDec[j-3]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qDest.push(acc);endGroup();}});
+// FIX: ADDR only 8-bit stored (bytes are 8-bit)
+section("FETCH · ADDR",12000,function(){
+for(var bb=0;bb<8;bb++){beginGroup(2000);var acc=null;
+for(var j=0;j<RAM_SIZE;j++){var s=(j>=3)?qDec[j-3]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}
+qDest.push(acc);endGroup();}
+qDest.push(K0); // bit 8 always 0
+});
 forceNewRow();
 var ms=core.RUNQo;var nms=NOT(ms);
 var fOp=[],fData=[],fTag=[],fDest=[];
@@ -510,10 +511,9 @@ core.clrEdge=AND(core.CLRo,NOT(core.clrPrev.o));
 var nq=NOT(core.RUNQo);
 core.effRunEdge=OR(AND(nq,core.runEdge),AND(core.RUNQo,core.CLKo));
 });
-section("CTRL · OP DEC",64000,function(){opDec=decodeOps(core.finalOp);});
+section("CTRL · OP DEC",72000,function(){opDec=decodeOps(core.finalOp);});
 section("CTRL · DEST DEC",19200,function(){destDec=makeDecoder(core.finalDest);});
 forceNewRow();
-// tagDec/dataDec extended ke 9-bit (high=K0) supaya MUX 0..511 aman
 section("CTRL · TAG DEC",19200,function(){tagDec=makeDecoder(core.finalTag.concat([K0]));});
 section("CTRL · DATA DEC",19200,function(){dataDec=makeDecoder(core.finalData.concat([K0]));});
 
@@ -527,6 +527,22 @@ core.fontMode=fontMode;
 section("FONT · MODE",600,function(){
 var fontA=AND(core.effRunEdge,opDec[OP_FONT]);
 for(i=0;i<2;i++){var v=core.finalData[i];var nv=OR(AND(fontA,v),AND(NOT(fontA),fontMode[i].o));setLat(fontMode[i],nv,fontA);}
+});
+
+// === RND · LFSR 8-bit ===
+var rndReg=[];
+for(i=0;i<8;i++)rndReg.push(LAT(i===0?1:0));
+core.rndReg=rndReg;
+section("RND · LFSR",1600,function(){
+var rndAct=AND(core.effRunEdge,opDec[OP_RND]);
+var seedAct=AND(core.effRunEdge,opDec[OP_SEED]);
+var newbit=XOR(XOR(rndReg[0].o,rndReg[2].o),XOR(rndReg[3].o,rndReg[4].o));
+for(i=0;i<8;i++){
+var next=(i===0)?newbit:rndReg[i-1].o;
+var seedBit=core.finalData[i];
+var withSeed=OR(AND(seedAct,seedBit),AND(NOT(seedAct),next));
+setLat(rndReg[i],withSeed,OR(rndAct,seedAct));
+}
 });
 forceNewRow();
 
@@ -650,6 +666,10 @@ opR[OP_PEEK]=peekRead.slice();
 opR[OP_STOREI]=storeiRead.slice();
 opR[OP_STORER]=storRead.slice();
 });
+section("ALU · RND",600,function(){
+var rr=[];for(b=0;b<8;b++)rr.push(core.rndReg[b].o);
+opR[OP_RND]=rr;
+});
 forceNewRow();
 section("OUTPUT MUX",5000,function(){
 for(b=0;b<8;b++){beginGroup(700);var acc=null;
@@ -707,7 +727,7 @@ setLat(cRow[i],v2,anyOp);
 }
 });
 
-section("OUTPUT · WRITE EN",64000,function(){
+section("OUTPUT · WRITE EN",72000,function(){
 var runOk=AND(core.effRunEdge,core.nDelay);
 var wrEnable=OR(core.WRo,core.RUNQo);
 var wrPulse=AND(runOk,wrEnable);
@@ -742,6 +762,7 @@ noWrite=OR(noWrite,opDec[OP_HALT]);
 noWrite=OR(noWrite,opDec[OP_FONT]);
 noWrite=OR(noWrite,opDec[OP_STOREW]);
 noWrite=OR(noWrite,opDec[OP_POKER]);
+noWrite=OR(noWrite,opDec[OP_SEED]);
 var doWrite=NOT(noWrite);
 
 var cellBit0=cCol[0].o;
@@ -969,8 +990,8 @@ forceNewRow();
 }
 
 var NOOP=[0x00,0x00,0x00,0x00];
-function writeRamByte(arr,addr,val){for(var b=0;b<8;b++)arr[addr][b].prev=(val>>b)&1;}
-function writeStoreByte(addr,val){for(var b=0;b<8;b++)core.STORE[addr][b].prev=(val>>b)&1;}
+function writeRamByte(arr,addr,val){if(addr<0||addr>=RAM_SIZE)return;for(var b=0;b<8;b++)arr[addr][b].prev=(val>>b)&1;}
+function writeStoreByte(addr,val){if(addr<0||addr>=STORE_SIZE)return;for(var b=0;b<8;b++)core.STORE[addr][b].prev=(val>>b)&1;}
 
 function clearMemory(){
 var i,b;
@@ -985,6 +1006,7 @@ if(core.sprVis){core.sprVis.prev=0;core.sprVis.prevEn=0;}
 if(core.cCol)for(i=0;i<3;i++){core.cCol[i].prev=0;core.cCol[i].prevEn=0;}
 if(core.cRow)for(i=0;i<2;i++){core.cRow[i].prev=0;core.cRow[i].prevEn=0;}
 if(core.fontMode)for(i=0;i<2;i++){core.fontMode[i].prev=0;core.fontMode[i].prevEn=0;}
+if(core.rndReg)for(i=0;i<8;i++){core.rndReg[i].prev=(i===0?1:0);core.rndReg[i].prevEn=0;}
 if(core.halt){core.halt.prev=0;core.halt.prevEn=0;}
 if(core.queuePrev){core.queuePrev.prev=0;core.queuePrev.prevEn=0;}
 if(core.clrqPrev){core.clrqPrev.prev=0;core.clrqPrev.prevEn=0;}
