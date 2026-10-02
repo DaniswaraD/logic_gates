@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v3.6</title>
+<title>CPU 64 v3.7</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
@@ -30,11 +30,11 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 </style>
 </head>
 <body>
-<div id="title">CPU 64 v3.6</div>
+<div id="title">CPU 64 v3.7</div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="cheat" class="min">
-<div class="bar" id="cheatBar"><span>CHEAT SHEET · v3.6</span><span class="btn" id="cheatMin">+</span></div>
+<div class="bar" id="cheatBar"><span>CHEAT SHEET · v3.7</span><span class="btn" id="cheatMin">+</span></div>
 <div class="body">
 <div class="hdr">OPCODE</div>
 <div class="row"><span class="c">00</span>NOP</div>
@@ -71,6 +71,7 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 <div class="row"><span class="c">2B</span>STORER RAM[DEST]=storage[DATA]</div>
 <div class="row"><span class="c">2C</span>STOREW storage[DATA]=RAM[TAG]</div>
 <div class="hdr">FORMAT: [OP, DATA, TAG, DEST]</div>
+<div class="hdr">LOD: zoom out maksimal = wire saja</div>
 </div>
 </div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
@@ -79,48 +80,45 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 
 <script>
 window.BUILTIN_PROJECTS = {
-version: 13,
+version: 14,
 projects: [
-// DOOM LITE: enemy '@' bergerak + crosshair sprite joystick + RMW storage
 {id:"doom-lite",name:"DOOM LITE",description:"Enemy + crosshair, storage RMW",program:[
-[0x01,0x1F,0x00,0x22],  //  0 SET 31 -> RAM[34] (mask)
-[0x01,0x00,0x00,0x20],  //  1 SET 0  -> RAM[32] (enemy pos)
-[0x01,0x01,0x00,0x21],  //  2 SET 1  -> RAM[33] (dir)
-[0x2C,0x64,0x20,0x00],  //  3 STOREW storage[100]=RAM[32]
-[0x16,0x0E,0x00,0x00],  //  4 SPX 14
-[0x17,0x07,0x00,0x00],  //  5 SPY 7
-[0x1C,0x00,0x00,0x00],  //  6 SPSHOW
-[0x2B,0x64,0x00,0x20],  //  7 STORER RAM[32]=storage[100]
-[0x29,0x20,0x20,0x00],  //  8 POKE ' ' at RAM[RAM[32]] (erase)
-[0x04,0x21,0x20,0x20],  //  9 ADD RAM[32]+RAM[33]->RAM[32]
-[0x08,0x22,0x20,0x20],  // 10 AND RAM[32]&RAM[34]->RAM[32]
-[0x29,0x40,0x20,0x00],  // 11 POKE '@' at RAM[RAM[32]] (draw)
-[0x2C,0x64,0x20,0x00],  // 12 STOREW storage[100]=RAM[32]
-[0x12,0x03,0x00,0x00],  // 13 DELAY 3
-[0x10,0x07,0x00,0x00],  // 14 JMP 7
+[0x01,0x1F,0x00,0x22],
+[0x01,0x00,0x00,0x20],
+[0x01,0x01,0x00,0x21],
+[0x2C,0x64,0x20,0x00],
+[0x16,0x0E,0x00,0x00],
+[0x17,0x07,0x00,0x00],
+[0x1C,0x00,0x00,0x00],
+[0x2B,0x64,0x00,0x20],
+[0x29,0x20,0x20,0x00],
+[0x04,0x21,0x20,0x20],
+[0x08,0x22,0x20,0x20],
+[0x29,0x40,0x20,0x00],
+[0x2C,0x64,0x20,0x00],
+[0x12,0x03,0x00,0x00],
+[0x10,0x07,0x00,0x00],
 [0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
 [0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
 
-// STORAGE COUNTER: counter persists in storage[0] even across project change
 {id:"storage-counter",name:"STORAGE COUNTER",description:"Persistent counter via storage",program:[
-[0x13,0x00,0x00,0x00],  //  0 SCRCLR
-[0x01,0x30,0x00,0x41],  //  1 SET 48 -> RAM[65] ('0')
-[0x01,0x09,0x00,0x42],  //  2 SET 9 -> RAM[66]  (mask for 0..9)
-[0x2B,0x00,0x00,0x40],  //  3 STORER RAM[64]=storage[0] (load counter)
-[0x1F,0x00,0x00,0x00],  //  4 HOME
-[0x20,0x00,0x01,0x00],  //  5 CUR (0,1)  center row
-[0x04,0x41,0x40,0x43],  //  6 ADD RAM[65]+RAM[64]->RAM[66] (ASCII)
-[0x21,0x43,0x00,0x00],  //  7 CHR RAM[43]  (write digit)
-[0x12,0x04,0x00,0x00],  //  8 DELAY 4
-[0x0C,0x40,0x00,0x40],  //  9 INC RAM[40]->RAM[40]
-[0x08,0x42,0x40,0x40],  // 10 AND RAM[42]&RAM[40]->RAM[40] (wrap 0..9)
-[0x2C,0x00,0x40,0x00],  // 11 STOREW storage[0]=RAM[40]
-[0x1F,0x00,0x00,0x00],  // 12 HOME
-[0x10,0x05,0x00,0x00],  // 13 JMP 5
+[0x13,0x00,0x00,0x00],
+[0x01,0x30,0x00,0x41],
+[0x01,0x09,0x00,0x42],
+[0x2B,0x00,0x00,0x40],
+[0x1F,0x00,0x00,0x00],
+[0x20,0x00,0x01,0x00],
+[0x04,0x41,0x40,0x43],
+[0x21,0x43,0x00,0x00],
+[0x12,0x04,0x00,0x00],
+[0x0C,0x40,0x00,0x40],
+[0x08,0x42,0x40,0x40],
+[0x2C,0x00,0x40,0x00],
+[0x1F,0x00,0x00,0x00],
+[0x10,0x05,0x00,0x00],
 [0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],
 [0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00]]},
 
-// BIG marquee
 {id:"big-cpu",name:"BIG CPU 64",description:"Big font marquee",program:[
 [0x13,0x00,0x00,0x00],[0x2A,0x02,0x00,0x00],[0x20,0x00,0x01,0x00],
 [0x1E,0x43,0x00,0x00],[0x1E,0x50,0x00,0x00],[0x1E,0x55,0x00,0x00],[0x1E,0x20,0x00,0x00],
@@ -128,7 +126,6 @@ projects: [
 [0x12,0x03,0x00,0x00],[0x10,0x03,0x00,0x00],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 
-// Bold small marquee
 {id:"bold-walk",name:"BOLD WALK",description:"Small bold marquee",program:[
 [0x13,0x00,0x00,0x00],[0x2A,0x01,0x00,0x00],[0x20,0x00,0x02,0x00],
 [0x1E,0x42,0x00,0x00],[0x1E,0x4F,0x00,0x00],[0x1E,0x4C,0x00,0x00],[0x1E,0x44,0x00,0x00],
@@ -137,7 +134,6 @@ projects: [
 [0x12,0x03,0x00,0x00],[0x10,0x03,0x00,0x00],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 
-// Type demo
 {id:"typewriter",name:"TYPEWRITER",description:"CHR + NL demo",program:[
 [0x13,0x00,0x00,0x00],[0x2A,0x00,0x00,0x00],[0x1F,0x00,0x00,0x00],
 [0x21,0x43,0x00,0x00],[0x21,0x50,0x00,0x00],[0x21,0x55,0x00,0x00],[0x21,0x20,0x00,0x00],
@@ -147,7 +143,6 @@ projects: [
 [0x12,0x0A,0x00,0x00],[0x10,0x00,0x00,0x00],
 [0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 
-// Mixed font
 {id:"mix-font",name:"MIXED FONT",description:"Small + Big",program:[
 [0x13,0x00,0x00,0x00],[0x2A,0x00,0x00,0x00],[0x1F,0x00,0x00,0x00],
 [0x21,0x43,0x00,0x00],[0x21,0x50,0x00,0x00],[0x21,0x55,0x00,0x00],[0x21,0x36,0x00,0x00],[0x21,0x34,0x00,0x00],
@@ -156,14 +151,12 @@ projects: [
 [0x12,0x0A,0x00,0x00],[0x10,0x00,0x00,0x00],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 
-// Sprite bounce
 {id:"bounce",name:"BOUNCE",description:"Sprite vertical wrap",program:[
 [0x16,0x0E,0x00,0x00],[0x17,0x0F,0x00,0x00],[0x1C,0x00,0x00,0x00],
 [0x1B,0x00,0x00,0x00],[0x12,0x01,0x00,0x00],[0x10,0x03,0x00,0x00],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 
-// Joystick sprite demo
 {id:"joy-sprite",name:"JOY SPRITE",description:"Sprite dikontrol joystick",program:[
 [0x16,0x0E,0x00,0x00],[0x17,0x07,0x00,0x00],[0x1C,0x00,0x00,0x00],
 [0x10,0x03,0x00,0x00],
@@ -193,7 +186,6 @@ FONT[75]=[9,10,12,10];FONT[76]=[8,8,8,15];FONT[77]=[9,15,15,9];FONT[78]=[9,13,11
 FONT[80]=[14,9,14,8];FONT[81]=[6,9,5,2];FONT[82]=[14,9,14,10];FONT[83]=[7,8,1,14];FONT[84]=[15,4,4,4];
 FONT[85]=[9,9,9,6];FONT[86]=[9,9,6,4];FONT[87]=[9,9,15,9];FONT[88]=[9,6,6,9];FONT[89]=[9,6,4,4];
 FONT[90]=[15,2,4,15];FONT[91]=[6,4,4,6];FONT[93]=[6,2,2,6];
-// BOLD: right-dilate only (subtle)
 var FONT_BOLD={};
 for(var _k in FONT){var _g=FONT[_k],_b=[];for(var _r=0;_r<4;_r++){var _w=_g[_r];_b.push(_w|((_w<<1)&0xF));}FONT_BOLD[_k]=_b;}
 var SUPPORTED=Object.keys(FONT).map(Number);
@@ -324,25 +316,99 @@ grp.appendChild(E("circle",{cx:0,cy:0,r:rI,fill:on?l.c:"#e8e8e8"}));
 if(l.label&&sz>=20){var t=E("text",{x:0,y:-rO-3,"text-anchor":"middle","font-size":7,fill:"#555"});t.textContent=l.label;grp.appendChild(t);}
 lL.appendChild(grp);
 }
-function renderWire(sx,sy,dx,dy,on,mx){
+
+// ==== renderWire (v3.7): mode minimal = garis diagonal langsung ====
+function renderWire(sx,sy,dx,dy,on,mx,simple){
 var path;
-if(Math.abs(sy-dy)<3)path="M"+sx+","+sy+"H"+dx;
-else{var m=(mx===undefined)?sx+(dx-sx)/2:mx;path="M"+sx+","+sy+"H"+m+"V"+dy+"H"+dx;}
-lW.appendChild(E("path",{d:path,fill:"none",stroke:on?"#111":"#cfcfcf","stroke-width":on?1.5:1}));
+if(simple){
+path="M"+sx+","+sy+"L"+dx+","+dy;
+}else if(Math.abs(sy-dy)<3){
+path="M"+sx+","+sy+"H"+dx;
+}else{
+var m=(mx===undefined)?sx+(dx-sx)/2:mx;
+path="M"+sx+","+sy+"H"+m+"V"+dy+"H"+dx;
 }
+var sw2=simple?(on?0.9:0.35):(on?1.5:1);
+var st=simple?(on?"#444":"#dcdcdc"):(on?"#111":"#cfcfcf");
+lW.appendChild(E("path",{d:path,fill:"none",stroke:st,"stroke-width":sw2}));
+}
+
+// ==== renderFrame (v3.7): LOD — zoom out maksimal = wire saja ====
 function renderFrame(){
 if(!vp)return;
 var r=svg.getBoundingClientRect();
 var vx1=-view.x/view.k,vy1=-view.y/view.k,vx2=vx1+r.width/view.k,vy2=vy1+r.height/view.k;
 var lod=view.k,pad=40;
+
+// LOD tiers
+var minimal      = lod < 0.015;   // hanya wire
+var showSections = lod > 0.020;
+var showGates    = lod > 0.060;
+var showSwitches = lod > 0.080;
+var showLeds     = lod > 0.100;
+
 clearLayer(lW);clearLayer(lG);clearLayer(lL);clearLayer(lU);clearLayer(lS);
-if(frame43)lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:frame43.w,height:frame43.h,fill:"none",stroke:"#aaa","stroke-width":0.4}));
-for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];if(s.x+s.w<vx1||s.x>vx2||s.y+s.h<vy1||s.y>vy2)continue;renderSection(s);}
-if(lod>0.03){for(var i=0;i<wires.length;i++){var w=wires[i];var sx=w.s.x,sy=w.s.y;if(sx===undefined||sy===undefined)continue;var dx,dy;if(w.l){dx=w.l.px-(w.l.sz||22)*0.4-2;dy=w.l.py;}else{dx=w.g.px-6;dy=w.g.py+w.py;}var mxw=(w.mx===undefined?sx:w.mx);var minx=Math.min(sx,dx,mxw),maxx=Math.max(sx,dx,mxw);var miny=Math.min(sy,dy),maxy=Math.max(sy,dy);if(maxx<vx1-pad||minx>vx2+pad||maxy<vy1-pad||miny>vy2+pad)continue;renderWire(sx,sy,dx,dy,w.s.v,w.mx);}}
-if(lod>0.08){for(var i=0;i<gates.length;i++){var g=gates[i];if(g.px+50<vx1-pad||g.px>vx2+pad)continue;if(g.py+44<vy1-pad||g.py>vy2+pad)continue;renderGate(g);}}
-if(lod>0.10){for(var i=0;i<sws.length;i++){var s=sws[i];if(s.px+70<vx1-pad||s.px>vx2+pad)continue;if(s.py+86<vy1-pad||s.py>vy2+pad)continue;renderSwitch(s);}}
-if(lod>0.12){for(var i=0;i<leds.length;i++){var l=leds[i];var rad=(l.sz||22)*0.5+4;if(l.px+rad<vx1||l.px-rad>vx2)continue;if(l.py+rad<vy1||l.py-rad>vy2)continue;renderLed(l);}}
+
+if(frame43 && lod > 0.010){
+lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:frame43.w,height:frame43.h,fill:"none",stroke:"#aaa","stroke-width":0.4}));
 }
+
+// SECTIONS
+if(showSections){
+for(var i=0;i<sectionsData.length;i++){
+var s=sectionsData[i];
+if(s.x+s.w<vx1||s.x>vx2||s.y+s.h<vy1||s.y>vy2)continue;
+renderSection(s);
+}
+}
+
+// WIRES (selalu)
+for(var i=0;i<wires.length;i++){
+var w=wires[i];
+var sx=w.s.x,sy=w.s.y;
+if(sx===undefined||sy===undefined)continue;
+var dx,dy;
+if(w.l){dx=w.l.px-(w.l.sz||22)*0.4-2;dy=w.l.py;}
+else{dx=w.g.px-6;dy=w.g.py+w.py;}
+var mxw=(w.mx===undefined?sx:w.mx);
+var minx=Math.min(sx,dx,mxw),maxx=Math.max(sx,dx,mxw);
+var miny=Math.min(sy,dy),maxy=Math.max(sy,dy);
+if(maxx<vx1-pad||minx>vx2+pad||maxy<vy1-pad||miny>vy2+pad)continue;
+renderWire(sx,sy,dx,dy,w.s.v,w.mx,minimal);
+}
+
+// GATES
+if(showGates){
+for(var i=0;i<gates.length;i++){
+var g=gates[i];
+if(g.px+50<vx1-pad||g.px>vx2+pad)continue;
+if(g.py+44<vy1-pad||g.py>vy2+pad)continue;
+renderGate(g);
+}
+}
+
+// SWITCHES
+if(showSwitches){
+for(var i=0;i<sws.length;i++){
+var s=sws[i];
+if(s.px+70<vx1-pad||s.px>vx2+pad)continue;
+if(s.py+86<vy1-pad||s.py>vy2+pad)continue;
+renderSwitch(s);
+}
+}
+
+// LEDS
+if(showLeds){
+for(var i=0;i<leds.length;i++){
+var l=leds[i];
+var rad=(l.sz||22)*0.5+4;
+if(l.px+rad<vx1||l.px-rad>vx2)continue;
+if(l.py+rad<vy1||l.py-rad>vy2)continue;
+renderLed(l);
+}
+}
+}
+
 function evalComb(g){var a=g.i[0]?g.i[0].v:0,b=g.i[1]?g.i[1].v:0;switch(g.t){case "AND":return a&b;case "OR":return a|b;case "NOT":return a?0:1;case "XOR":return a^b;}return 0;}
 function simulate(){
 var iter,i,g;
@@ -392,16 +458,12 @@ forceNewRow();
 }
 
 function buildJoystick(){
-// + shape: 3x3 grid
-//  [ ] [U] [ ]
-//  [L] [P] [R]
-//  [ ] [D] [ ]
 var bw=50,bh=58,g=8;
 var gridW=3*bw+2*g;
 var gridH=3*bh+2*g;
 var anchor=place(gridW,gridH);
 var bx=anchor.x, by=anchor.y;
-function mk(lb,px,py){var p={x:px,y:py};var s={v:0,o:N(0,0),px:p.x,py:p.y,label:lb,osc:false};s.o.x=p.x+44;s.o.y=p.y+20;sws.push(s);return s;}
+function mk(lb,px,py){var s={v:0,o:N(0,0),px:px,py:py,label:lb,osc:false};s.o.x=px+44;s.o.y=py+20;sws.push(s);return s;}
 section("INPUT · JOYSTICK",gridW+8,function(){
 var up_px = bx + bw + g;
 var mid_px = bx + bw + g;
@@ -425,7 +487,7 @@ var QADDR=[],slots=[],ptr=[],ptrSel=[],qAddr=[],i,b,s;
 section("QUEUE · ADDR (7)",840,function(){for(i=6;i>=0;i--)QADDR[i]=sw("QA"+i);beginGroup(240);for(i=6;i>=0;i--)led(QADDR[i].o,"#a060ff","QA"+i);endGroup();});
 section("QUEUE · ACTION",900,function(){
 core.CLRQo=sw("CLR_Q").o;core.QUEUEo=sw("QUEUE").o;core.RUNQo=sw("RUN_Q").o;
-beginGroup(340);led(core.CLRQo,"#ff4d4d","CQ");led(core.QUEUEo,"#39d353","Q");led(core.RUNQo,"#ffb020","RQ");led(core.RUNQo,"#00c853","●");endGroup();
+beginGroup(340);led(core.CLRQo,"#ff4d4d","CQ");led(core.QUEUEo,"#39d353","Q");led(core.RUNQo,"#ffb020","RQ");endGroup();
 });
 section("QUEUE · QCLK",240,function(){core.QCLKo=osc(1,"QCLK").o;});
 forceNewRow();
@@ -875,7 +937,6 @@ var anyB=v_bn|v_bb;
 if(!anyS&&!anyB)continue;
 var mS=charSels[ci_small][si];
 var mB=charSels[ci_big][si];
-// FIXED: bold & normal as OR modes: bit=1 if (normal & !bold) or (bold & boldMode)
 var tS=K0,tB=K0;
 if(anyS){
 var bitS = v_sn ? (v_sb ? K1 : nbold) : (v_sb ? bold : K0);
@@ -933,7 +994,6 @@ function writeRamByte(arr,addr,val){for(var b=0;b<8;b++)arr[addr][b].prev=(val>>
 function clearMemory(){
 var i,b;
 for(i=0;i<RAM_SIZE;i++)for(b=0;b<8;b++){core.RAM[i][b].prev=0;core.RAM[i][b].prevEn=0;}
-// STORE not reset (non-volatile)
 for(var s=0;s<QUEUE_SLOTS;s++){for(b=0;b<ADDR_BITS;b++)core.slots[s].addr[b].prev=0;core.slots[s].valid.prev=0;core.slots[s].valid.prevEn=0;}
 if(core.ptr)for(i=0;i<PTR_BITS;i++){core.ptr[i].prev=0;core.ptr[i].prevEn=0;}
 if(core.delayReg)for(i=0;i<4;i++){core.delayReg[i].prev=0;core.delayReg[i].prevEn=0;}
