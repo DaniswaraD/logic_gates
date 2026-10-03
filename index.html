@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v11.0</title><style>
+<title>CPU 64 v11.1</title><style>
 *{box-sizing:border-box}html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
 svg{display:block;width:100vw;height:100vh;background:#fff;touch-action:none;cursor:grab}svg.drag{cursor:grabbing}
 text{font-family:inherit;user-select:none;pointer-events:none}
@@ -17,7 +17,7 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 #zoomCtrl button:active{background:#333;color:#fff}
 #err{position:fixed;top:170px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;white-space:pre-wrap}
 </style></head><body>
-<div id="title">CPU 64 v11.0<small id="gcount"></small></div>
+<div id="title">CPU 64 v11.1<small id="gcount"></small></div>
 <div id="hud">PTR=<b id="hudPTR">?</b> SP=<b id="hudSP">?</b> TMR=<b id="hudTMR">?</b> CUR=<b id="hudCUR">?</b><br>IR=<span class="ir" id="hudIR">----</span> <span id="hudMN">NOP</span></div>
 <div id="busLegend"><span class="sw" style="background:#4a9eff"></span>INPUT<br><span class="sw" style="background:#ffb020"></span>CONTROL<br><span class="sw" style="background:#a060ff"></span>STORAGE<br><span class="sw" style="background:#39d353"></span>ALU<br><span class="sw" style="background:#ff4d4d"></span>OUTPUT<br><span class="sw" style="background:#999"></span>OFF</div>
 <div id="err"></div>
@@ -29,7 +29,6 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 <script>
 // =============================================================
 // FONT ROM: 41 chars × 8 rows × 8 cols. Bit 7 = leftmost pixel.
-// 0-25=A-Z, 26-35=0-9, 36='.', 37=',', 38='!', 39=' ', 40=BLOCK
 // =============================================================
 window.FONT8=[
 0x00,0x70,0x88,0x88,0xF8,0x88,0x88,0x00, // A
@@ -72,11 +71,11 @@ window.FONT8=[
 0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x10, // ,
 0x00,0x20,0x20,0x20,0x20,0x20,0x00,0x20, // !
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // space
-0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF  // BLOCK / ENTER
+0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF  // BLOCK
 ];
 
 // =============================================================
-// PROGRAM BUILDER (JS uses it to construct program arrays)
+// PROGRAM BUILDER
 // =============================================================
 function makeProgBuilder(){
   var p=[]; var labels={}; var patches=[];
@@ -136,73 +135,61 @@ function makeProgBuilder(){
 // =============================================================
 function buildCharSelector(){
   var B=makeProgBuilder();
-  // Registers
   var CUR_X=240, TEXT_X=241, JOY_R=242, PREV=243;
   var T1=244, T2=245, T3=246, T4=247;
-  var DC=200, DCAR=201;   // cell reg, char reg
-  var TB0=248;            // text buffer 248..255
+  var DC=200, DCAR=201;
+  var TB0=248;
 
   B.SCRCLR();
-  // Init text buffer (spaces)
   for(var i=0;i<8;i++) B.SET(39, TB0+i);
 
-  // --- Draw keyboard loop (40 keys A..Z0..9.!space at cells 11..58) ---
-  // Registers I=210, CELL=211
   B.SET(0, 210);
   B.SET(11, 211);
   B.label("KLOOP");
-  B.MOV(210, DCAR);   // char = I
-  B.MOV(211, DC);     // cell = CELL
-  B.DRAWC(DC, DCAR);  // draw cell=RAM[DC], char=RAM[DCAR]
+  B.MOV(210, DCAR);
+  B.MOV(211, DC);
+  B.DRAWC(DC, DCAR);
   B.INC(210, 210);
   B.INC(211, 211);
-  // If I & 7 == 0, then adjust cell by +2 extra (row gap)
   B.SET(7, T1);
-  B.AND(210, T1, T2);   // T2 = I & 7
+  B.AND(210, T1, T2);
   B.JNZ(T2, "KNOADJ");
   B.INC(211, 211);
   B.INC(211, 211);
   B.label("KNOADJ");
-  // Exit when I == 40
   B.SET(40, T3);
-  B.CMP(T3, 210);       // flagZ if RAM[210]==RAM[T3]==40
+  B.CMP(T3, 210);
   B.JNE("KLOOP");
 
-  // ENTER block at cell 19 (marker di layar)
   B.SET(19, DC);
   B.SET(40, DCAR);
   B.DRAWC(DC, DCAR);
 
-  // Draw text row 0..7 with space initially
   for(var i=0;i<8;i++){
     B.SET(i, DC);
     B.MOV(TB0+i, DCAR);
     B.DRAWC(DC, DCAR);
   }
-  // Cursor indicator at cell 9 (block)
   B.SET(9, DC);
   B.SET(40, DCAR);
   B.DRAWC(DC, DCAR);
 
-  // Init state
   B.SET(0, CUR_X);
   B.SET(0, TEXT_X);
   B.SET(0, PREV);
 
-  // ===== MAIN LOOP =====
   B.label("MAIN");
   B.JOY(JOY_R);
 
-  // ---- RIGHT (mask 8) ----
   B.SET(8, T1);
-  B.AND(JOY_R, T1, T2);   // T2 = joy & 8
-  B.AND(PREV, T1, T3);    // T3 = prev & 8
+  B.AND(JOY_R, T1, T2);
+  B.AND(PREV, T1, T3);
   B.NOT(T3, T3);
-  B.AND(T2, T3, T2);      // rising?
+  B.AND(T2, T3, T2);
   B.JZ(T2, "SKIP_R");
     B.INC(CUR_X, CUR_X);
     B.SET(9, T1);
-    B.CMP(CUR_X, T1);     // flagZ if curX == 9
+    B.CMP(CUR_X, T1);
     B.JEQ("WRAP_R");
     B.JMP("AFTER_R");
     B.label("WRAP_R");
@@ -210,7 +197,6 @@ function buildCharSelector(){
     B.label("AFTER_R");
   B.label("SKIP_R");
 
-  // ---- LEFT (mask 4) ----
   B.SET(4, T1);
   B.AND(JOY_R, T1, T2);
   B.AND(PREV, T1, T3);
@@ -218,31 +204,26 @@ function buildCharSelector(){
   B.AND(T2, T3, T2);
   B.JZ(T2, "SKIP_L");
     B.SET(0, T1);
-    B.CMP(CUR_X, T1);     // flagZ if curX == 0
+    B.CMP(CUR_X, T1);
     B.JEQ("SKIP_L");
     B.DEC(CUR_X, CUR_X);
   B.label("SKIP_L");
 
-  // ---- POINT (mask 16) ----
   B.SET(16, T1);
   B.AND(JOY_R, T1, T2);
   B.AND(PREV, T1, T3);
   B.NOT(T3, T3);
   B.AND(T2, T3, T2);
   B.JZ(T2, "SKIP_P");
-    // If curX == 8 => ENTER (clear text)
     B.SET(8, T1);
     B.CMP(CUR_X, T1);
     B.JEQ("DO_ENTER");
-    // Append: RAM[RAM[TB0+textX]] = RAM[CUR_X]
     B.SET(TB0, T4);
-    B.ADD(TEXT_X, T4, T4);      // T4 = 248 + textX
-    B.BYTE(CUR_X, T4);          // RAM[RAM[T4]] = RAM[CUR_X]
-    // Redraw cell textX with char curX
-    B.MOV(TEXT_X, DC);          // DC = textX
-    B.MOV(CUR_X, DCAR);         // DCAR = curX (0..7 -> 'A'..'H')
+    B.ADD(TEXT_X, T4, T4);
+    B.BYTE(CUR_X, T4);
+    B.MOV(TEXT_X, DC);
+    B.MOV(CUR_X, DCAR);
     B.DRAWC(DC, DCAR);
-    // Advance textX
     B.INC(TEXT_X, TEXT_X);
     B.SET(8, T1);
     B.CMP(TEXT_X, T1);
@@ -251,7 +232,6 @@ function buildCharSelector(){
     B.JMP("SKIP_P");
 
     B.label("DO_ENTER");
-    // Clear text buffer to spaces + redraw cells 0..7
     for(var i=0;i<8;i++) B.SET(39, TB0+i);
     for(var i=0;i<8;i++){
       B.SET(i, DC);
@@ -261,7 +241,6 @@ function buildCharSelector(){
     B.SET(0, TEXT_X);
   B.label("SKIP_P");
 
-  // Save prev joy
   B.MOV(JOY_R, PREV);
   B.DELAY(3);
   B.JMP("MAIN");
@@ -278,9 +257,9 @@ function buildPlasma(){
   B.label("INNER");
   B.TIME(T);
   B.XOR(I, T, V);
-  B.BYTE(V, I);            // RAM[RAM[I]] = RAM[V]
+  B.BYTE(V, I);
   B.INC(I, I);
-  B.CMP(LIM, I);           // flagZ if I == LIM(240)
+  B.CMP(LIM, I);
   B.JNE("INNER");
   B.DELAY(3);
   B.JMP("L");
@@ -293,12 +272,12 @@ function buildHyperspace(){
   B.SET(15, M);
   B.label("L");
   B.RND(R);
-  B.AND(R, M, R);           // R = rnd & 15
-  B.SHL(R, R); B.SHL(R, R); B.SHL(R, R); B.SHL(R, R); // R *= 16
+  B.AND(R, M, R);
+  B.SHL(R, R); B.SHL(R, R); B.SHL(R, R); B.SHL(R, R);
   B.TIME(T);
   B.AND(T, M, T);
   B.INC(T, T);
-  B.BYTE(T, R);             // RAM[RAM[R]] = RAM[T]
+  B.BYTE(T, R);
   B.DELAY(1);
   B.JMP("L");
   return B.finish();
@@ -311,8 +290,8 @@ function buildMoire(){
   B.label("L");
   B.SET(0, I);
   B.label("INNER");
-  B.SHR(I, V);              // V = I>>1
-  B.XOR(I, V, V);           // V = I ^ (I>>1)
+  B.SHR(I, V);
+  B.XOR(I, V, V);
   B.SHR(V, V);
   B.TIME(T);
   B.XOR(V, T, V);
@@ -354,8 +333,8 @@ function buildFire(){
   B.label("L");
   B.SET(0, I);
   B.label("INNER");
-  B.SHL(I, V);              // V = I<<1
-  B.ADD(I, V, V);           // V = 3I
+  B.SHL(I, V);
+  B.ADD(I, V, V);
   B.TIME(T);
   B.ADD(T, V, V);
   B.XOR(I, V, V);
@@ -416,7 +395,7 @@ function buildScroll(){
   B.SET(0, I);
   B.label("INNER");
   B.TIME(T);
-  B.ADD(T, I, V);           // V = I + time
+  B.ADD(T, I, V);
   B.XOR(I, V, V);
   B.SHL(V, V);
   B.XOR(T, V, V);
@@ -450,18 +429,16 @@ function buildInvert(){
 
 function buildLife(){
   var B=makeProgBuilder();
-  // Simplified: for each byte i, new = (left_byte ^ right_byte) mixed with i
   var I=210, T=211, V=212, LIM=213, L=214, R=215, T2=216;
   B.SET(240, LIM);
   B.label("L");
-  B.SET(1, I);              // start at 1 (skip byte 0)
+  B.SET(1, I);
   B.label("INNER");
-  // L = RAM[i-1]
   B.SET(1, T);
-  B.SUB(T, I, T2);          // T2 = I - 1
-  B.MOV(T2, L);             // L = RAM[I-1]
-  B.ADD(T, I, T2);          // T2 = I + 1
-  B.MOV(T2, R);             // R = RAM[I+1]
+  B.SUB(T, I, T2);
+  B.MOV(T2, L);
+  B.ADD(T, I, T2);
+  B.MOV(T2, R);
   B.XOR(L, R, V);
   B.TIME(T);
   B.XOR(T, V, V);
@@ -474,8 +451,7 @@ function buildLife(){
   return B.finish();
 }
 
-// ----
-window.BUILTIN_PROJECTS={version:60,projects:[
+window.BUILTIN_PROJECTS={version:61,projects:[
   {id:"charsel",   name:"CHAR SELECTOR", description:"Text editor + ENTER on-screen", program: buildCharSelector()},
   {id:"plasma",    name:"PLASMA",        description:"XOR plasma storm",              program: buildPlasma()},
   {id:"hyper",     name:"HYPERSPACE",    description:"Random star trails",            program: buildHyperspace()},
@@ -498,12 +474,13 @@ function showErr(m){var el=document.getElementById("err");el.style.display="bloc
 window.addEventListener("error",function(e){showErr(e.message+" @"+e.lineno);});
 
 // ================ CONFIG ================
-var SCR_W=80, SCR_H=48;                 // 48 is multiple of 8; visible 45 ok (viewBox will crop last row visually)
+var SCR_W=80, SCR_H=48;
 var LED_SZ=5;
-var CELL_COLS=10, CELL_ROWS=6;          // 10 cells * 8px = 80 wide, 6*8=48 tall
+var CELL_COLS=10, CELL_ROWS=6;
 var CELLS=CELL_COLS*CELL_ROWS;          // 60
 var SCR_BYTES=CELLS*8;                  // 480
-var RAM_SIZE=1024, QUEUE_SLOTS=192, PTR_BITS=8, STACK_DEPTH=16, SP_BITS=4;
+// v11.1: RAM_SIZE 1024→512, QUEUE_SLOTS 192→128 (performa)
+var RAM_SIZE=512, QUEUE_SLOTS=128, PTR_BITS=8, STACK_DEPTH=16, SP_BITS=4;
 
 var OP_NOP=0x0000,OP_SET=0x0001,OP_MOV=0x0002,OP_ADD=0x0004,OP_SUB=0x0005,OP_MUL=0x0006,OP_DIV=0x0007,
 OP_AND=0x0008,OP_OR=0x0009,OP_XOR=0x000A,OP_NOT=0x000B,OP_INC=0x000C,OP_DEC=0x000D,
@@ -707,7 +684,7 @@ section("INPUT · ACTION",900,function(){core.RUNo=sw("RUN_Q").o;core.CLRo=sw("C
 section("INPUT · CLK",900,function(){core.CLKo=osc(1,"CLK").o;});
 forceNewRow();
 core.OP_HI=OP_HI;core.OP_LO=OP_LO;core.D=D;core.T=T;core.A=A;core.RAM=[];
-section("STORAGE · RAM 1024×8",96000,function(){for(i=0;i<RAM_SIZE;i++){beginGroup(140);core.RAM.push([]);for(var b=0;b<8;b++){beginGroup(18);core.RAM[i].push(LAT(0));endGroup();}endGroup();}});
+section("STORAGE · RAM "+RAM_SIZE+"×8",RAM_SIZE*90,function(){for(i=0;i<RAM_SIZE;i++){beginGroup(140);core.RAM.push([]);for(var b=0;b<8;b++){beginGroup(18);core.RAM[i].push(LAT(0));endGroup();}endGroup();}});
 forceNewRow();
 core.hwTimer=[];
 section("HW · TIMER 8-bit",900,function(){for(i=0;i<8;i++)core.hwTimer.push(LAT(0));});}
@@ -759,9 +736,10 @@ forceNewRow();}
 function buildBackend(){var i,b;
 var opDec,destDec,tagDec,dataDec;var RAM=core.RAM;
 var srcB=[],srcC=[],finalR=[];var screenLeds=[];
+// v11.1 FIX: runEdge harus digate CLK, bukan rising-edge RUN_Q
 section("CTRL · EDGE",900,function(){core.runPrev=LAT(0);setLat(core.runPrev,core.RUNo,core.CLKo);
 core.clrPrev=LAT(0);setLat(core.clrPrev,core.CLRo,core.CLKo);
-core.runEdge=AND(core.RUNo,NOT(core.runPrev.o));
+core.runEdge=AND(core.RUNo,core.CLKo);
 core.clrEdge=AND(core.CLRo,NOT(core.clrPrev.o));
 core.effRunEdge=core.runEdge;});
 section("CTRL · OP DEC",9000,function(){opDec=decodeOps(core.finalOpHi,core.finalOpLo);});
@@ -878,10 +856,9 @@ section("ALU · TIME",600,function(){var tt=[];for(b=0;b<8;b++)tt.push(core.hwTi
 forceNewRow();
 section("OUTPUT MUX",5000,function(){for(b=0;b<8;b++){beginGroup(700);var acc=null;for(var ii=0;ii<opList.length;ii++){var opv=opList[ii];var t=AND(opDec[opv],opR[opv][b]);acc=(acc===null)?t:OR(acc,t);}if(acc===null)acc=K0;finalR.push(acc);endGroup();}});
 
-// ============== FONT ROM (indexed by srcB for DRAWC) ==============
-var fontOut=[];  // fontOut[row][bit] = gate
+var fontOut=[];
 section("FONT · ROM 41×8×8",5000,function(){
-  var charDec=makeDecoder(srcB);   // 256 outputs (only 0..40 used)
+  var charDec=makeDecoder(srcB);
   for(var r=0;r<8;r++){
     fontOut[r]=[];
     for(var bit=0;bit<8;bit++){
@@ -894,14 +871,12 @@ section("FONT · ROM 41×8×8",5000,function(){
   }
 });
 
-// ============== DRAWC address decoder (indexed by srcC) ==============
 var cellDec=null;
 section("DRAWC · CELL DEC",3000,function(){
-  cellDec=makeDecoder(srcC);  // 256 outputs
+  cellDec=makeDecoder(srcC);
 });
 
-// ============== WRITE LOGIC ==============
-section("OUTPUT · WRITE EN",96000,function(){
+section("OUTPUT · WRITE EN",RAM_SIZE*95,function(){
   var wrEnable=core.effRunEdge;
   var scrClrAct=AND(core.effRunEdge,opDec[OP_SCRCLR]);
   var drawcAct=AND(core.effRunEdge,opDec[OP_DRAWC]);
@@ -918,14 +893,15 @@ section("OUTPUT · WRITE EN",96000,function(){
   noWrite=OR(noWrite,opDec[OP_DRAWC]);noWrite=OR(noWrite,opDec[OP_CHR]);
   var doWrite=NOT(noWrite);
   for(i=0;i<RAM_SIZE;i++){beginGroup(100);
-    var wEn=AND(AND(wrEnable,destDec[i]),doWrite);
+    // v11.1: guard destDec[i] untuk i>=256
+    var dec_i=(i<destDec.length)?destDec[i]:K0;
+    var wEn=AND(AND(wrEnable,dec_i),doWrite);
     var clrEn=(i<SCR_BYTES)?scrClrAct:K0;
-    // DRAWC write path (uses srcC as cell index)
     var drawcEn=K0;
     if(i<SCR_BYTES){
       var myCell=i>>3;
       var myRow=i&7;
-      var cellMatch=(myCell<256)?cellDec[myCell]:K0;
+      var cellMatch=(myCell<cellDec.length)?cellDec[myCell]:K0;
       drawcEn=AND(drawcAct, cellMatch);
     }
     var en=OR(OR(OR(wEn,core.clrEdge),clrEn),drawcEn);
@@ -938,14 +914,12 @@ section("OUTPUT · WRITE EN",96000,function(){
     }
   endGroup();}
 });
-// BYTE indirect write
-section("BYTE · INDIRECT",96000,function(){var byteAct=AND(core.effRunEdge,opDec[OP_BYTE]);
+section("BYTE · INDIRECT",RAM_SIZE*80,function(){var byteAct=AND(core.effRunEdge,opDec[OP_BYTE]);
 var pokeDec2=makeDecoder(srcB);
 for(i=0;i<RAM_SIZE;i++){beginGroup(80);var we=AND(byteAct,pokeDec2[i]);
 for(b=0;b<8;b++)setLat(RAM[i][b],srcC[b],we);endGroup();}});
 forceNewRow();
 
-// ============== SCREEN ==============
 section("SCREEN · GRID 80×48",SCR_W*(LED_SZ+GAPX)+GAPX,function(){
   for(var row=0;row<SCR_H;row++){beginGroup(SCR_W*(LED_SZ+GAPX)+GAPX);screenLeds.push([]);
   for(var col=0;col<SCR_W;col++)screenLeds[row].push(ledPending("#111","",LED_SZ));
@@ -1113,10 +1087,9 @@ document.getElementById("zoomIn").addEventListener("click",function(){zoomC(1.3)
 document.getElementById("zoomOut").addEventListener("click",function(){zoomC(1/1.3);});
 document.getElementById("zoomReset").addEventListener("click",function(){fitAll();});
 loadProject();
-// Run CPU: multiple sim ticks per frame, plus screen refresh
+// v11.1: 8 siklus per 20ms → ~200 IPS, animasi kelihatan bergerak
 setInterval(function(){try{
-  tickOsc();
-  for(var k=0;k<6;k++) simulate();
+  for(var c=0;c<8;c++){ tickOsc(); simulate(); simulate(); }
   updateHUD();updateScreen();
 }catch(e){showErr((e&&e.message)||String(e));}},20);
 var lastR=0;
