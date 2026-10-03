@@ -12,7 +12,6 @@ var SCR_W=CFG.SCR_W,SCR_H=CFG.SCR_H,LED_SZ=CFG.LED_SZ;
 var CELL_COLS=CFG.CELL_COLS,CELL_ROWS=CFG.CELL_ROWS,SCR_BYTES=CFG.SCR_BYTES;
 var RAM_SIZE=CFG.RAM_SIZE,PTR_BITS=CFG.PTR_BITS,SP_BITS=CFG.SP_BITS;
 
-/* ===================== PROJECT BUILDER ===================== */
 function PB(){
 var p=[],labels={},patches=[];
 function em(hi,lo,d,t,a){p.push([hi|0,lo|0,(d|0)&255,(t|0)&255,(a|0)&255]);return p.length-1;}
@@ -23,8 +22,7 @@ function jnz(t,n){var i=em(0x00,0x15,0,t,0);patches.push([i,n]);return i;}
 function jeq(n){var i=em(0x00,0x18,0,0,0);patches.push([i,n]);return i;}
 function jne(n){var i=em(0x00,0x19,0,0,0);patches.push([i,n]);return i;}
 function jlt(n){var i=em(0x00,0x16,0,0,0);patches.push([i,n]);return i;}
-function fin(){for(var i=0;i<patches.length;i++)p[patches[i][0]][4]=labels[patches[i][1]];
-return p;}
+function fin(){for(var i=0;i<patches.length;i++)p[patches[i][0]][4]=labels[patches[i][1]];return p;}
 return{
 SET:function(d,t){return em(0x00,0x01,d,0,t);},
 MOV:function(s,t){return em(0x00,0x02,0,s,t);},
@@ -53,12 +51,12 @@ DRAWC:function(cellR,charR){return em(0x00,0x34,cellR,charR,0);},
 label:lab,finish:fin
 };}
 
-/* ===================== PROJECTS ===================== */
 function buildCharSel(){
 var B=PB();
 var CX=240,TX=241,JY=242,PV=243,T1=244,T2=245,T3=246;
 var CR=247,CH=248;
 B.SCRCLR();
+B.SET(0,CX);B.SET(0,TX);B.SET(0,PV);
 for(var i=0;i<8;i++){
 B.SET(i,CH);
 B.SET(10+i,CR);
@@ -68,7 +66,6 @@ B.SET(40,CH);B.SET(18,CR);B.DRAWC(CR,CH);
 for(var i=0;i<8;i++){
 B.SET(39,CH);B.SET(20+i,CR);B.DRAWC(CR,CH);
 }
-B.SET(0,CX);B.SET(0,TX);B.SET(0,PV);
 B.label("MAIN");
 B.JOY(JY);
 B.SET(8,T1);B.AND(JY,T1,T2);B.AND(PV,T1,T3);B.NOT(T3,T3);B.AND(T2,T3,T2);
@@ -95,9 +92,7 @@ B.SET(8,T1);B.CMP(TX,T1);B.JNE("SKP");
 B.SET(0,TX);
 B.JMP("SKP");
 B.label("ENTER");
-for(var i=0;i<8;i++){
-B.SET(39,CH);B.SET(20+i,CR);B.DRAWC(CR,CH);
-}
+for(var i=0;i<8;i++){B.SET(39,CH);B.SET(20+i,CR);B.DRAWC(CR,CH);}
 B.SET(0,TX);
 B.label("SKP");
 B.MOV(JY,PV);
@@ -114,7 +109,6 @@ B.TIME(T);B.XOR(I,T,V);B.BYTE(V,I);
 B.INC(I,I);B.CMP(LIM,I);B.JNE("I");
 B.DELAY(2);B.JMP("L");
 return B.finish();}
-
 function buildNoise(){
 var B=PB();var I=240,R=241,LIM=242;
 B.SET(SCR_BYTES,LIM);
@@ -124,7 +118,6 @@ B.RND(R);B.BYTE(R,I);
 B.INC(I,I);B.CMP(LIM,I);B.JNE("I");
 B.DELAY(2);B.JMP("L");
 return B.finish();}
-
 function buildMoire(){
 var B=PB();var I=240,T=241,V=242,LIM=243;
 B.SET(SCR_BYTES,LIM);
@@ -135,7 +128,6 @@ B.TIME(T);B.XOR(V,T,V);B.BYTE(V,I);
 B.INC(I,I);B.CMP(LIM,I);B.JNE("I");
 B.DELAY(2);B.JMP("L");
 return B.finish();}
-
 function buildWave(){
 var B=PB();var I=240,T=241,V=242,LIM=243;
 B.SET(SCR_BYTES,LIM);
@@ -146,7 +138,6 @@ B.XOR(I,V,V);B.SHR(V,V);B.XOR(T,V,V);
 B.BYTE(V,I);B.INC(I,I);B.CMP(LIM,I);B.JNE("I");
 B.DELAY(2);B.JMP("L");
 return B.finish();}
-
 function buildMandel(){
 var B=PB();var I=240,T=241,V=242,LIM=243;
 B.SET(SCR_BYTES,LIM);
@@ -156,7 +147,6 @@ B.TIME(T);B.XOR(I,T,V);B.ADD(T,V,V);B.MUL(I,V,V);B.SHR(V,V);B.XOR(T,V,V);
 B.BYTE(V,I);B.INC(I,I);B.CMP(LIM,I);B.JNE("I");
 B.DELAY(2);B.JMP("L");
 return B.finish();}
-
 function buildFire(){
 var B=PB();var I=240,T=241,V=242,LIM=243;
 B.SET(SCR_BYTES,LIM);
@@ -166,7 +156,6 @@ B.SHL(I,V);B.ADD(I,V,V);B.TIME(T);B.ADD(T,V,V);B.XOR(I,V,V);B.SHR(V,V);
 B.BYTE(V,I);B.INC(I,I);B.CMP(LIM,I);B.JNE("I");
 B.DELAY(2);B.JMP("L");
 return B.finish();}
-
 function buildInvert(){
 var B=PB();var I=240,T=241,V=242,LIM=243;
 B.SET(SCR_BYTES,LIM);
@@ -176,7 +165,6 @@ B.TIME(T);B.XOR(I,T,V);B.NOT(V,V);B.BYTE(V,I);
 B.INC(I,I);B.CMP(LIM,I);B.JNE("I");
 B.DELAY(2);B.JMP("L");
 return B.finish();}
-
 function buildScroll(){
 var B=PB();var I=240,T=241,V=242,LIM=243;
 B.SET(SCR_BYTES,LIM);
@@ -186,7 +174,6 @@ B.TIME(T);B.ADD(T,I,V);B.XOR(I,V,V);B.SHL(V,V);B.XOR(T,V,V);
 B.BYTE(V,I);B.INC(I,I);B.CMP(LIM,I);B.JNE("I");
 B.DELAY(2);B.JMP("L");
 return B.finish();}
-
 function buildHyperspace(){
 var B=PB();var I=240,R=241,T=242,M=243;
 B.SET(15,M);
@@ -195,19 +182,14 @@ B.RND(R);B.AND(R,M,R);B.SHL(R,R);B.SHL(R,R);B.SHL(R,R);B.SHL(R,R);
 B.TIME(T);B.AND(T,M,T);B.INC(T,T);B.BYTE(T,R);
 B.DELAY(1);B.JMP("L");
 return B.finish();}
-
 function buildLife(){
 var B=PB();var I=240,T=241,V=242,LIM=243,L=244,R=245;
 B.SET(SCR_BYTES,LIM);
 B.label("L");B.SET(1,I);
 B.label("I");
-B.SET(1,T);B.SUB(T,I,T);
-B.MOV(T,L);
-B.SET(1,T);B.ADD(T,I,T);
-B.MOV(T,R);
-B.XOR(L,R,V);
-B.TIME(T);B.XOR(T,V,V);
-B.BYTE(V,I);
+B.SET(1,T);B.SUB(T,I,T);B.MOV(T,L);
+B.SET(1,T);B.ADD(T,I,T);B.MOV(T,R);
+B.XOR(L,R,V);B.TIME(T);B.XOR(T,V,V);B.BYTE(V,I);
 B.INC(I,I);B.CMP(LIM,I);B.JNE("I");
 B.DELAY(3);B.JMP("L");
 return B.finish();}
@@ -226,13 +208,11 @@ var PROJECTS=[
 {id:"life",name:"CELLULAR",program:buildLife()}
 ];
 
-/* ===================== BUILD CPU ===================== */
 var state=CPU.build();
 var gates=state.gates,sws=state.sws,leds=state.leds,latches=state.latches;
 var wires=state.wires,sectionsData=state.sectionsData,core=state.core;
 var screenLeds=state.screenLeds;
 
-/* ===================== WIRE ROUTING ===================== */
 function routeWires(){var STEP=2,buckets={},list=[],i,w;
 for(i=0;i<wires.length;i++){w=wires[i];delete w.mx;if(!w.s||w.s.x===undefined)continue;
 if(w.l){w.ex=w.l.px-(w.l.sz||22)*0.4-2;w.ey=w.l.py;}
@@ -249,10 +229,8 @@ if(arr)for(var m=0;m<arr.length;m++){var o=arr[m];
 if(o.n!==w.s&&o.a<y2&&o.b>y1){ok=false;break;}}
 if(ok)pick=key;}}
 if(pick===null)pick=base;
-(buckets[pick]||(buckets[pick]=[])).push({a:y1,b:y2,n:w.s});
-w.mx=pick*STEP;}}
+(buckets[pick]||(buckets[pick]=[])).push({a:y1,b:y2,n:w.s});w.mx=pick*STEP;}}
 
-/* ===================== LAYOUT ===================== */
 function relayout(){
 var M=80,GX=30,GY=30;
 var byTitle={};var i,k;
@@ -262,9 +240,6 @@ for(k=s.g0;k<s.g1;k++){var g=gates[k];g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
 for(k=s.s0;k<s.s1;k++){var q=sws[k];q.px+=dx;q.py+=dy;q.o.x+=dx;q.o.y+=dy;}
 for(k=s.l0;k<s.l1;k++){var l=leds[k];l.px+=dx;l.py+=dy;}
 for(k=s.lt0;k<s.lt1;k++){var lt=latches[k];lt.px+=dx;lt.py+=dy;lt.o.x+=dx;lt.o.y+=dy;}
-if(s.title==="SCREEN · GRID "+SCR_W+"×"+SCR_H){
-for(var r=0;r<SCR_H;r++)for(var c=0;c<SCR_W;c++){
-var led=screenLeds[r][c];led.px+=dx;led.py+=dy;}}
 s.x=nx;s.y=ny;}
 var inT=["INPUT · OP_HI","INPUT · OP_LO","INPUT · DATA","INPUT · TAG","INPUT · DEST","INPUT · ACTION","INPUT · CLK"];
 var x=M,y=M,inW=0;
@@ -296,49 +271,36 @@ if(ss.x<mnx)mnx=ss.x;if(ss.y<mny)mny=ss.y;
 if(ss.x+ss.w>mxx)mxx=ss.x+ss.w;if(ss.y+ss.h>mxy)mxy=ss.y+ss.h;}
 return{x:mnx,y:mny,w:mxx-mnx,h:mxy-mny};}
 
-/* ===================== SVG LAYERS ===================== */
 var vp=E("g",{});svg.appendChild(vp);
 var lS=E("g",{}),lWo=E("g",{}),lWn=E("g",{}),lScr=E("g",{}),lG=E("g",{}),lL=E("g",{}),lU=E("g",{});
 vp.appendChild(lS);vp.appendChild(lWo);vp.appendChild(lWn);
 vp.appendChild(lScr);
 vp.appendChild(lG);vp.appendChild(lL);vp.appendChild(lU);
 
-/* =====================================================================
-   SCREEN PIXELS AS ROUND LEDS
-   Each LED: outer ring (dies/body) + inner fill (driven by RAM latch).
-   led.i is a direct reference to RAM[byte][bit].o — no JS forcing.
-   ===================================================================== */
 var pixEls=[];
-var LED_R = LED_SZ*0.52;   /* outer radius */
-var LED_RI = LED_SZ*0.32;  /* inner lit radius */
+var LED_R=LED_SZ*0.52, LED_RI=LED_SZ*0.32;
 function ensurePixelEls(){
 if(pixEls.length)return;
 for(var r=0;r<SCR_H;r++){pixEls.push([]);
 for(var c=0;c<SCR_W;c++){
 var led=screenLeds[r][c];
 var g=E("g",{transform:"translate("+led.px+","+led.py+")"});
-/* LED body (outer ring) */
-g.appendChild(E("circle",{cx:0,cy:0,r:LED_R,fill:"#d8d8d8",stroke:"#555","stroke-width":0.5}));
-/* LED inner (driven) */
-var inner=E("circle",{cx:0,cy:0,r:LED_RI,fill:"#f4f4f4",stroke:"none"});
+g.appendChild(E("circle",{cx:0,cy:0,r:LED_R,fill:"#e0e0e0",stroke:"#555","stroke-width":0.4}));
+var inner=E("circle",{cx:0,cy:0,r:LED_RI,fill:"#f6f6f6",stroke:"none"});
 g.appendChild(inner);
 lScr.appendChild(g);
 pixEls[r].push(inner);
 }}}
-
-/* Screen refresh: read wired latch node, update only on change */
 function refreshScreen(){
-for(var r=0;r<SCR_H;r++){
-for(var c=0;c<SCR_W;c++){
+for(var r=0;r<SCR_H;r++)for(var c=0;c<SCR_W;c++){
 var led=screenLeds[r][c];
 var on=led.i.v?1:0;
 if(led._lv!==on){
 led._lv=on;
 var el=pixEls[r][c];
-if(el)el.setAttribute("fill",on?"#ff2020":"#f4f4f4");
-}}}}
+if(el)el.setAttribute("fill",on?"#ff2020":"#f6f6f6");
+}}}
 
-/* ===================== RENDER ===================== */
 function clearLayer(g){while(g.firstChild)g.removeChild(g.firstChild);}
 function renderSection(s){
 lS.appendChild(E("rect",{x:s.x,y:s.y,width:s.w,height:s.h,fill:"#fafafa",stroke:s.color,"stroke-width":1.5,"stroke-dasharray":"6 3"}));
@@ -388,6 +350,7 @@ if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT"||
 setTimeout(function(){s.v=0;},180);});}
 lU.appendChild(grp);}
 function renderIndicatorLed(l){var sz=l.sz||10;
+if(l.screen)return;
 var on=l.i?l.i.v:0;
 var fill=on?(l.c||"#39d353"):"#e8e8e8";
 var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
@@ -449,11 +412,11 @@ if(showSwitches)for(var i=0;i<sws.length;i++){var s=sws[i];
 if(s.px+70<vx1-pad||s.px>vx2+pad)continue;
 if(s.py+86<vy1-pad||s.py>vy2+pad)continue;renderSwitch(s);}
 for(var i=0;i<leds.length;i++){var l=leds[i];
+if(l.screen)continue;
 var rad=(l.sz||10)*0.5+4;
 if(l.px+rad<vx1||l.px-rad>vx2)continue;
 if(l.py+rad<vy1||l.py-rad>vy2)continue;renderIndicatorLed(l);}}
 
-/* ===================== FIT VIEW ===================== */
 function fitAll(){var r=svg.getBoundingClientRect();
 var k=Math.min(r.width/frame43.w,r.height/frame43.h)*0.95;
 if(k<0.0015)k=0.0015;
@@ -471,7 +434,6 @@ var k=Math.min(r.width/(w+120),r.height/(h+120))*0.92;
 if(k<0.03)k=0.03;if(k>2.5)k=2.5;
 view.k=k;view.x=r.width/2-cx*k;view.y=r.height/2-cy*k;applyView();}
 
-/* ===================== HUD ===================== */
 function readLatches8(arr,idx){var v=0;if(!arr[idx])return 0;
 for(var b=0;b<8;b++)if(arr[idx][b]&&arr[idx][b].o.v)v|=(1<<b);
 return v;}
@@ -498,11 +460,10 @@ var ir=readIR(),hex=ir.toString(16).toUpperCase();
 while(hex.length<4)hex="0"+hex;
 document.getElementById("hudIR").textContent=hex;
 document.getElementById("hudMN").textContent=CPU.MN[ir]||"?";}
-function updateGateCount(){var total=gates.length+sws.length+leds.length+SCR_W*SCR_H;
+function updateGateCount(){var total=gates.length+sws.length+leds.length;
 document.getElementById("gcount").textContent=
 "· "+total.toLocaleString()+" gates · "+latches.length.toLocaleString()+" FFs";}
 
-/* ===================== PROJECT SELECT ===================== */
 function initProj(){
 var box=document.getElementById("projSel");
 var dd=document.getElementById("projDropdown");
@@ -513,14 +474,13 @@ dd.appendChild(o);}
 dd.onchange=function(){
 for(var j=0;j<PROJECTS.length;j++)if(PROJECTS[j].id===dd.value){
 CPU.loadProgram(PROJECTS[j]);
-for(var b=0;b<PTR_BITS;b++)if(core.ptr[b]){core.ptr[b].prev=0;core.ptr[b].o.v=0;}
-if(core.halt){core.halt.prev=0;core.halt.o.v=0;}
-for(var k=0;k<6;k++)CPU.simulate();
+for(var b=0;b<PTR_BITS;b++)if(core.ptr[b]){core.ptr[b].prev=0;core.ptr[b].o.v=0;core.ptr[b].prevEn=0;}
+if(core.halt){core.halt.prev=0;core.halt.o.v=0;core.halt.prevEn=0;}
+for(var k=0;k<40;k++){CPU.tickOsc();CPU.simulate();}
 updateHUD();refreshScreen();
 return;}};
 box.style.display="flex";}
 
-/* ===================== VIEW / INTERACT ===================== */
 var view={x:0,y:0,k:1};
 var MIN_K=0.0002,MAX_K=40;
 function applyView(){vp.setAttribute("transform","translate("+view.x+","+view.y+") scale("+view.k+")");}
@@ -572,26 +532,26 @@ document.getElementById("zoomIn").addEventListener("click",function(){zoomC(1.3)
 document.getElementById("zoomOut").addEventListener("click",function(){zoomC(1/1.3);});
 document.getElementById("zoomReset").addEventListener("click",function(){fitAll();});
 
-/* ===================== INIT ===================== */
 routeWires();
 var frame43=relayout();
 ensurePixelEls();
 initProj();
 CPU.loadProgram(PROJECTS[0]);
-for(var k=0;k<10;k++)CPU.simulate();
+for(var k=0;k<60;k++){CPU.tickOsc();CPU.simulate();}
 updateHUD();
 refreshScreen();
 updateGateCount();
 fitScreen();
 renderFrame();
 
-/* ===================== MAIN LOOP ===================== */
 setInterval(function(){
 try{
-CPU.tickOsc();
-for(var i=0;i<4;i++)CPU.simulate();
-updateHUD();
-refreshScreen();
+  for(var i=0;i<14;i++){
+    CPU.tickOsc();
+    CPU.simulate();
+  }
+  updateHUD();
+  refreshScreen();
 }catch(e){showErr((e&&e.message)||String(e));}},25);
 var _lastR=0;
 requestAnimationFrame(function loop(t){
