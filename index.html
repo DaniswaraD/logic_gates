@@ -1,30 +1,728 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v12.0</title><style>
-*{box-sizing:border-box}html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
-svg{display:block;width:100vw;height:100vh;background:#fff;touch-action:none;cursor:grab}svg.drag{cursor:grabbing}
-text{font-family:inherit;user-select:none;pointer-events:none}
-#title{position:fixed;top:10px;left:12px;z-index:10;font-size:13px;font-weight:700;color:#222;background:#fff;padding:4px 8px;border:2px solid #333}#title small{font-weight:400;color:#666;margin-left:8px}
-#hud{position:fixed;top:52px;left:12px;z-index:11;background:#111;color:#0f0;font-family:ui-monospace,monospace;font-size:11px;padding:6px 10px;border:2px solid #333;line-height:1.6}
-#hud b{color:#ff0}#hud .ir{color:#0af;font-weight:700}
-#busLegend{position:fixed;top:52px;left:360px;z-index:11;background:#fff;border:2px solid #333;padding:6px 10px;font-size:11px;line-height:1.6;font-family:ui-monospace,monospace}
-#busLegend .sw{display:inline-block;width:14px;height:4px;vertical-align:middle;margin-right:6px}
-#help{position:fixed;bottom:10px;left:12px;font-size:11px;color:#888;z-index:10}
-#projSel{position:fixed;top:10px;right:12px;z-index:21;background:#fff;border:2px solid #333;padding:5px 8px;font-size:11px;display:flex;align-items:center;gap:6px}
-#projSel label{font-weight:700;color:#333}#projSel select{font-family:inherit;font-size:11px;padding:3px 6px;border:1px solid #888;background:#fff;max-width:220px}
+<title>CPU 64 v8.0</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#111;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none;color:#ccc}
+svg{display:block;width:100vw;height:100vh;background:#0a0a0c;touch-action:none;cursor:grab}
+svg.drag{cursor:grabbing}
+text{font-family:inherit;user-select:none;pointer-events:none;fill:#ccc}
+#title{position:fixed;top:10px;left:12px;z-index:10;font-size:12px;font-weight:700;color:#39d353;background:#111;padding:4px 8px;border:2px solid #39d353}
+#hud{position:fixed;top:48px;left:12px;z-index:11;background:#000;color:#0f0;font-size:11px;padding:6px 10px;border:2px solid #0f0;line-height:1.6;white-space:pre;font-family:inherit}
+#hud b{color:#ff0}
+#help{position:fixed;bottom:10px;left:12px;font-size:11px;color:#666;z-index:10}
+#projSel{position:fixed;top:10px;right:12px;z-index:21;background:#111;border:2px solid #39d353;padding:5px 8px;font-size:11px;display:flex;align-items:center;gap:6px;color:#0f0}
+#projSel label{font-weight:700;color:#0f0}
+#projSel select{font-family:inherit;font-size:11px;padding:3px 6px;border:1px solid #0f0;background:#000;color:#0f0}
 #zoomCtrl{position:fixed;bottom:14px;right:14px;z-index:30;display:flex;flex-direction:column;gap:6px}
-#zoomCtrl button{width:52px;height:52px;font-size:22px;font-weight:700;font-family:inherit;border:2px solid #333;background:#fff;cursor:pointer;padding:0}
-#zoomCtrl button:active{background:#333;color:#fff}
-#err{position:fixed;top:170px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;white-space:pre-wrap}
+#zoomCtrl button{width:48px;height:48px;font-size:20px;font-weight:700;font-family:inherit;border:2px solid #39d353;background:#111;color:#39d353;cursor:pointer;padding:0}
+#zoomCtrl button:active{background:#39d353;color:#111}
+#err{position:fixed;bottom:80px;left:12px;z-index:100;background:#300;border:2px solid #f00;color:#f00;padding:8px 12px;font-size:11px;max-width:80vw;display:none;white-space:pre-wrap}
 </style></head><body>
-<div id="title">CPU 64 v12.0<small id="gcount"></small></div>
-<div id="hud">PTR=<b id="hudPTR">?</b> SP=<b id="hudSP">?</b> TMR=<b id="hudTMR">?</b> CUR=<b id="hudCUR">?</b><br>IR=<span class="ir" id="hudIR">----</span> <span id="hudMN">NOP</span></div>
-<div id="busLegend"><span class="sw" style="background:#4a9eff"></span>INPUT<br><span class="sw" style="background:#ffb020"></span>CONTROL<br><span class="sw" style="background:#a060ff"></span>STORAGE<br><span class="sw" style="background:#39d353"></span>ALU<br><span class="sw" style="background:#ff4d4d"></span>OUTPUT<br><span class="sw" style="background:#999"></span>OFF</div>
+<div id="title">CPU 64 v8.0</div>
+<div id="hud">PC=<b id="hPC">0</b> A=<b id="hA">0</b> B=<b id="hB">0</b> D=<b id="hD">0</b> Z=<b id="hZ">0</b>
+IR=<b id="hIR">----</b> <span id="hMN">NOP</span></div>
 <div id="err"></div>
-<div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
-<div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll=zoom · drag=pan · dblclick=layar · ⟲=peta</div>
+<div id="projSel"><label>PROGRAM:</label><select id="dd"></select></div>
+<div id="zoomCtrl"><button id="zi">+</button><button id="zo">−</button><button id="zr">⟲</button></div>
+<div id="help">scroll=zoom · drag=pan · dblclick=screen</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
-<script src="cpu.js"></script>
-<script src="app.js"></script>
+
+<script>
+// ============================================================
+// PROGRAMS
+// ============================================================
+// Instruction: [OP_HI, OP_LO, DATA, TAG, DEST]
+// REG: R0..R127. Data in DATA field, TAG=source reg, DEST=dest reg.
+// Opcodes:
+// 0x0001 SET imm→R[DEST]  | 0x0002 MOV R[TAG]→R[DEST]
+// 0x0004 ADD R[DEST]+=R[TAG] | 0x0005 SUB | 0x0008 AND | 0x0009 OR | 0x000A XOR
+// 0x000B NOT R[DEST] | 0x000C INC | 0x000D DEC | 0x0011 CLR
+// 0x0010 JMP DEST | 0x0012 DELAY imm | 0x0013 SCRCLR
+// 0x0014 JZ R[TAG]→DEST | 0x0015 JNZ
+// 0x0020 CMP R[TAG] vs R[DEST] (flags)
+// 0x0016 JLT DEST | 0x0017 JGT | 0x0018 JEQ | 0x0019 JNE
+// 0x0023 HALT | 0x002A RND→R[DEST] | 0x002C JOY→R[DEST] | 0x0030 TIME→R[DEST]
+// 0x0028 PIX SCREEN[R[DEST]&17] = R[TAG]
+
+window.PROGRAMS={version:100,programs:[
+// 1. DOTS — random pixels
+{id:"dots",name:"DOTS",program:[
+  [0x00,0x01,17,0,1],     // 0  R1=17 (mask)
+  [0x00,0x01,255,0,3],    // 1  R3=255 (all-on byte)
+  [0x00,0x01,30,0,2],     // 2  R2=30 (count)
+  // loop slot 3
+  [0x00,0x2A,0,0,0],      // 3  R0=RND
+  [0x00,0x08,1,0,0],      // 4  R0 &= R1 (0-17)
+  [0x00,0x28,0,3,0],      // 5  PIX: SCREEN[R0]=R3 (TAG=R3, DEST=R0)
+  [0x00,0x0D,0,2,2],      // 6  DEC R2
+  [0x00,0x15,2,0,3],      // 7  JNZ R2 → slot 3
+  [0x00,0x12,40,0,0],     // 8  DELAY 40
+  [0x00,0x13,0,0,0],      // 9  SCRCLR
+  [0x00,0x01,30,0,2],     // 10 R2=30
+  [0x00,0x10,0,0,3],      // 11 JMP slot 3
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]
+]},
+// 2. RAIN — column fill
+{id:"rain",name:"RAIN",program:[
+  [0x00,0x13,0,0,0],      // 0  SCRCLR
+  [0x00,0x01,0,0,0],      // 1  R0=0
+  // loop slot 2
+  [0x00,0x01,128,0,1],    // 2  R1=128 (bit7 on)
+  [0x00,0x28,0,1,0],      // 3  PIX: SCREEN[R0]=R1  (TAG=R1, DEST=R0)
+  [0x00,0x0C,0,0,0],      // 4  INC R0
+  [0x00,0x01,18,0,2],     // 5  R2=18
+  [0x00,0x20,0,2,0],      // 6  CMP (R[2]-R[0])
+  [0x00,0x16,0,0,2],      // 7  JLT slot 2
+  [0x00,0x01,0,0,0],      // 8  R0=0
+  [0x00,0x10,0,0,2],      // 9  JMP slot 2
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]
+]},
+// 3. CHECKER — full screen pattern
+{id:"checker",name:"CHECKER",program:[
+  [0x00,0x13,0,0,0],      // 0  SCRCLR
+  [0x00,0x01,0,0,0],      // 1  R0=0
+  // loop slot 2
+  [0x00,0x2A,0,0,1],      // 2  R1=RND
+  [0x00,0x01,3,0,2],      // 3  R2=3
+  [0x00,0x08,2,1,1],      // 4  R1 &= R2
+  [0x00,0x0C,0,1,1],      // 5  R1++
+  [0x00,0x28,0,1,0],      // 6  PIX: SCREEN[R0]=R1
+  [0x00,0x0C,0,0,0],      // 7  INC R0
+  [0x00,0x01,18,0,2],     // 8  R2=18
+  [0x00,0x20,0,2,0],      // 9  CMP (R[2]-R[0])
+  [0x00,0x16,0,0,2],      // 10 JLT slot 2
+  [0x00,0x01,0,0,0],      // 11 R0=0
+  [0x00,0x12,20,0,0],     // 12 DELAY 20
+  [0x00,0x10,0,0,2],      // 13 JMP slot 2
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+  [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]
+]}]};
+
+// ============================================================
+// ENGINE
+// ============================================================
+(function(){"use strict";
+var NS="http://www.w3.org/2000/svg",XLINK="http://www.w3.org/1999/xlink";
+var svg=document.getElementById("s");
+function E(t,a){var e=document.createElementNS(NS,t);for(var k in a){if(k.indexOf("xlink:")===0)e.setAttributeNS(XLINK,k,a[k]);else e.setAttribute(k,a[k]);}return e;}
+function showErr(m){var el=document.getElementById("err");el.style.display="block";el.textContent="ERR: "+m;console.error(m);}
+window.addEventListener("error",function(e){showErr(e.message+"@"+e.lineno);});
+
+var REG_SIZE=128, RAM_SIZE=256, STORE_SIZE=512;
+var SCR_W=16, SCR_H=9, PIX_SZ=32;
+var QUEUE_SLOTS=64, INST_BYTES=5;
+var PTR_BITS=6;
+
+// Opcodes
+var OP_NOP=0x0000,OP_SET=0x0001,OP_MOV=0x0002,OP_ADD=0x0004,OP_SUB=0x0005,OP_MUL=0x0006,OP_DIV=0x0007,
+OP_AND=0x0008,OP_OR=0x0009,OP_XOR=0x000A,OP_NOT=0x000B,OP_INC=0x000C,OP_DEC=0x000D,
+OP_JMP=0x0010,OP_CLR=0x0011,OP_DELAY=0x0012,OP_SCRCLR=0x0013,OP_JZ=0x0014,OP_JNZ=0x0015,
+OP_JLT=0x0016,OP_JGT=0x0017,OP_JEQ=0x0018,OP_JNE=0x0019,
+OP_CMP=0x0020,OP_SHL=0x0021,OP_SHR=0x0022,OP_HALT=0x0023,
+OP_LDMR=0x0024,OP_STMR=0x0025,OP_LDMS=0x0026,OP_STMS=0x0027,
+OP_PIX=0x0028,OP_RND=0x002A,OP_JOY=0x002C,OP_TIME=0x0030;
+var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,OP_NOT,OP_INC,OP_DEC,
+OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,OP_JLT,OP_JGT,OP_JEQ,OP_JNE,
+OP_CMP,OP_SHL,OP_SHR,OP_HALT,OP_LDMR,OP_STMR,OP_LDMS,OP_STMS,OP_PIX,OP_RND,OP_JOY,OP_TIME];
+var MN={};MN[OP_NOP]="NOP";MN[OP_SET]="SET";MN[OP_MOV]="MOV";MN[OP_ADD]="ADD";MN[OP_SUB]="SUB";
+MN[OP_MUL]="MUL";MN[OP_DIV]="DIV";MN[OP_AND]="AND";MN[OP_OR]="OR";MN[OP_XOR]="XOR";
+MN[OP_NOT]="NOT";MN[OP_INC]="INC";MN[OP_DEC]="DEC";MN[OP_JMP]="JMP";MN[OP_CLR]="CLR";
+MN[OP_DELAY]="DELAY";MN[OP_SCRCLR]="SCRCLR";MN[OP_JZ]="JZ";MN[OP_JNZ]="JNZ";MN[OP_JLT]="JLT";MN[OP_JGT]="JGT";
+MN[OP_JEQ]="JEQ";MN[OP_JNE]="JNE";MN[OP_CMP]="CMP";MN[OP_SHL]="SHL";MN[OP_SHR]="SHR";MN[OP_HALT]="HALT";
+MN[OP_LDMR]="LDMR";MN[OP_STMR]="STMR";MN[OP_LDMS]="LDMS";MN[OP_STMS]="STMS";
+MN[OP_PIX]="PIX";MN[OP_RND]="RND";MN[OP_JOY]="JOY";MN[OP_TIME]="TIME";
+
+// Latch primitive
+function LAT(init){return {v:init|0, prev:init|0, next:init|0, en_prev:0};}
+function latchStep(l,en,dat){
+  // phase 1: compute next
+  // phase 2: commit if rising edge on en
+  // Simplify: if en && !prev_en, commit
+  if(en && !l.en_prev) l.prev = dat;
+  l.en_prev = en;
+  l.next = l.prev;
+}
+function latchSet(l,v){v=v|0;l.v=v;l.prev=v;l.next=v;}
+
+// Global state
+var REG=[], RAM=[], STORE=[], SCREEN=[], PC=[];
+var IRhi=[], IRlo=[], IRd=[], IRt=[], IRdest=[];
+var flagZ=0, flagC=0, flagLT=0;
+var hwTimer=0, hwTimerJS=0;
+var joyState=0;
+
+function initMem(){
+  var i,b;
+  REG=[]; for(i=0;i<REG_SIZE;i++){var r=[];for(b=0;b<8;b++)r.push(LAT(0));REG.push(r);}
+  RAM=[]; for(i=0;i<RAM_SIZE;i++){var r=[];for(b=0;b<8;b++)r.push(LAT(0));RAM.push(r);}
+  STORE=[]; for(i=0;i<STORE_SIZE;i++){var r=[];for(b=0;b<8;b++)r.push(LAT(0));STORE.push(r);}
+  SCREEN=[]; for(i=0;i<18;i++){var r=[];for(b=0;b<8;b++)r.push(LAT(0));SCREEN.push(r);}
+  PC=[]; for(i=0;i<PTR_BITS;i++)PC.push(LAT(0));
+  IRhi=[]; IRlo=[]; IRd=[]; IRt=[]; IRdest=[];
+  for(i=0;i<8;i++){IRhi.push(LAT(0));IRlo.push(LAT(0));IRd.push(LAT(0));IRt.push(LAT(0));IRdest.push(LAT(0));}
+  flagZ=0;flagC=0;flagLT=0;hwTimer=0;
+}
+
+// Program queue
+var QUEUE=[];
+function initQueue(){
+  QUEUE=[];
+  for(var s=0;s<QUEUE_SLOTS;s++){
+    var inst=[];
+    for(var bi=0;bi<INST_BYTES;bi++){
+      var byteBits=[];for(var b=0;b<8;b++)byteBits.push(LAT(0));
+      inst.push(byteBits);
+    }
+    QUEUE.push(inst);
+  }
+}
+
+function readReg(idx){var v=0;if(idx<0||idx>=REG_SIZE)return 0;for(var b=0;b<8;b++)if(REG[idx][b].v)v|=(1<<b);return v;}
+function writeReg(idx,v){if(idx<0||idx>=REG_SIZE)return;v=v|0;for(var b=0;b<8;b++)latchSet(REG[idx][b],(v>>b)&1);}
+function readByteArr(arr,idx){var v=0;if(!arr[idx])return 0;for(var b=0;b<8;b++)if(arr[idx][b].v)v|=(1<<b);return v;}
+function writeByteArr(arr,idx,v){if(!arr[idx])return;v=v|0;for(var b=0;b<8;b++)latchSet(arr[idx][b],(v>>b)&1);}
+function readPC(){var v=0;for(var b=0;b<PTR_BITS;b++)if(PC[b].v)v|=(1<<b);return v;}
+function writePC(v){v=v|0;for(var b=0;b<PTR_BITS;b++)latchSet(PC[b],(v>>b)&1);}
+
+// Fetch current instruction from queue
+function fetchInst(){
+  var pc=readPC();
+  if(pc<0||pc>=QUEUE_SLOTS)return null;
+  var inst=QUEUE[pc];
+  var opHi=0,opLo=0,d=0,t=0,dest=0;
+  for(var b=0;b<8;b++){
+    if(inst[0][b].v)opHi|=(1<<b);
+    if(inst[1][b].v)opLo|=(1<<b);
+    if(inst[2][b].v)d|=(1<<b);
+    if(inst[3][b].v)t|=(1<<b);
+    if(inst[4][b].v)dest|=(1<<b);
+  }
+  return {opHi:opHi,opLo:opLo,op:(opHi<<8)|opLo,data:d,tag:t,dest:dest};
+}
+
+// Execution step
+function cpuStep(){
+  var inst=fetchInst();
+  if(!inst)return;
+  var op=inst.op;
+  var A=readReg(inst.tag);
+  var B=readReg(inst.dest);
+  var imm=inst.data;
+  var nextPC=(readPC()+1)%QUEUE_SLOTS;
+  var jump=false;
+
+  if(op===OP_SET){writeReg(inst.dest,imm);}
+  else if(op===OP_MOV){writeReg(inst.dest,A);}
+  else if(op===OP_ADD){writeReg(inst.dest,(A+B)&0xFF);}
+  else if(op===OP_SUB){writeReg(inst.dest,(B-A)&0xFF);}
+  else if(op===OP_MUL){writeReg(inst.dest,((A*B)&0xFF));}
+  else if(op===OP_DIV){writeReg(inst.dest,A===0?0:((B/A)&0xFF));}
+  else if(op===OP_AND){writeReg(inst.dest,A&B);}
+  else if(op===OP_OR){writeReg(inst.dest,A|B);}
+  else if(op===OP_XOR){writeReg(inst.dest,A^B);}
+  else if(op===OP_NOT){writeReg(inst.dest,(~B)&0xFF);}
+  else if(op===OP_INC){writeReg(inst.dest,(B+1)&0xFF);}
+  else if(op===OP_DEC){writeReg(inst.dest,(B-1)&0xFF);}
+  else if(op===OP_CLR){writeReg(inst.dest,0);}
+  else if(op===OP_SHL){writeReg(inst.dest,(B<<1)&0xFF);}
+  else if(op===OP_SHR){writeReg(inst.dest,(B>>1)&0xFF);}
+  else if(op===OP_JMP){nextPC=inst.dest&(QUEUE_SLOTS-1);jump=true;}
+  else if(op===OP_JZ){if(A===0){nextPC=inst.dest&(QUEUE_SLOTS-1);jump=true;}}
+  else if(op===OP_JNZ){if(A!==0){nextPC=inst.dest&(QUEUE_SLOTS-1);jump=true;}}
+  else if(op===OP_CMP){var diff=(A-B)&0xFF;flagZ=(diff===0)?1:0;flagC=(A>=B)?0:1;flagLT=(A<B)?1:0;}
+  else if(op===OP_JLT){if(flagLT){nextPC=inst.dest&(QUEUE_SLOTS-1);jump=true;}}
+  else if(op===OP_JGT){if(flagLT===0&&flagZ===0){nextPC=inst.dest&(QUEUE_SLOTS-1);jump=true;}}
+  else if(op===OP_JEQ){if(flagZ){nextPC=inst.dest&(QUEUE_SLOTS-1);jump=true;}}
+  else if(op===OP_JNE){if(!flagZ){nextPC=inst.dest&(QUEUE_SLOTS-1);jump=true;}}
+  else if(op===OP_HALT){/* nothing - PC stays */}
+  else if(op===OP_LDMR){var ramAddr=A;writeReg(inst.dest,readByteArr(RAM,ramAddr));}
+  else if(op===OP_STMR){var ramAddr2=A;writeByteArr(RAM,ramAddr2,B);}
+  else if(op===OP_LDMS){var stAddr=A;writeReg(inst.dest,readByteArr(STORE,stAddr));}
+  else if(op===OP_STMS){var stAddr2=A;writeByteArr(STORE,stAddr2,B);}
+  else if(op===OP_PIX){var scrAddr=B&17;var v=A;if(scrAddr<18)writeByteArr(SCREEN,scrAddr,v);}
+  else if(op===OP_RND){writeReg(inst.dest,(Math.random()*256)|0);}
+  else if(op===OP_JOY){writeReg(inst.dest,joyState&0xFF);}
+  else if(op===OP_TIME){writeReg(inst.dest,hwTimer&0xFF);}
+  else if(op===OP_DELAY){
+    // Delay: skip ahead by N steps (implemented via JS loop in tick)
+    // We'll just run N cpuStep calls in tick for this
+    delayCount=inst.data;
+  }
+  else if(op===OP_SCRCLR){
+    for(var i=0;i<18;i++)writeByteArr(SCREEN,i,0);
+  }
+  // NOP does nothing.
+
+  if(!jump && op!==OP_HALT)writePC(nextPC);
+  else if(jump)writePC(nextPC);
+  else writePC(readPC()); // HALT stays
+
+  hwTimerJS=(hwTimerJS+1)&0xFF;
+  hwTimer=hwTimerJS;
+}
+
+var delayCount=0;
+function tick(){
+  if(delayCount>0){delayCount--;return;}
+  cpuStep();
+}
+
+// Load program
+function loadProgram(prog){
+  initMem();initQueue();
+  var list=prog.program||[];
+  for(var i=0;i<QUEUE_SLOTS;i++){
+    var ins=(i<list.length)?list[i]:[0,0,0,0,0];
+    for(var bi=0;bi<INST_BYTES;bi++){
+      var val=(ins[bi]||0)&0xFF;
+      for(var b=0;b<8;b++)latchSet(QUEUE[i][bi][b],(val>>b)&1);
+    }
+  }
+  writePC(0);
+}
+
+// ============================================================
+// RENDERING — use defs + use for speed
+// ============================================================
+var view={x:0,y:0,k:1};
+var vp=null;
+var defs=null;
+var layerBG=null,layerSect=null,layerGate=null,layerLatch=null,layerSwitch=null,layerScreen=null,layerWire=null;
+var sectionsData=[];
+var SCREEN_SECTION_POS=null;
+var JOY_SECTION_POS=null;
+
+function buildScene(){
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  vp=E("g",{});svg.appendChild(vp);
+  defs=E("defs",{});vp.appendChild(defs);
+  // Gate shapes
+  var gateShapes={
+    AND:"M0,0 L14,0 A17,17 0 0 1 14,30 L0,30 Z",
+    OR:"M0,0 Q12,0 30,15 Q12,30 0,30 Q10,15 0,0 Z",
+    NOT:"M0,0 L30,15 L0,30 Z",
+    XOR:"M4,0 Q17,0 34,15 Q17,30 4,30 Q15,15 4,0 Z"
+  };
+  for(var k in gateShapes){
+    var g=E("g",{id:"gate-"+k});
+    g.appendChild(E("path",{d:gateShapes[k],fill:"#fff",stroke:"#222","stroke-width":1}));
+    if(k==="NOT")g.appendChild(E("circle",{cx:33,cy:15,r:3,fill:"#fff",stroke:"#222","stroke-width":1}));
+    if(k==="XOR")g.appendChild(E("path",{d:"M0,0 Q10,15 0,30",fill:"none",stroke:"#222","stroke-width":1}));
+    defs.appendChild(g);
+  }
+  // Latch shape
+  var latchG=E("g",{id:"latch"});
+  latchG.appendChild(E("rect",{x:0,y:0,width:40,height:32,fill:"#fff",stroke:"#222","stroke-width":1}));
+  latchG.appendChild(E("circle",{cx:20,cy:16,r:2,fill:"#0a7"}));
+  defs.appendChild(latchG);
+  // Switch shape
+  var swG=E("g",{id:"switch"});
+  swG.appendChild(E("rect",{x:0,y:0,width:36,height:44,fill:"#c8c8c8",stroke:"#222","stroke-width":1}));
+  swG.appendChild(E("rect",{x:4,y:4,width:28,height:14,fill:"#fff",stroke:"#222","stroke-width":1}));
+  defs.appendChild(swG);
+  // LED indicator shape
+  var ledG=E("g",{id:"led"});
+  ledG.appendChild(E("circle",{cx:0,cy:0,r:8,fill:"#fff",stroke:"#222","stroke-width":1}));
+  ledG.appendChild(E("circle",{cx:0,cy:0,r:4,fill:"#e8e8e8"}));
+  defs.appendChild(ledG);
+  // Screen pixel shapes (on/off)
+  var pixOn=E("g",{id:"pixOn"});
+  pixOn.appendChild(E("rect",{x:0,y:0,width:PIX_SZ,height:PIX_SZ,fill:"#000",stroke:"#333","stroke-width":1}));
+  defs.appendChild(pixOn);
+  var pixOff=E("g",{id:"pixOff"});
+  pixOff.appendChild(E("rect",{x:0,y:0,width:PIX_SZ,height:PIX_SZ,fill:"#fff",stroke:"#ccc","stroke-width":1}));
+  defs.appendChild(pixOff);
+  // Osc shape
+  var oscG=E("g",{id:"osc"});
+  oscG.appendChild(E("rect",{x:0,y:0,width:36,height:44,fill:"#ffe9a8",stroke:"#222","stroke-width":1}));
+  oscG.appendChild(E("path",{d:"M5,22 H10 L14,10 L22,34 L26,22 H31",fill:"none",stroke:"#1a56db","stroke-width":1}));
+  defs.appendChild(oscG);
+  // Layers
+  layerBG=E("g",{});vp.appendChild(layerBG);
+  layerSect=E("g",{});vp.appendChild(layerSect);
+  layerWire=E("g",{});vp.appendChild(layerWire);
+  layerGate=E("g",{});vp.appendChild(layerGate);
+  layerLatch=E("g",{});vp.appendChild(layerLatch);
+  layerSwitch=E("g",{});vp.appendChild(layerSwitch);
+  layerScreen=E("g",{});vp.appendChild(layerScreen);
+}
+
+function renderSection(s){
+  layerSect.appendChild(E("rect",{x:s.x,y:s.y,width:s.w,height:s.h,fill:s.fill||"#fafafa",stroke:s.color||"#888","stroke-width":2,"stroke-dasharray":"8 4"}));
+  layerSect.appendChild(E("rect",{x:s.x,y:s.y,width:s.w,height:24,fill:s.color||"#888",opacity:0.35}));
+  var t=E("text",{x:s.x+12,y:s.y+17,"font-size":13,"font-weight":700,fill:s.color||"#666","font-family":"ui-monospace,monospace"});t.textContent=s.title;layerSect.appendChild(t);
+}
+
+function renderAll(){
+  // clear layers
+  while(layerBG.firstChild)layerBG.removeChild(layerBG.firstChild);
+  while(layerSect.firstChild)layerSect.removeChild(layerSect.firstChild);
+  while(layerWire.firstChild)layerWire.removeChild(layerWire.firstChild);
+  while(layerGate.firstChild)layerGate.removeChild(layerGate.firstChild);
+  while(layerLatch.firstChild)layerLatch.removeChild(layerLatch.firstChild);
+  while(layerSwitch.firstChild)layerSwitch.removeChild(layerSwitch.firstChild);
+  while(layerScreen.firstChild)layerScreen.removeChild(layerScreen.firstChild);
+
+  var r=svg.getBoundingClientRect();
+  var vx1=-view.x/view.k,vy1=-view.y/view.k,vx2=vx1+r.width/view.k,vy2=vy1+r.height/view.k;
+
+  // sections always visible
+  for(var i=0;i<sectionsData.length;i++){
+    var s=sectionsData[i];
+    if(s.x+s.w<vx1-100||s.x>vx2+100||s.y+s.h<vy1-100||s.y>vy2+100)continue;
+    renderSection(s);
+  }
+
+  // switches
+  if(view.k>0.005)renderSwitchGroup(vx1,vy1,vx2,vy2);
+
+  // LEDs
+  if(view.k>0.01)renderLEDGroup(vx1,vy1,vx2,vy2);
+
+  // gates (only at high zoom)
+  if(view.k>0.15)renderGateGroup(vx1,vy1,vx2,vy2);
+
+  // latches (only at high zoom)
+  if(view.k>0.20)renderLatchGroup(vx1,vy1,vx2,vy2);
+}
+
+var switchList=[],indicatorList=[];
+function addSwitch(x,y,getV,label){switchList.push({x:x,y:y,getV:getV,label:label});}
+function addIndicator(x,y,getV,color){indicatorList.push({x:x,y:y,getV:getV,color:color||"#39d353"});}
+
+function renderSwitchGroup(vx1,vy1,vx2,vy2){
+  for(var i=0;i<switchList.length;i++){
+    var s=switchList[i];
+    if(s.x+60<vx1||s.x>vx2||s.y+60<vy1||s.y>vy2)continue;
+    var grp=E("g",{transform:"translate("+s.x+","+s.y+")"});
+    var v=s.getV();
+    grp.appendChild(E("rect",{x:0,y:0,width:36,height:44,fill:v?"#a7f3a7":"#c8c8c8",stroke:"#222","stroke-width":1}));
+    var ky=v?4:26;
+    grp.appendChild(E("rect",{x:4,y:ky,width:28,height:14,fill:"#fff",stroke:"#222","stroke-width":1}));
+    if(s.label){var t=E("text",{x:18,y:56,"text-anchor":"middle","font-size":9,"font-weight":700,fill:"#222"});t.textContent=s.label;grp.appendChild(t);}
+    // hit area
+    var hit=E("rect",{x:0,y:0,width:36,height:44,fill:"transparent",cursor:"pointer"});
+    hit.addEventListener("pointerdown",function(ev){ev.stopPropagation();s.toggle&&s.toggle();});
+    grp.appendChild(hit);
+    layerSwitch.appendChild(grp);
+  }
+  for(var i=0;i<indicatorList.length;i++){
+    var s=indicatorList[i];
+    if(s.x+20<vx1||s.x>vx2||s.y+20<vy1||s.y>vy2)continue;
+    var grp=E("g",{transform:"translate("+s.x+","+s.y+")"});
+    grp.appendChild(E("circle",{cx:0,cy:0,r:8,fill:"#fff",stroke:"#222","stroke-width":1}));
+    grp.appendChild(E("circle",{cx:0,cy:0,r:4,fill:s.getV()?s.color:"#ddd"}));
+    layerSwitch.appendChild(grp);
+  }
+}
+
+var ledObjects=[];
+function renderLEDGroup(vx1,vy1,vx2,vy2){
+  for(var i=0;i<ledObjects.length;i++){
+    var l=ledObjects[i];
+    if(l.px+PIX_SZ<vx1||l.px>vx2||l.py+PIX_SZ<vy1||l.py>vy2)continue;
+    var v=l.getV();
+    // screen pixel: filled black if 1, white if 0
+    var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
+    grp.appendChild(E("rect",{x:0,y:0,width:PIX_SZ,height:PIX_SZ,fill:v?"#000":"#fff",stroke:"#999","stroke-width":1}));
+    layerScreen.appendChild(grp);
+  }
+}
+
+var gateObjects=[];
+function renderGateGroup(vx1,vy1,vx2,vy2){
+  for(var i=0;i<gateObjects.length;i++){
+    var g=gateObjects[i];
+    if(g.px+50<vx1||g.px>vx2||g.py+40<vy1||g.py>vy2)continue;
+    layerGate.appendChild(E("use",{"xlink:href":"#gate-"+g.t,href:"#gate-"+g.t,x:g.px,y:g.py}));
+  }
+}
+
+var latchObjects=[];
+function renderLatchGroup(vx1,vy1,vx2,vy2){
+  for(var i=0;i<latchObjects.length;i++){
+    var l=latchObjects[i];
+    if(l.px+50<vx1||l.px>vx2||l.py+40<vy1||l.py>vy2)continue;
+    layerLatch.appendChild(E("use",{"xlink:href":"#latch",href:"#latch",x:l.px,y:l.py}));
+  }
+}
+
+// ============================================================
+// BUILD SCENE
+// ============================================================
+var SECT_REG,SECT_RAM,SECT_STORE,SECT_SCR,SECT_CPU;
+
+function buildScene_(){
+  buildScene();
+  sectionsData=[];
+  latchObjects=[];gateObjects=[];ledObjects=[];switchList=[];indicatorList=[];
+  SCREEN_SECTION_POS=null;JOY_SECTION_POS=null;
+
+  var M=100,GAP=60;
+  // Layout: left column = CPU + SCREEN + JOY
+  // Right column = REG + RAM + STORE
+  var cx=M,cy=M;
+
+  // === SCREEN section (16x9) ===
+  var scrW=SCR_W*PIX_SZ+20, scrH=SCR_H*PIX_SZ+40;
+  SECT_SCR={x:cx,y:cy,w:scrW,h:scrH,title:"SCREEN 16:9",color:"#39d353"};
+  sectionsData.push(SECT_SCR);
+  SCREEN_SECTION_POS=SECT_SCR;
+  // create LEDs
+  for(var row=0;row<SCR_H;row++){
+    for(var col=0;col<SCR_W;col++){
+      var px=cx+10+col*PIX_SZ, py=cy+30+row*PIX_SZ;
+      ledObjects.push({px:px,py:py,row:row,col:col,getV:function(r,c){return function(){var byteIdx=(r*SCR_W+c)>>3;var bit=(r*SCR_W+c)&7;if(byteIdx>=18)return 0;var bv=readByteArr(SCREEN,byteIdx);return (bv>>(7-bit))&1;};}(row,col)});
+    }
+  }
+
+  // === JOYSTICK section ===
+  cx += scrW+GAP;
+  var joyW=3*40+2*10+20, joyH=3*52+2*8+40;
+  SECT_JOY={x:cx,y:cy,w:joyW,h:joyH,title:"JOYSTICK",color:"#4a9eff"};
+  sectionsData.push(SECT_JOY);
+  JOY_SECTION_POS=SECT_JOY;
+  // 5 buttons: UP, DOWN, LEFT, RIGHT, POINT
+  var bx=cx+20, by=cy+30;
+  // UP at top-center
+  addSwitch(bx+50, by, function(){return (joyState&1)?1:0;}, "UP");
+  switchList[switchList.length-1].toggle=function(){joyState ^= 1; setTimeout(function(){joyState &= ~1;},200);};
+  // DOWN at bottom-center
+  addSwitch(bx+50, by+104, function(){return (joyState&2)?1:0;}, "DOWN");
+  switchList[switchList.length-1].toggle=function(){joyState ^= 2; setTimeout(function(){joyState &= ~2;},200);};
+  // LEFT
+  addSwitch(bx, by+52, function(){return (joyState&4)?1:0;}, "LEFT");
+  switchList[switchList.length-1].toggle=function(){joyState ^= 4; setTimeout(function(){joyState &= ~4;},200);};
+  // RIGHT
+  addSwitch(bx+100, by+52, function(){return (joyState&8)?1:0;}, "RIGHT");
+  switchList[switchList.length-1].toggle=function(){joyState ^= 8; setTimeout(function(){joyState &= ~8;},200);};
+  // POINT in center
+  addSwitch(bx+50, by+52, function(){return (joyState&16)?1:0;}, "POINT");
+  switchList[switchList.length-1].toggle=function(){joyState ^= 16; setTimeout(function(){joyState &= ~16;},200);};
+
+  // === REG section ===
+  var regStartY=cy+scrH+GAP;
+  cx=M;
+  var regW=128*14+20, regH=8*18+40;
+  SECT_REG={x:cx,y:regStartY,w:regW,h:regH,title:"REGISTERS (128 bytes)",color:"#4a9eff"};
+  sectionsData.push(SECT_REG);
+  // Place latches
+  for(var i=0;i<REG_SIZE;i++){
+    for(var b=0;b<8;b++){
+      var lx=cx+10+i*14, ly=regStartY+30+b*18;
+      latchObjects.push({px:lx,py:ly,latch:REG[i][b]});
+    }
+  }
+
+  // === RAM section ===
+  var ramY=regStartY+regH+GAP;
+  var ramW=RAM_SIZE*10+20, ramH=8*18+40;
+  SECT_RAM={x:cx,y:ramY,w:ramW,h:ramH,title:"RAM (256 bytes)",color:"#a060ff"};
+  sectionsData.push(SECT_RAM);
+  for(var i=0;i<RAM_SIZE;i++){
+    for(var b=0;b<8;b++){
+      var lx=cx+10+i*10, ly=ramY+30+b*18;
+      latchObjects.push({px:lx,py:ly,latch:RAM[i][b]});
+    }
+  }
+
+  // === STORE section ===
+  var storeY=ramY+ramH+GAP;
+  var storeW=STORE_SIZE*6+20, storeH=8*18+40;
+  SECT_STORE={x:cx,y:storeY,w:storeW,h:storeH,title:"STORAGE (512 bytes)",color:"#ffb020"};
+  sectionsData.push(SECT_STORE);
+  for(var i=0;i<STORE_SIZE;i++){
+    for(var b=0;b<8;b++){
+      var lx=cx+10+i*6, ly=storeY+30+b*18;
+      latchObjects.push({px:lx,py:ly,latch:STORE[i][b]});
+    }
+  }
+
+  // === CPU section ===
+  var cpuY=storeY+storeH+GAP;
+  var cpuW=2000, cpuH=1400;
+  SECT_CPU={x:cx,y:cpuY,w:cpuW,h:cpuH,title:"CPU (Queue 64×5 bytes)",color:"#39d353"};
+  sectionsData.push(SECT_CPU);
+  // Queue latches
+  for(var s=0;s<QUEUE_SLOTS;s++){
+    for(var bi=0;bi<INST_BYTES;bi++){
+      for(var b=0;b<8;b++){
+        var qx=cx+10+(s*5+bi)*40, qy=cpuY+30+b*16;
+        latchObjects.push({px:qx,py:qy,latch:QUEUE[s][bi][b]});
+      }
+    }
+  }
+}
+
+// ============================================================
+// UI
+// ============================================================
+function updateHUD(){
+  var pc=readPC();
+  var a=readReg(0);
+  var inst=fetchInst();
+  var hIR="----",hMN="NOP";
+  if(inst){
+    var hx=inst.op.toString(16).toUpperCase();while(hx.length<4)hx="0"+hx;
+    hIR=hx;hMN=MN[inst.op]||"?";
+  }
+  document.getElementById("hPC").textContent=pc;
+  document.getElementById("hA").textContent=a;
+  document.getElementById("hB").textContent=readReg(1);
+  document.getElementById("hD").textContent=flagZ;
+  document.getElementById("hIR").textContent=hIR;
+  document.getElementById("hMN").textContent=hMN;
+}
+
+function applyView(){
+  if(vp)vp.setAttribute("transform","translate("+view.x+","+view.y+") scale("+view.k+")");
+}
+
+function fitScreen(){
+  var r=svg.getBoundingClientRect();
+  if(!SCREEN_SECTION_POS){view.k=1;view.x=0;view.y=0;applyView();return;}
+  var s=SCREEN_SECTION_POS;
+  var k=Math.min(r.width/(s.w+100),r.height/(s.h+100))*0.9;
+  if(k<0.1)k=0.1;if(k>4)k=4;
+  view.k=k;
+  view.x=r.width/2-(s.x+s.w/2)*k;
+  view.y=r.height/2-(s.y+s.h/2)*k;
+  applyView();
+}
+
+function fitAll(){
+  if(!sectionsData.length)return;
+  var r=svg.getBoundingClientRect();
+  var x1=Infinity,y1=Infinity,x2=-Infinity,y2=-Infinity;
+  for(var i=0;i<sectionsData.length;i++){
+    var s=sectionsData[i];
+    if(s.x<x1)x1=s.x;if(s.y<y1)y1=s.y;
+    if(s.x+s.w>x2)x2=s.x+s.w;if(s.y+s.h>y2)y2=s.y+s.h;
+  }
+  var w=x2-x1,h=y2-y1;
+  var k=Math.min(r.width/(w+100),r.height/(h+100))*0.95;
+  if(k<0.001)k=0.001;if(k>10)k=10;
+  view.k=k;
+  view.x=r.width/2-((x1+x2)/2)*k;
+  view.y=r.height/2-((y1+y2)/2)*k;
+  applyView();
+}
+
+function setZoomAt(nk,cx,cy){
+  nk=Math.min(10,Math.max(0.001,nk));
+  var s=nk/view.k;
+  view.x=cx-(cx-view.x)*s;
+  view.y=cy-(cy-view.y)*s;
+  view.k=nk;
+  applyView();
+}
+
+// Event handlers
+svg.addEventListener("wheel",function(e){e.preventDefault();var r=svg.getBoundingClientRect();setZoomAt(view.k*(e.deltaY<0?1.15:1/1.15),e.clientX-r.left,e.clientY-r.top);},{passive:false});
+
+var ptrs={},panS=null,pinchS=null,mode=null;
+svg.addEventListener("pointerdown",function(e){
+  if(e.target&&e.target.classList&&e.target.classList.contains("swhit"))return;
+  if(e.target&&e.target.parentNode&&e.target.parentNode.classList&&e.target.parentNode.classList.contains("swhit"))return;
+  if(e.button!==undefined&&e.button!==0&&e.pointerType==="mouse")return;
+  ptrs[e.pointerId]={x:e.clientX,y:e.clientY};
+  try{svg.setPointerCapture(e.pointerId);}catch(err){}
+  var ids=Object.keys(ptrs);
+  if(ids.length===1){mode="pan";panS={x:e.clientX,y:e.clientY,ox:view.x,oy:view.y,moved:false};svg.classList.add("drag");}
+  else if(ids.length===2){
+    mode="pinch";
+    var p0=ptrs[ids[0]],p1=ptrs[ids[1]];
+    pinchS={d:Math.hypot(p0.x-p1.x,p0.y-p1.y),cx:(p0.x+p1.x)/2,cy:(p0.y+p1.y)/2,k:view.k,x:view.x,y:view.y};
+    panS=null;
+  }
+});
+svg.addEventListener("pointermove",function(e){
+  if(!ptrs[e.pointerId])return;
+  ptrs[e.pointerId].x=e.clientX;ptrs[e.pointerId].y=e.clientY;
+  if(mode==="pinch"){
+    var ids=Object.keys(ptrs);if(ids.length<2)return;
+    var p0=ptrs[ids[0]],p1=ptrs[ids[1]];
+    var d=Math.hypot(p0.x-p1.x,p0.y-p1.y);
+    var cx=(p0.x+p1.x)/2,cy=(p0.y+p1.y)/2;
+    var r=svg.getBoundingClientRect();
+    var f=d/pinchS.d;
+    var nk=Math.min(10,Math.max(0.001,pinchS.k*f));
+    var s=nk/pinchS.k;
+    var mx=pinchS.cx-r.left,my=pinchS.cy-r.top;
+    var nmx=cx-r.left,nmy=cy-r.top;
+    view.x=nmx-(mx-pinchS.x)*s;
+    view.y=nmy-(my-pinchS.y)*s;
+    view.k=nk;applyView();
+  } else if(mode==="pan"&&panS){
+    var dx=e.clientX-panS.x,dy=e.clientY-panS.y;
+    if(Math.abs(dx)>3||Math.abs(dy)>3)panS.moved=true;
+    if(panS.moved){view.x=panS.ox+dx;view.y=panS.oy+dy;applyView();}
+  }
+});
+function endPtr(e){delete ptrs[e.pointerId];
+  var ids=Object.keys(ptrs);
+  if(ids.length===0){mode=null;panS=null;pinchS=null;svg.classList.remove("drag");}
+  else if(ids.length===1){mode="pan";var id=ids[0];panS={x:ptrs[id].x,y:ptrs[id].y,ox:view.x,oy:view.y,moved:false};pinchS=null;}
+}
+svg.addEventListener("pointerup",endPtr);
+svg.addEventListener("pointercancel",endPtr);
+svg.addEventListener("pointerleave",function(e){if(ptrs[e.pointerId])endPtr(e);});
+svg.addEventListener("dblclick",function(){fitScreen();});
+
+document.getElementById("zi").addEventListener("click",function(){var r=svg.getBoundingClientRect();setZoomAt(view.k*1.3,r.width/2,r.height/2);});
+document.getElementById("zo").addEventListener("click",function(){var r=svg.getBoundingClientRect();setZoomAt(view.k/1.3,r.width/2,r.height/2);});
+document.getElementById("zr").addEventListener("click",fitAll);
+
+// Boot
+function boot(){
+  try{
+    buildScene_();
+    var P=window.PROGRAMS;
+    var dd=document.getElementById("dd");
+    while(dd.firstChild)dd.removeChild(dd.firstChild);
+    for(var i=0;i<P.programs.length;i++){
+      var o=document.createElement("option");o.value=i;o.textContent=P.programs[i].name;dd.appendChild(o);
+    }
+    function loadProg(idx){loadProgram(P.programs[idx]);}
+    dd.onchange=function(){loadProg(parseInt(dd.value,10));};
+    loadProg(0);
+    fitScreen();
+    renderAll();
+    updateHUD();
+    // CPU tick loop
+    setInterval(function(){
+      try{
+        for(var s=0;s<4;s++)tick();
+        updateHUD();
+      }catch(e){showErr(e.message||String(e));}
+    },30);
+    // Render loop
+    var lastR=0;
+    requestAnimationFrame(function loop(t){
+      requestAnimationFrame(loop);
+      if(t-lastR<50)return;lastR=t;
+      try{renderAll();}catch(e){showErr(e.message||String(e));}
+    });
+  }catch(e){showErr((e&&e.message)||String(e));console.error(e);}
+}
+boot();
+})();
+</script>
 </body></html>
