@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v6.0</title><style>
+<title>CPU 64 v6.1</title><style>
 *{box-sizing:border-box}html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
 svg{display:block;width:100vw;height:100vh;background:#fff;touch-action:none;cursor:grab}svg.drag{cursor:grabbing}
 text{font-family:inherit;user-select:none;pointer-events:none}
@@ -19,12 +19,12 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 #zoomCtrl button:active{background:#333;color:#fff}
 #err{position:fixed;top:110px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;white-space:pre-wrap}
 </style></head><body>
-<div id="title">CPU 64 v6.0<small id="gcount"></small></div>
+<div id="title">CPU 64 v6.1<small id="gcount"></small></div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
-<div id="cheat" class="min"><div class="bar" id="cheatBar"><span>CHEAT · v6.0</span><span id="cheatMin">+</span></div>
+<div id="cheat" class="min"><div class="bar" id="cheatBar"><span>CHEAT · v6.1</span><span id="cheatMin">+</span></div>
 <div class="body">
-<div class="hdr">OPCODE</div>
+<div class="hdr">OPCODE LAMA</div>
 <div class="row"><span class="c">00</span>NOP</div><div class="row"><span class="c">01</span>SET</div>
 <div class="row"><span class="c">02</span>MOV</div><div class="row"><span class="c">04-07</span>ADD SUB MUL DIV</div>
 <div class="row"><span class="c">08-0B</span>AND OR XOR NOT</div><div class="row"><span class="c">0C-0D</span>INC DEC</div>
@@ -42,18 +42,18 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 <div class="row"><span class="c">2D</span>JOY</div><div class="row"><span class="c">2E</span>PEEK</div>
 <div class="row"><span class="c">2F</span>STOREI</div><div class="row"><span class="c">30</span>POKER</div>
 <div class="row"><span class="c">31</span>RND</div><div class="row"><span class="c">32</span>SEED</div>
-<div class="hdr">BARU v6.0 · C-LIKE</div>
+<div class="hdr">BARU v6 · C-LIKE</div>
 <div class="row"><span class="c">33</span>CMP B C → flag Z/LT/GT</div>
 <div class="row"><span class="c">34</span>JLT addr</div><div class="row"><span class="c">35</span>JGT addr</div>
 <div class="row"><span class="c">36</span>JEQ addr</div><div class="row"><span class="c">37</span>JNE addr</div>
 <div class="row"><span class="c">38</span>CALL addr</div><div class="row"><span class="c">39</span>RET</div>
-<div class="note">Pola C: <code>CMP a b</code> + <code>JLT L</code> = <code>if(a&lt;b)goto L</code>. <code>CALL f</code>/<code>RET</code> = fungsi. Call-stack 8-level, semua dari gerbang (decoder pohon-AND + MUX OR-dari-AND).<br><br>Format: <code>[OP, DATA, TAG, DEST]</code>. B=RAM[TAG], C=RAM[DATA]. Layar di RAM[0..31].</div>
+<div class="note"><b>Pola C:</b> <code>CMP a b</code> + <code>JLT L</code> = <code>if(a&lt;b)goto L</code>. <code>CALL f</code>/<code>RET</code> = fungsi. Call-stack 8 level, semua dari gerbang.<br><br>Format: <code>[OP, DATA, TAG, DEST]</code>. B=RAM[TAG], C=RAM[DATA].</div>
 </div></div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll=zoom · drag=pan · dblclick=fit · klik switch</div>
+<div id="help">scroll=zoom · drag=pan · dblclick=layar · ⟲=seluruh rangkaian · klik switch</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 <script>
-window.BUILTIN_PROJECTS={version:23,projects:[
+window.BUILTIN_PROJECTS={version:24,projects:[
 {id:"pingpong",name:"PING-PONG",description:"Sprite bolak-balik",program:[
 [0x01,0,0,60],[0x01,1,0,61],[0x01,15,0,62],[0x01,14,0,19],[0x01,4,0,20],
 [0x16,14,0,0],[0x17,7,0,0],[0x1C,0,0,0],
@@ -103,25 +103,10 @@ window.BUILTIN_PROJECTS={version:23,projects:[
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
 {id:"c-demo",name:"C-DEMO · FUNGSI + LOOP",description:"CALL/RET + CMP + JNE: cetak ABCDEFGHIJ",program:[
-[0x13,0,0,0],           // 0 SCRCLR
-[0x01,65,0,60],         // 1 R60='A'
-[0x01,0,0,61],          // 2 R61=counter
-[0x01,10,0,62],         // 3 R62=limit
-[0x01,0,0,50],          // 4 R50=cursor
-[0x33,61,62,0],         // 5 CMP R61 vs R62
-[0x36,13,0,0],          // 6 JEQ done
-[0x38,15,0,0],          // 7 CALL print
-[0x0C,0,61,61],         // 8 INC R61
-[0x0C,0,60,60],         // 9 INC R60
-[0x10,5,0,0],           // 10 JMP loop
-[0x28,0,0,0],           // 11 HALT
-[0x28,0,0,0],           // 12 HALT
-[0x28,0,0,0],           // 13 HALT(done)
-[0x00,0,0,0],           // 14 NOP
-[0x30,60,50,0],         // 15 POKER RAM[R50]=R60
-[0x0C,0,50,50],         // 16 INC R50
-[0x39,0,0,0],           // 17 RET
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+[0x13,0,0,0],[0x01,65,0,60],[0x01,0,0,61],[0x01,10,0,62],[0x01,0,0,50],
+[0x33,61,62,0],[0x36,12,0,0],[0x38,14,0,0],[0x0C,0,61,61],[0x0C,0,60,60],
+[0x10,5,0,0],[0x28,0,0,0],[0x28,0,0,0],[0x28,0,0,0],
+[0x30,60,50,0],[0x0C,0,50,50],[0x39,0,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
@@ -254,7 +239,8 @@ var _cachedRect=null,_cacheT=0;
 function getRect(){var now=performance.now();if(!_cachedRect||now-_cacheT>200){_cachedRect=svg.getBoundingClientRect();_cacheT=now;}return _cachedRect;}
 function renderFrame(){if(!vp)return;var r=getRect();
 var vx1=-view.x/view.k,vy1=-view.y/view.k,vx2=vx1+r.width/view.k,vy2=vy1+r.height/view.k;
-var lod=view.k,pad=40;var minimal=lod<0.015,showSections=lod>0.020,showGates=lod>0.060,showSwitches=lod>0.080,showLeds=lod>0.100,showWires=lod>0.004;
+var lod=view.k,pad=40;
+var minimal=lod<0.015,showSections=lod>0.020,showGates=lod>0.035,showSwitches=lod>0.045,showLeds=lod>0.055,showWires=lod>0.004;
 clearLayer(lG);clearLayer(lL);clearLayer(lU);clearLayer(lS);
 if(frame43&&lod>0.010){lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:frame43.w,height:frame43.h,fill:"none",stroke:"#aaa","stroke-width":0.4}));}
 if(showSections){for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];if(s.x+s.w<vx1||s.x>vx2||s.y+s.h<vy1||s.y>vy2)continue;renderSection(s);}}
@@ -701,13 +687,30 @@ for(k=sc2.l0;k<sc2.l1;k++){var l=leds[k];l.px+=dx;l.py+=dy;if(l.ph){l.ph.x=l.px-
 for(k=sc2.lt0;k<sc2.lt1;k++){var lt=latches[k];lt.px+=dx;lt.py+=dy;lt.o.x+=dx;lt.o.y+=dy;}
 sc2.x=nx;sc2.y=ny;}
 return {x:0,y:0,w:best.f.W,h:best.f.H};}
-function fitView(){if(!frame43)return;var r=svg.getBoundingClientRect();
-var k=Math.min(r.width/frame43.w,r.height/frame43.h)*0.95;view.k=k;
-view.x=(r.width-frame43.w*k)/2-frame43.x*k;view.y=(r.height-frame43.h*k)/2-frame43.y*k;applyView();}
+function fitAll(){if(!frame43)return;var r=svg.getBoundingClientRect();
+var k=Math.min(r.width/frame43.w,r.height/frame43.h)*0.95;
+if(k<0.0015)k=0.0015;
+view.k=k;
+view.x=(r.width-frame43.w*k)/2-frame43.x*k;
+view.y=(r.height-frame43.h*k)/2-frame43.y*k;applyView();}
+function fitScreen(){var r=svg.getBoundingClientRect();
+var x1=Infinity,y1=Infinity,x2=-Infinity,y2=-Infinity,found=false;
+for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];
+if(s.title==="SCREEN · GRID"||s.title==="INPUT · JOYSTICK"){
+found=true;
+if(s.x<x1)x1=s.x;if(s.y<y1)y1=s.y;
+if(s.x+s.w>x2)x2=s.x+s.w;if(s.y+s.h>y2)y2=s.y+s.h;}}
+var w,h,cx,cy;
+if(found){w=x2-x1;h=y2-y1;cx=(x1+x2)/2;cy=(y1+y2)/2;}
+else if(frame43){w=frame43.w;h=frame43.h;cx=frame43.x+frame43.w/2;cy=frame43.y+frame43.h/2;}
+else return;
+var k=Math.min(r.width/(w+80),r.height/(h+80))*0.95;
+if(k<0.03)k=0.03;
+view.k=k;view.x=r.width/2-cx*k;view.y=r.height/2-cy*k;applyView();}
 function updateGateCount(){var total=gates.length+sws.length+leds.length;
 document.getElementById("gcount").textContent="· "+total.toLocaleString()+" gates · "+latches.length.toLocaleString()+" FFs";}
 function loadProject(){try{reset();buildFrontend();buildJoystick();buildQueue();buildExecutor();buildBackend();
-frame43=relayout43();routeWires();initProj();simulate();fitView();updateGateCount();renderFrame();
+frame43=relayout43();routeWires();initProj();simulate();fitScreen();updateGateCount();renderFrame();
 }catch(e){showErr((e&&e.message)||String(e));console.error(e);if(e&&e.stack)console.error(e.stack);}}
 var view={x:0,y:0,k:1};var MIN_K=0.0002,MAX_K=30;
 function applyView(){if(vp)vp.setAttribute("transform","translate("+view.x+","+view.y+") scale("+view.k+")");}
@@ -741,10 +744,10 @@ if(ids.length===0){mode=null;panS=null;pinchS=null;svg.classList.remove("drag");
 else if(ids.length===1){mode="pan";var id=ids[0];panS={x:ptrs[id].x,y:ptrs[id].y,ox:view.x,oy:view.y,moved:false};pinchS=null;}}
 svg.addEventListener("pointerup",endPtr);svg.addEventListener("pointercancel",endPtr);
 svg.addEventListener("pointerleave",function(e){if(ptrs[e.pointerId])endPtr(e);});
-svg.addEventListener("dblclick",function(){fitView();});
+svg.addEventListener("dblclick",function(){fitScreen();});
 document.getElementById("zoomIn").addEventListener("click",function(){zoomC(1.3);});
 document.getElementById("zoomOut").addEventListener("click",function(){zoomC(1/1.3);});
-document.getElementById("zoomReset").addEventListener("click",function(){fitView();});
+document.getElementById("zoomReset").addEventListener("click",function(){fitAll();});
 var cheatEl=document.getElementById("cheat"),cheatMin=document.getElementById("cheatMin");
 document.getElementById("cheatBar").addEventListener("click",function(){cheatEl.classList.toggle("min");
 cheatMin.textContent=cheatEl.classList.contains("min")?"+":"−";});
