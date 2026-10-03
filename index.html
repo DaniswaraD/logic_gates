@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v5.0 · PURE GATES</title>
+<title>CPU 64 v5.1 · PURE GATES</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
@@ -16,7 +16,7 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 #projSel{position:fixed;top:10px;right:12px;z-index:21;background:#fff;border:2px solid #333;padding:5px 8px;font-size:11px;display:none;align-items:center;gap:6px}
 #projSel label{font-weight:700;letter-spacing:1px;color:#333}
 #projSel select{font-family:inherit;font-size:11px;padding:3px 6px;border:1px solid #888;background:#fff;max-width:280px}
-#cheat{position:fixed;top:52px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:430px;font-size:11px;line-height:1.4}
+#cheat{position:fixed;top:52px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:440px;font-size:11px;line-height:1.4}
 #cheat .bar{background:#333;color:#fff;padding:6px 10px;font-weight:700;font-size:11px;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 #cheat .bar .btn{font-size:16px;font-weight:700;padding:0 6px}
 #cheat .body{padding:10px;max-height:80vh;overflow:auto}
@@ -24,19 +24,24 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 #cheat .hdr{font-weight:700;font-size:11px;color:#222;margin:6px 0 3px;letter-spacing:1px;border-bottom:1px solid #ddd;padding-bottom:2px}
 #cheat .row{font-family:ui-monospace,monospace;margin:1px 0}
 #cheat .c{color:#0a7;font-weight:700;display:inline-block;width:52px}
+#cheat .note{background:#f6f8fa;padding:6px 8px;margin:4px 0;border-left:3px solid #0a7;font-size:10px}
 #zoomCtrl{position:fixed;bottom:14px;right:14px;z-index:30;display:flex;flex-direction:column;gap:6px}
-#zoomCtrl button{width:52px;height:52px;font-size:24px;font-weight:700;font-family:inherit;border:2px solid #333;background:#fff;cursor:pointer;padding:0;line-height:1}
+#zoomCtrl button{width:52px;height:52px;font-size:22px;font-weight:700;font-family:inherit;border:2px solid #333;background:#fff;cursor:pointer;padding:0;line-height:1}
 #zoomCtrl button:active{background:#333;color:#fff}
 #err{position:fixed;top:110px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;font-family:ui-monospace,monospace;white-space:pre-wrap}
 </style>
 </head>
 <body>
-<div id="title">CPU 64 v5.0 · PURE GATES<small id="gcount"></small></div>
+<div id="title">CPU 64 v5.1 · PURE GATES<small id="gcount"></small></div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="cheat" class="min">
-<div class="bar" id="cheatBar"><span>CHEAT SHEET · v5.0</span><span class="btn" id="cheatMin">+</span></div>
+<div class="bar" id="cheatBar"><span>CHEAT SHEET · v5.1</span><span class="btn" id="cheatMin">+</span></div>
 <div class="body">
+<div class="hdr">PURITY</div>
+<div class="note">Semua state hidup di <b>cross-coupled NAND loop</b>. Tidak ada variabel JS yang menyimpan bit CPU. Sinyal merambat lewat kawat sampai <code>settle()</code> konvergen.</div>
+<div class="note"><b>Gate murni:</b> setiap FF = 10 gerbang NAND (master-slave D-FF). ALU = XOR/AND/OR full-adder. Decoder = pohon AND. MUX = OR dari AND.</div>
+<div class="note"><b>Eksternal (seperti CPU asli):</b> clock = kristal, switch/joystick = pin I/O, program load = EPROM programmer, LED = display.</div>
 <div class="hdr">OPCODE</div>
 <div class="row"><span class="c">00</span>NOP</div>
 <div class="row"><span class="c">01</span>SET</div><div class="row"><span class="c">02</span>MOV</div>
@@ -61,19 +66,16 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 <div class="row"><span class="c">2D</span>JOY</div><div class="row"><span class="c">2E</span>PEEK</div>
 <div class="row"><span class="c">2F</span>STOREI</div><div class="row"><span class="c">30</span>POKER</div>
 <div class="row"><span class="c">31</span>RND</div><div class="row"><span class="c">32</span>SEED</div>
-<div class="hdr">v5.0 · PURE LOGIC</div>
-<div class="row">Setiap latch = 10 gerbang (2 buffer + 8 NAND master-slave D-FF)</div>
-<div class="row">Tidak ada state tersembunyi. Semua nilai hidup di kabel.</div>
 <div class="hdr">FORMAT: [OP, DATA, TAG, DEST]</div>
 </div>
 </div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll = zoom · drag = pan · dblclick = fit</div>
+<div id="help">scroll = zoom · drag = pan · dblclick = input switches · ⟲ = fit all</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <script>
 window.BUILTIN_PROJECTS = {
-version: 18,
+version: 19,
 projects: [
 {id:"maze",name:"MAZE SCROLLER",description:"UP/DOWN scroll maze",storage:[
 [0,32],[1,32],[2,32],[3,32],[4,32],[5,32],[6,32],[7,32],
@@ -190,9 +192,11 @@ function jr(){jseed=(jseed*1103515245+12345)&0x7fffffff;return jseed/0x7fffffff;
 function reset(){
 while(svg.firstChild)svg.removeChild(svg.firstChild);
 gates=[];sws=[];leds=[];latches=[];wires=[];sectionsData=[];frame43=null;jseed=7;core={};
-groupStack=[{x:20,y:80,rowH:0,maxW:60000,maxXUsed:0,maxYUsed:0,gStart:0,sStart:0,lStart:0}];
+groupStack=[{x:20,y:80,rowH:0,maxW:60000,maxXUsed:0,maxYUsed:0,gStart:0,sStart:0,lStart:0,ltStart:0}];
 vp=E("g",{});svg.appendChild(vp);
-lS=E("g",{});lW_off=E("path",{fill:"none",stroke:"#cfcfcf","stroke-width":1,"stroke-linejoin":"round"});lW_on=E("path",{fill:"none",stroke:"#111","stroke-width":1.5,"stroke-linejoin":"round"});
+lS=E("g",{});
+lW_off=E("path",{fill:"none",stroke:"#cfcfcf","stroke-width":1,"stroke-linejoin":"round"});
+lW_on=E("path",{fill:"none",stroke:"#111","stroke-width":1.5,"stroke-linejoin":"round"});
 lG=E("g",{});lF=E("g",{});lL=E("g",{});lU=E("g",{});
 vp.appendChild(lS);vp.appendChild(lW_off);vp.appendChild(lW_on);vp.appendChild(lG);vp.appendChild(lF);vp.appendChild(lL);vp.appendChild(lU);
 }
@@ -204,26 +208,29 @@ if(f.x-GAPX>f.maxXUsed)f.maxXUsed=f.x-GAPX;
 var yU=f.y+h;if(yU>f.maxYUsed)f.maxYUsed=yU;return p;
 }
 function place(w,h){return framePlaceIn(curFrame(),w,h);}
-function beginGroup(mw){groupStack.push({x:0,y:0,rowH:0,maxW:mw||200,maxXUsed:0,maxYUsed:0,gStart:gates.length,sStart:sws.length,lStart:leds.length});}
+function beginGroup(mw){groupStack.push({x:0,y:0,rowH:0,maxW:mw||200,maxXUsed:0,maxYUsed:0,gStart:gates.length,sStart:sws.length,lStart:leds.length,ltStart:latches.length});}
 function endGroup(){
 var f=groupStack.pop();if(!f)return;
 var w=f.maxXUsed||10,h=f.maxYUsed||10;
 var pos=framePlaceIn(curFrame(),w,h);var dx=pos.x,dy=pos.y,i;
-for(i=f.gStart;i<gates.length;i++){var g=gates[i];if(g._hidden)continue;g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
+// Move ALL gates including hidden (needed for correct wire endpoints)
+for(i=f.gStart;i<gates.length;i++){var g=gates[i];g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
 for(i=f.sStart;i<sws.length;i++){var s=sws[i];s.px+=dx;s.py+=dy;s.o.x+=dx;s.o.y+=dy;}
 for(i=f.lStart;i<leds.length;i++){var l=leds[i];l.px+=dx;l.py+=dy;if(l.ph){l.ph.x=l.px-2;l.ph.y=l.py;}}
+for(i=f.ltStart;i<latches.length;i++){var lt=latches[i];lt.px+=dx;lt.py+=dy;}
 }
 function forceNewRow(){var f=groupStack[0];if(!f)return;f.x=0;f.y+=f.rowH+30;f.rowH=0;}
 function section(title,mw,fn){
-var g0=gates.length,s0=sws.length,l0=leds.length;
+var g0=gates.length,s0=sws.length,l0=leds.length,lt0=latches.length;
 beginGroup(mw);fn();endGroup();
 var mnx=Infinity,mny=Infinity,mxx=-Infinity,mxy=-Infinity;
 function ext(x1,y1,x2,y2){if(x1<mnx)mnx=x1;if(y1<mny)mny=y1;if(x2>mxx)mxx=x2;if(y2>mxy)mxy=y2;}
 for(var i=g0;i<gates.length;i++){var g=gates[i];if(g._hidden)continue;ext(g.px-6,g.py-2,g.px+41,g.py+32);}
+for(var i=lt0;i<latches.length;i++){var l=latches[i];ext(l.px-8,l.py-4,l.px+54,l.py+42);}
 for(var i=s0;i<sws.length;i++){var s=sws[i];ext(s.px-2,s.py-2,s.px+52,s.py+59);}
 for(var i=l0;i<leds.length;i++){var l=leds[i];var r=l.sz?l.sz*0.4:10;ext(l.px-r-3,l.py-r-11,l.px+r+3,l.py+r+3);}
 if(!isFinite(mnx))return;var pad=8;
-sectionsData.push({x:mnx-pad,y:mny-pad-18,w:(mxx-mnx)+2*pad,h:(mxy-mny)+2*pad+18,title:title,g0:g0,g1:gates.length,s0:s0,s1:sws.length,l0:l0,l1:leds.length});
+sectionsData.push({x:mnx-pad,y:mny-pad-18,w:(mxx-mnx)+2*pad,h:(mxy-mny)+2*pad+18,title:title,g0:g0,g1:gates.length,s0:s0,s1:sws.length,l0:l0,l1:leds.length,lt0:lt0,lt1:latches.length});
 }
 function N(v,d){return{v:v|0,d:d|0};}
 function mkGate(t,ins){
@@ -233,7 +240,6 @@ var g={t:t,i:ins,o:N(0,d),px:p.x,py:p.y+jy};g.o.x=g.px+34;g.o.y=g.py+15;
 for(var i=0;i<ins.length;i++){var iy=ins.length===1?15:(i===0?10:20);if(ins[i]&&ins[i].x!==undefined&&!ins[i].virtual)wires.push({s:ins[i],g:g,py:iy});}
 gates.push(g);return g;
 }
-// Hidden internal gate (no place, no wire)
 function mkGH(t,ins){
 var d=0;for(var i=0;i<ins.length;i++)d=Math.max(d,(ins[i]&&ins[i].d)||0);d=d+1;
 var g={t:t,i:ins,o:N(0,d),px:0,py:0,_hidden:true};
@@ -245,12 +251,14 @@ function NOT(a){return mkGate("NOT",[a]).o;}
 function XOR(a,b){return mkGate("XOR",[a,b]).o;}
 
 // =============================================================
-// LAT: master-slave D flip-flop from NAND gates (10 gates)
-//  - 2 input buffers (AND identity)
-//  - nD = NAND(D,D)
-//  - nC = NAND(CLK,CLK)
-//  - Master latch: Sm=NAND(D,nC), Rm=NAND(nD,nC), Qm=NAND(Sm,Qmb), Qmb=NAND(Rm,Qm)
-//  - Slave latch:  Ss=NAND(Qm,C), Rs=NAND(Qmb,C), Qs=NAND(Ss,Qsb), Qsb=NAND(Rs,Qs)
+// LAT: master-slave D flip-flop from 10 NAND gates
+//   nD = NAND(D,D);  nC = NAND(C,C)
+//   Master (active-low when CLK=0):
+//     Sm = NAND(D, nC);   Rm = NAND(nD, nC)
+//     Qm = NAND(Sm, Qmb); Qmb = NAND(Rm, Qm)
+//   Slave (active-low when CLK=1):
+//     Ss = NAND(Qm, C);   Rs = NAND(Qmb, C)
+//     Qs = NAND(Ss, Qsb); Qsb = NAND(Rs, Qs)
 // =============================================================
 function LAT(init){
 init=init|0;
@@ -258,38 +266,25 @@ var dIn=mkGH("AND",[K0,K1]);
 var cIn=mkGH("AND",[K0,K1]);
 var nD=mkGH("NAND",[dIn.o,dIn.o]);
 var nC=mkGH("NAND",[cIn.o,cIn.o]);
-// Master
 var Sm=mkGH("NAND",[dIn.o,nC.o]);
 var Rm=mkGH("NAND",[nD.o,nC.o]);
 var QmPh=N(init,3);
 var Qm=mkGH("NAND",[Sm.o,QmPh]);
 var Qmb=mkGH("NAND",[Rm.o,Qm.o]);
 Qm.i[1]=Qmb.o;
-// Slave
 var Ss=mkGH("NAND",[Qm.o,cIn.o]);
 var Rs=mkGH("NAND",[Qmb.o,cIn.o]);
 var QsPh=N(init,3);
 var Qs=mkGH("NAND",[Ss.o,QsPh]);
 var Qsb=mkGH("NAND",[Rs.o,Qs.o]);
 Qs.i[1]=Qsb.o;
-// Init state
-Qm.o.v=init; Qmb.o.v=(~init)&1;
-Qs.o.v=init; Qsb.o.v=(~init)&1;
-// Reserve visual space for wrapper
+Qm.o.v=init;Qmb.o.v=(~init)&1;
+Qs.o.v=init;Qsb.o.v=(~init)&1;
 var p=place(46,38);
-// Position D/CLK input buffers & Q output at wrapper location
-dIn.px=p.x; dIn.py=p.y+2; dIn.o.x=p.x+46; dIn.o.y=p.y+2+15;
-cIn.px=p.x; cIn.py=p.y+20; cIn.o.x=p.x+46; cIn.o.y=p.y+20+15;
+dIn.px=p.x; dIn.py=p.y+2; dIn.o.x=p.x+46; dIn.o.y=p.y+17;
+cIn.px=p.x; cIn.py=p.y+20; cIn.o.x=p.x+46; cIn.o.y=p.y+35;
 Qs.o.x=p.x+46; Qs.o.y=p.y+19;
-var wrapper={
-  t:"LATX",
-  i:[dIn.o,cIn.o],
-  o:Qs.o,
-  px:p.x, py:p.y,
-  _dIn:dIn, _cIn:cIn,
-  _Qm:Qm, _Qmb:Qmb, _Qs:Qs, _Qsb:Qsb,
-  _init:init
-};
+var wrapper={t:"LATX",i:[dIn.o,cIn.o],o:Qs.o,px:p.x,py:p.y,_dIn:dIn,_cIn:cIn,_Qm:Qm,_Qmb:Qmb,_Qs:Qs,_Qsb:Qsb,_init:init};
 latches.push(wrapper);
 return wrapper;
 }
@@ -330,8 +325,7 @@ function renderGate(g){
 var grp=E("g",{transform:"translate("+g.px+","+g.py+")"});
 grp.appendChild(E("path",{d:gateBody(g.t),fill:"#fff",stroke:"#222","stroke-width":1}));
 if(g.t==="XOR"||g.t==="XNOR")grp.appendChild(E("path",{d:"M0,0 Q10,15 0,30",fill:"none",stroke:"#222","stroke-width":1}));
-if(g.t==="NOT"||g.t==="NAND")grp.appendChild(E("circle",{cx:33,cy:15,r:3,fill:"#fff",stroke:"#222","stroke-width":1}));
-if(g.t==="NOR")grp.appendChild(E("circle",{cx:33,cy:15,r:3,fill:"#fff",stroke:"#222","stroke-width":1}));
+if(g.t==="NOT"||g.t==="NAND"||g.t==="NOR")grp.appendChild(E("circle",{cx:33,cy:15,r:3,fill:"#fff",stroke:"#222","stroke-width":1}));
 var n=(g.t==="NOT")?1:2;for(var i=0;i<n;i++){var y=n===1?15:(i===0?10:20);grp.appendChild(E("line",{x1:-6,y1:y,x2:0,y2:y,stroke:"#222","stroke-width":1}));}
 grp.appendChild(E("line",{x1:34,y1:15,x2:40,y2:15,stroke:"#222","stroke-width":1}));
 var lbl=(g.t==="NAND")?"&":(g.t==="NOR")?"≥1":(g.t==="XNOR")?"=1":"";
@@ -423,7 +417,7 @@ lW_on.setAttribute("stroke-width",minimal?0.9:1.5);
 lW_off.setAttribute("stroke-width",minimal?0.35:1);
 lW_off.setAttribute("stroke",minimal?"#dcdcdc":"#cfcfcf");
 if(showGates){for(var i=0;i<gates.length;i++){var g=gates[i];if(g._hidden)continue;if(g.px+50<vx1-pad||g.px>vx2+pad)continue;if(g.py+44<vy1-pad||g.py>vy2+pad)continue;renderGate(g);}}
-if(showLatches){for(var i=0;i<latches.length;i++){var l=latches[i];if(l.px+50<vx1-pad||l.px>vx2+pad)continue;if(l.py+44<vy1-pad||l.py>vy2+pad)continue;renderLatch(l);}}
+if(showLatches){for(var i=0;i<latches.length;i++){var l=latches[i];if(l.px+54<vx1-pad||l.px-8>vx2+pad)continue;if(l.py+42<vy1-pad||l.py-4>vy2+pad)continue;renderLatch(l);}}
 if(showSwitches){for(var i=0;i<sws.length;i++){var s=sws[i];if(s.px+70<vx1-pad||s.px>vx2+pad)continue;if(s.py+86<vy1-pad||s.py>vy2+pad)continue;renderSwitch(s);}}
 if(showLeds){for(var i=0;i<leds.length;i++){var l=leds[i];var rad=(l.sz||22)*0.5+4;if(l.px+rad<vx1||l.px-rad>vx2)continue;if(l.py+rad<vy1||l.py-rad>vy2)continue;renderLed(l);}}
 }
@@ -985,12 +979,8 @@ endGroup();
 });
 forceNewRow();
 
-// ============================================================
-// Row-code font rendering (saves ~30k gates)
-// ============================================================
 var rowCodeSmall=[], rowCodeSmallBold=[], rowCodeBig=[], rowCodeBigBold=[];
 section("SCREEN · ROWCODE",20000,function(){
-// Small: 32 cells × 4 rows × 4 bits
 for(var ci=0;ci<DISPLAY_CELLS;ci++){
 var rc=[];
 for(r=0;r<4;r++){
@@ -1011,7 +1001,6 @@ rc.push(bits);
 }
 rowCodeSmall.push(rc);
 }
-// Big: 8 cells × 4 rows × 4 bits
 for(var ci=0;ci<8;ci++){
 var rc=[];
 for(r=0;r<4;r++){
@@ -1021,7 +1010,6 @@ var acc=null;
 for(var si=0;si<SUPPORTED.length;si++){
 var ch=SUPPORTED[si];
 if((FONT[ch][r]>>b)&1){
-// big uses RAM cells 0..7 only
 var m=charSels[ci][si];
 acc=(acc===null)?m:OR(acc,m);
 }
@@ -1033,7 +1021,6 @@ rc.push(bits);
 }
 rowCodeBig.push(rc);
 }
-// Bold variants: bold[i] = plain[i] | plain[i+1]
 for(var ci=0;ci<DISPLAY_CELLS;ci++){
 var rc=[];
 for(r=0;r<4;r++){
@@ -1065,19 +1052,16 @@ section("SCREEN · GRID",SCR_W*(SIZE_LED+GAPX)+GAPX,function(){for(r=0;r<SCR_H;r
 section("SCREEN · FONT",20000,function(){
 for(r=0;r<SCR_H;r++){beginGroup(8000);
 for(c=0;c<SCR_W;c++){beginGroup(5000);
-// small coords
 var ci_small=(r>>2)*CHAR_COLS+(c>>2);
 var spx=c&3,spy=r&3;
 var bs=3-spx;
 var sP=rowCodeSmall[ci_small][spy][bs];
 var sB=rowCodeSmallBold[ci_small][spy][bs];
-// big coords
 var ci_big=(r>>3)*4+(c>>3);
 var bpx=(c>>1)&3,bpy=(r>>1)&3;
 var bb=3-bpx;
 var bP=rowCodeBig[ci_big][bpy][bb];
 var bB=rowCodeBigBold[ci_big][bpy][bb];
-// Select bold/plain, then big/small
 var pixS=OR(AND(nbold,sP),AND(bold,sB));
 var pixB=OR(AND(nbold,bP),AND(bold,bB));
 var pix=OR(AND(nbig,pixS),AND(big,pixB));
@@ -1209,27 +1193,11 @@ for(var t=0;t<=30;t++){var Wp=maxW*Math.pow(totW/maxW,t/30);var p=pack(Wp),f2=fi
 for(i=0;i<n;i++){
 var sc2=secs[i],nx=M+best.p.pos[i].x,ny=TOP+best.p.pos[i].y;
 var dx=nx-sc2.x,dy=ny-sc2.y;
-for(k=sc2.g0;k<sc2.g1;k++){var g=gates[k];if(g._hidden)continue;g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
+for(k=sc2.g0;k<sc2.g1;k++){var g=gates[k];g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
 for(k=sc2.s0;k<sc2.s1;k++){var q2=sws[k];q2.px+=dx;q2.py+=dy;q2.o.x+=dx;q2.o.y+=dy;}
 for(k=sc2.l0;k<sc2.l1;k++){var l=leds[k];l.px+=dx;l.py+=dy;if(l.ph){l.ph.x=l.px-2;l.ph.y=l.py;}}
+for(k=sc2.lt0;k<sc2.lt1;k++){var lt=latches[k];lt.px+=dx;lt.py+=dy;}
 sc2.x=nx;sc2.y=ny;
-}
-// reposition latches inside sections
-for(i=0;i<latches.length;i++){
-var l=latches[i];
-// find containing section
-for(k=0;k<n;k++){
-var s3=secs[k];
-if(l.px>=s3.x-100&&l.px<=s3.x+s3.w+100&&l.py>=s3.y-100&&l.py<=s3.y+s3.h+100){
-// already moved by gate loop above (dIn/dIn.o moved), but latch px/py is stale
-// find the actual delta by checking dIn
-var d=l._dIn;
-var deltaX=d.px-l.px;
-var deltaY=d.py-l.py;
-l.px=d.px;l.py=d.py-2;
-break;
-}
-}
 }
 return {x:0,y:0,w:best.f.W,h:best.f.H};
 }
@@ -1242,9 +1210,30 @@ view.x=(r.width - frame43.w*k)/2 - frame43.x*k;
 view.y=(r.height - frame43.h*k)/2 - frame43.y*k;
 applyView();
 }
+// Fit the input switch column (initial home view)
+function fitInputColumn(){
+var titles={"INPUT · OPCODE (8)":1,"INPUT · DATA (8)":1,"INPUT · TAG (8)":1,"INPUT · ADDR (9)":1,"INPUT · ACTION":1,"INPUT · CLK":1};
+var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+for(var i=0;i<sectionsData.length;i++){
+var s=sectionsData[i];
+if(!titles[s.title])continue;
+if(s.x<minX)minX=s.x;
+if(s.y<minY)minY=s.y;
+if(s.x+s.w>maxX)maxX=s.x+s.w;
+if(s.y+s.h>maxY)maxY=s.y+s.h;
+}
+if(!isFinite(minX)){fitView();return;}
+var w=maxX-minX, h=maxY-minY;
+var r=svg.getBoundingClientRect();
+var k=Math.min(r.width/(w+120), r.height/(h+120))*0.95;
+view.k=k;
+view.x=(r.width - w*k)/2 - minX*k;
+view.y=(r.height - h*k)/2 - minY*k;
+applyView();
+}
 function updateGateCount(){
 var total=gates.length+sws.length+leds.length;
-document.getElementById("gcount").textContent="· "+total.toLocaleString()+" gates";
+document.getElementById("gcount").textContent="· "+total.toLocaleString()+" gates · "+latches.length.toLocaleString()+" FFs";
 }
 function loadProject(){
 try{
@@ -1258,7 +1247,7 @@ frame43=relayout43();
 routeWires();
 initProj();
 simulate();
-fitView();
+fitInputColumn();
 updateGateCount();
 renderFrame();
 }catch(e){showErr((e&&e.message)||String(e));console.error(e);if(e&&e.stack)console.error(e.stack);}
@@ -1304,7 +1293,7 @@ else if(ids.length===1){mode="pan";var id=ids[0];panS={x:ptrs[id].x,y:ptrs[id].y
 svg.addEventListener("pointerup",endPtr);
 svg.addEventListener("pointercancel",endPtr);
 svg.addEventListener("pointerleave",function(e){if(ptrs[e.pointerId])endPtr(e);});
-svg.addEventListener("dblclick",function(){fitView();});
+svg.addEventListener("dblclick",function(){fitInputColumn();});
 document.getElementById("zoomIn").addEventListener("click",function(){zoomC(1.3);});
 document.getElementById("zoomOut").addEventListener("click",function(){zoomC(1/1.3);});
 document.getElementById("zoomReset").addEventListener("click",function(){fitView();});
