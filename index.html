@@ -1,12 +1,14 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v6.4 · MAZE</title><style>
+<title>CPU 64 v6.5 · MAZE</title><style>
 *{box-sizing:border-box}html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
 svg{display:block;width:100vw;height:100vh;background:#fff;touch-action:none;cursor:grab}svg.drag{cursor:grabbing}
 text{font-family:inherit;user-select:none;pointer-events:none}
 #title{position:fixed;top:10px;left:12px;z-index:10;font-size:13px;font-weight:700;color:#222;background:#fff;padding:4px 8px;border:2px solid #333}#title small{font-weight:400;color:#666;margin-left:8px}
+#hud{position:fixed;top:52px;left:12px;z-index:11;background:#111;color:#0f0;font-family:ui-monospace,monospace;font-size:11px;padding:6px 10px;border:2px solid #333;line-height:1.5}
+#hud b{color:#ff0}
 #help{position:fixed;bottom:10px;left:12px;font-size:11px;color:#888;z-index:10}
-#cheat{position:fixed;top:10px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:300px;font-size:11px;line-height:1.4}
+#cheat{position:fixed;top:10px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:280px;font-size:11px;line-height:1.4}
 #cheat .bar{background:#333;color:#fff;padding:6px 10px;font-weight:700;display:flex;justify-content:space-between;cursor:pointer}
 #cheat .body{padding:10px;max-height:80vh;overflow:auto}#cheat.min .body{display:none}
 #cheat .hdr{font-weight:700;color:#222;margin:6px 0 3px;border-bottom:1px solid #ddd}
@@ -15,36 +17,33 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 #zoomCtrl{position:fixed;bottom:14px;right:14px;z-index:30;display:flex;flex-direction:column;gap:6px}
 #zoomCtrl button{width:52px;height:52px;font-size:22px;font-weight:700;font-family:inherit;border:2px solid #333;background:#fff;cursor:pointer;padding:0}
 #zoomCtrl button:active{background:#333;color:#fff}
-#err{position:fixed;top:110px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;white-space:pre-wrap}
+#err{position:fixed;top:220px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;white-space:pre-wrap}
 </style></head><body>
-<div id="title">CPU 64 v6.4 · MAZE<small id="gcount"></small></div>
+<div id="title">CPU 64 v6.5 · MAZE<small id="gcount"></small></div>
+<div id="hud">PX=<b id="hudPX">?</b> PY=<b id="hudPY">?</b> PTR=<b id="hudPTR">?</b> JOY=<b id="hudJOY">?</b></div>
 <div id="err"></div>
 <div id="cheat" class="min"><div class="bar" id="cheatBar"><span>CHEAT · MAZE</span><span id="cheatMin">+</span></div>
 <div class="body">
 <div class="hdr">KONTROL</div>
-<div class="note">Klik <b>UP/DOWN/LEFT/RIGHT</b> pada joystick untuk gerakkan karakter <b>hijau</b>. Capai kotak <b>merah</b> = reset ke start.</div>
+<div class="note">Klik <b>UP/DOWN/LEFT/RIGHT</b> di joystick untuk gerakkan karakter <b>hijau</b>. Sentuh <b>merah</b> = reset.</div>
 <div class="hdr">PALETTE</div>
 <div class="row"><span class="sw" style="background:#000"></span>dinding · hitam</div>
 <div class="row"><span class="sw" style="background:#fff"></span>lantai · putih</div>
 <div class="row"><span class="sw" style="background:#0f0"></span>karakter · hijau</div>
 <div class="row"><span class="sw" style="background:#f00"></span>exit · merah</div>
-<div class="hdr">ARSITEKTUR</div>
-<div class="note">CPU (dari gerbang AND/OR/NOT/XOR) mengeksekusi program maze: baca joystick → cek dinding via STOREI → update posisi. RAM 512×8 = FF. STORAGE 256×8 = FF (maze 16×16).</div>
-<div class="note"><b>Program:</b> 62 instruksi di RAM[128..]. <b>Maze:</b> 256 byte di STORAGE. <b>Player pos:</b> RAM[64,65].</div>
-<div class="hdr">LAYOUT MEMORI</div>
-<div class="row">RAM[0..63] · display/vars</div>
-<div class="row">RAM[64] · player_x</div>
-<div class="row">RAM[65] · player_y</div>
-<div class="row">RAM[66..127] · temp vars</div>
-<div class="row">RAM[128..] · program code</div>
-<div class="row">STORE[0..255] · maze data</div>
+<div class="hdr">HUD (pojok kiri atas)</div>
+<div class="note"><b>PX/PY</b> = posisi karakter (target: gerak saat klik arrow)<br><b>PTR</b> = program counter<br><b>JOY</b> = bit joystick (1=UP, 2=DOWN, 4=LEFT, 8=RIGHT)</div>
+<div class="hdr">LAYOUT</div>
+<div class="row">RAM[64] px · RAM[65] py · RAM[70] joy</div>
+<div class="row">RAM[128..] program code</div>
+<div class="row">STORE[0..255] maze 16×16</div>
 </div></div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
 <div id="help">scroll=zoom · drag=pan · dblclick=layar · ⟲=seluruh rangkaian · klik switch joystick</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 <script>
-window.BUILTIN_PROJECTS={version:27,projects:[
-{id:"maze",name:"MAZE 2D",description:"Arrow keys → exit",mazeData:[
+window.BUILTIN_PROJECTS={version:28,projects:[
+{id:"maze",name:"MAZE 2D",description:"Arrow → exit",mazeData:[
 "################",
 "#..............#",
 "#.############.#",
@@ -60,26 +59,80 @@ window.BUILTIN_PROJECTS={version:27,projects:[
 "#.##########.#.#",
 "#............#.#",
 "#.############.#",
-"##############E#"
+"##############*#"
 ],program:[
-[0x01,1,0,64],[0x01,1,0,65],
-[0x2D,0,0,70],[0x14,60,70,0],
-[0x01,1,0,71],[0x08,71,70,71],[0x14,11,71,0],
-[0x02,0,64,72],[0x02,0,65,73],[0x0D,0,73,73],[0x10,40,0,0],
-[0x01,2,0,71],[0x08,71,70,71],[0x14,18,71,0],
-[0x02,0,64,72],[0x02,0,65,73],[0x0C,0,73,73],[0x10,40,0,0],
-[0x01,4,0,71],[0x08,71,70,71],[0x14,25,71,0],
-[0x02,0,64,72],[0x02,0,65,73],[0x0D,0,72,72],[0x10,40,0,0],
-[0x01,8,0,71],[0x08,71,70,71],[0x14,60,71,0],
-[0x02,0,64,72],[0x02,0,65,73],[0x0C,0,72,72],[0x10,40,0,0],
-[0x00,0,0,0],[0x00,0,0,0],[0x00,0,0,0],[0x00,0,0,0],
-[0x00,0,0,0],[0x00,0,0,0],[0x00,0,0,0],[0x00,0,0,0],
-[0x02,0,73,75],[0x26,0,75,75],[0x26,0,75,75],[0x26,0,75,75],
-[0x26,0,75,75],[0x04,72,75,75],[0x2F,0,75,76],[0x01,35,0,77],
-[0x33,77,76,0],[0x36,60,0,0],[0x02,0,72,64],[0x02,0,73,65],
-[0x01,42,0,77],[0x33,77,76,0],[0x37,60,0,0],[0x01,1,0,64],
-[0x01,1,0,65],[0x10,60,0,0],[0x00,0,0,0],[0x00,0,0,0],
-[0x12,3,0,0],[0x10,2,0,0],[0x00,0,0,0],[0x00,0,0,0]
+// 0-1: initial position
+[0x01,1,0,64],      // 0  SET R64=1
+[0x01,1,0,65],      // 1  SET R65=1
+// 2-3: read joystick
+[0x2D,0,0,70],      // 2  JOY → R70
+[0x14,54,70,0],     // 3  JZ R70 → 54
+// 4-6: test UP (bit 0)
+[0x01,1,0,71],      // 4  SET R71=1
+[0x08,71,70,71],    // 5  AND R71, R70
+[0x14,11,71,0],     // 6  JZ R71 → 11
+[0x02,0,64,72],     // 7  R72 = R64 (cand px)
+[0x02,0,65,73],     // 8  R73 = R65 (cand py)
+[0x0D,0,73,73],     // 9  R73-- (cand py-1)
+[0x10,45,0,0],      // 10 JMP 45
+// 11-13: test DOWN (bit 1)
+[0x01,2,0,71],      // 11 SET R71=2
+[0x08,71,70,71],    // 12 AND
+[0x14,18,71,0],     // 13 JZ → 18
+[0x02,0,64,72],     // 14 R72 = R64
+[0x02,0,65,73],     // 15 R73 = R65
+[0x0C,0,73,73],     // 16 R73++
+[0x10,45,0,0],      // 17 JMP 45
+// 18-20: test LEFT (bit 2)
+[0x01,4,0,71],      // 18 SET R71=4
+[0x08,71,70,71],    // 19 AND
+[0x14,25,71,0],     // 20 JZ → 25
+[0x02,0,64,72],     // 21 R72 = R64
+[0x02,0,65,73],     // 22 R73 = R65
+[0x0D,0,72,72],     // 23 R72--
+[0x10,45,0,0],      // 24 JMP 45
+// 25-27: test RIGHT (bit 3)
+[0x01,8,0,71],      // 25 SET R71=8
+[0x08,71,70,71],    // 26 AND
+[0x14,54,71,0],     // 27 JZ → 54 (no direction matched)
+[0x02,0,64,72],     // 28 R72 = R64
+[0x02,0,65,73],     // 29 R73 = R65
+[0x0C,0,72,72],     // 30 R72++
+[0x10,45,0,0],      // 31 JMP 45
+[0x00,0,0,0],       // 32
+[0x00,0,0,0],       // 33
+[0x00,0,0,0],       // 34
+[0x00,0,0,0],       // 35
+[0x00,0,0,0],       // 36
+[0x00,0,0,0],       // 37
+[0x00,0,0,0],       // 38
+[0x00,0,0,0],       // 39
+[0x00,0,0,0],       // 40
+[0x00,0,0,0],       // 41
+[0x00,0,0,0],       // 42
+[0x00,0,0,0],       // 43
+[0x00,0,0,0],       // 44
+// 45: COMMIT — cek wall di STORE[py*16+px]
+[0x02,0,73,74],     // 45 R74 = R73 (new py)
+[0x26,0,74,74],     // 46 SHL R74 (=py*2)
+[0x26,0,74,74],     // 47 SHL (=py*4)
+[0x26,0,74,74],     // 48 SHL (=py*8)
+[0x26,0,74,74],     // 49 SHL (=py*16)
+[0x04,72,74,74],    // 50 ADD R74 + R72 (=py*16+px)
+[0x2F,0,74,75],     // 51 STOREI — R75 = STORE[R74]
+[0x01,35,0,76],     // 52 SET R76=35 ('#')
+[0x33,76,75,0],     // 53 CMP (R75 - 35)  [TAG=75=RAM byte, DATA=76=35]
+[0x36,54,0,0],      // 54 JEQ → 54 (wall — skip commit)  ← hmm this needs a real target!
+[0x02,0,72,64],     // 55 R64 = R72 (commit px)
+[0x02,0,73,65],     // 56 R65 = R73 (commit py)
+[0x01,42,0,76],     // 57 R76 = 42 ('*' exit)
+[0x33,76,75,0],     // 58 CMP (R75 - 42)
+[0x37,62,0,0],      // 59 JNE → 62 (not exit, skip reset)
+[0x01,1,0,64],      // 60 R64 = 1 (reset px)
+[0x01,1,0,65],      // 61 R65 = 1 (reset py)
+[0x10,2,0,0],       // 62 JMP 2 (loop)
+[0x00,0,0,0],       // 63
+[0x00,0,0,0]        // 64
 ]}
 ]};
 </script>
@@ -185,15 +238,16 @@ if(s.label){var t=E("text",{x:w/2,y:h+11,"text-anchor":"middle","font-size":8,"f
 if(!s.osc){var hit=E("rect",{x:0,y:0,width:w,height:h,fill:"transparent",cursor:"pointer",class:"swhit"});grp.appendChild(hit);
 hit.addEventListener("pointerdown",function(ev){ev.stopPropagation();ev.preventDefault();s.v=s.v?0:1;
 if(s.label==="DESTRUCT"&&s.v){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);setTimeout(function(){s.v=0;},200);}
-if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT")){setTimeout(function(){s.v=0;},300);}});}
+if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT")){setTimeout(function(){s.v=0;},500);}});}
 lU.appendChild(grp);}
 function renderLed(l){var sz=l.sz||SIZE_LED;
-var on=(l.forceV!==undefined)?l.forceV:l.i.v;
+var isPixel=(l.forceColor!==undefined);
+var on=isPixel?(l.forceV||0):l.i.v;
 var fill;
-if(l.forceColor!==undefined)fill=on?l.forceColor:"#f0f0f0";
+if(isPixel)fill=on?l.forceColor:"#f0f0f0";
 else fill=on?l.c:"#e8e8e8";
 var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
-if(l.forceColor!==undefined){var side=sz+GAPX;
+if(isPixel){var side=sz+GAPX;
 grp.appendChild(E("rect",{x:-side/2,y:-side/2,width:side,height:side,fill:fill,stroke:"none"}));}
 else{var rO=sz*0.4,rI=sz*0.22;
 grp.appendChild(E("circle",{cx:0,cy:0,r:rO,fill:"#fff",stroke:"#222","stroke-width":1}));
@@ -465,8 +519,14 @@ latchReset(core.slots[i].valid,1);addr+=4;}}
 function autoStart(){for(var i=0;i<sws.length;i++){if(sws[i].label==="RUN_Q"){sws[i].v=1;}}}
 function initProj(){loadProgram(window.BUILTIN_PROJECTS.projects[0]);autoStart();}
 function readLatches8(arr,idx){var v=0;for(var b=0;b<8;b++){if(arr[idx]&&arr[idx][b]&&arr[idx][b].o.v)v|=(1<<b);}return v;}
-function updateMazeScreen(){if(!core.screenLeds||!core.RAM||!core.STORE)return;
+function readPTR(){var v=0;for(var b=0;b<PTR_BITS;b++){if(core.ptr&&core.ptr[b]&&core.ptr[b].o.v)v|=(1<<b);}return v;}
+var hudPX=document.getElementById("hudPX"),hudPY=document.getElementById("hudPY"),hudPTR=document.getElementById("hudPTR"),hudJOY=document.getElementById("hudJOY");
+function updateMazeScreen(){
+if(!core.screenLeds||!core.RAM||!core.STORE)return;
 var px=readLatches8(core.RAM,64),py=readLatches8(core.RAM,65);
+var joy=readLatches8(core.RAM,70);
+var ptr=readPTR();
+hudPX.textContent=px;hudPY.textContent=py;hudPTR.textContent=ptr;hudJOY.textContent=joy;
 for(var my=0;my<16;my++){
 for(var mx=0;mx<16;mx++){
 var addr=my*16+mx;if(addr>=STORE_SIZE)break;
@@ -586,7 +646,7 @@ var cheatEl=document.getElementById("cheat"),cheatMin=document.getElementById("c
 document.getElementById("cheatBar").addEventListener("click",function(){cheatEl.classList.toggle("min");
 cheatMin.textContent=cheatEl.classList.contains("min")?"+":"−";});
 loadProject();
-setInterval(function(){try{tickOsc();simulate();updateMazeScreen();}catch(e){showErr((e&&e.message)||String(e));}},25);
+setInterval(function(){try{tickOsc();simulate();updateMazeScreen();}catch(e){showErr((e&&e.message)||String(e));}},15);
 var lastR=0;
 requestAnimationFrame(function loop(t){requestAnimationFrame(loop);if(t-lastR<33)return;lastR=t;
 try{renderFrame();}catch(e){showErr((e&&e.message)||String(e));}});
