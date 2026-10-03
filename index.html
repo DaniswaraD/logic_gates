@@ -17,17 +17,18 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 #projSel label{font-weight:700;letter-spacing:1px;color:#333}
 #projSel select{font-family:inherit;font-size:11px;padding:3px 6px;border:1px solid #888;background:#fff;max-width:280px}
 #cheat{position:fixed;top:52px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:440px;font-size:11px;line-height:1.4}
-#cheat .bar{background:#333;color:#fff;padding:6px 10px;font-weight:700;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+#cheat .bar{background:#333;color:#fff;padding:6px 10px;font-weight:700;font-size:11px;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+#cheat .bar .btn{font-size:16px;font-weight:700;padding:0 6px}
 #cheat .body{padding:10px;max-height:80vh;overflow:auto}
 #cheat.min .body{display:none}
-#cheat .hdr{font-weight:700;color:#222;margin:6px 0 3px;letter-spacing:1px;border-bottom:1px solid #ddd;padding-bottom:2px}
-#cheat .row{margin:1px 0}
-#cheat .c{color:#0a7;font-weight:700;display:inline-block;width:60px}
+#cheat .hdr{font-weight:700;font-size:11px;color:#222;margin:6px 0 3px;letter-spacing:1px;border-bottom:1px solid #ddd;padding-bottom:2px}
+#cheat .row{font-family:ui-monospace,monospace;margin:1px 0}
+#cheat .c{color:#0a7;font-weight:700;display:inline-block;width:52px}
 #cheat .note{background:#f6f8fa;padding:6px 8px;margin:4px 0;border-left:3px solid #0a7;font-size:10px}
 #zoomCtrl{position:fixed;bottom:14px;right:14px;z-index:30;display:flex;flex-direction:column;gap:6px}
-#zoomCtrl button{width:52px;height:52px;font-size:22px;font-weight:700;font-family:inherit;border:2px solid #333;background:#fff;cursor:pointer;padding:0}
+#zoomCtrl button{width:52px;height:52px;font-size:22px;font-weight:700;font-family:inherit;border:2px solid #333;background:#fff;cursor:pointer;padding:0;line-height:1}
 #zoomCtrl button:active{background:#333;color:#fff}
-#err{position:fixed;top:110px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;white-space:pre-wrap}
+#err{position:fixed;top:110px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;font-family:ui-monospace,monospace;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -35,45 +36,54 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="cheat" class="min">
-<div class="bar" id="cheatBar"><span>CHEAT · v6.0</span><span class="btn" id="cheatMin">+</span></div>
+<div class="bar" id="cheatBar"><span>CHEAT SHEET · v6.0</span><span class="btn" id="cheatMin">+</span></div>
 <div class="body">
-<div class="hdr">OPCODE LAMA</div>
+<div class="hdr">ARSITEKTUR</div>
+<div class="note">Logika kombinasional: 100% gerbang AND/OR/NOT/XOR. MUX = OR-dari-AND. Decoder = pohon AND. ALU = full-adder dari XOR/AND/OR.</div>
+<div class="note">Flip-flop (storage): primitif atomik snapshot-commit. v6.0 menambah call-stack 8-deep (8×6 latch) dan 3 flag CMP (Z/LT/GT).</div>
+<div class="hdr">OPCODE LAMA (v5.2)</div>
 <div class="row"><span class="c">00</span>NOP</div>
 <div class="row"><span class="c">01</span>SET</div><div class="row"><span class="c">02</span>MOV</div>
-<div class="row"><span class="c">04-07</span>ADD SUB MUL DIV</div>
-<div class="row"><span class="c">08-0B</span>AND OR XOR NOT</div>
-<div class="row"><span class="c">0C-0D</span>INC DEC</div>
+<div class="row"><span class="c">04</span>ADD</div><div class="row"><span class="c">05</span>SUB</div>
+<div class="row"><span class="c">06</span>MUL</div><div class="row"><span class="c">07</span>DIV</div>
+<div class="row"><span class="c">08</span>AND</div><div class="row"><span class="c">09</span>OR</div>
+<div class="row"><span class="c">0A</span>XOR</div><div class="row"><span class="c">0B</span>NOT</div>
+<div class="row"><span class="c">0C</span>INC</div><div class="row"><span class="c">0D</span>DEC</div>
 <div class="row"><span class="c">10</span>JMP</div><div class="row"><span class="c">11</span>CLR</div>
 <div class="row"><span class="c">12</span>DELAY</div><div class="row"><span class="c">13</span>SCRCLR</div>
 <div class="row"><span class="c">14</span>JZ</div><div class="row"><span class="c">15</span>JNZ</div>
-<div class="row"><span class="c">16-1D</span>SPX SPY ± SPSHOW SPHIDE</div>
+<div class="row"><span class="c">16-1B</span>SPX/SPY/±</div>
+<div class="row"><span class="c">1C</span>SPSHOW</div><div class="row"><span class="c">1D</span>SPHIDE</div>
 <div class="row"><span class="c">1E</span>SCROLL</div><div class="row"><span class="c">1F</span>HOME</div>
 <div class="row"><span class="c">20</span>CUR</div><div class="row"><span class="c">21</span>CHR</div>
 <div class="row"><span class="c">22</span>NL</div><div class="row"><span class="c">23</span>CLRLN</div>
 <div class="row"><span class="c">24</span>SCLR</div><div class="row"><span class="c">25</span>FILL</div>
-<div class="row"><span class="c">26-27</span>SHL SHR</div><div class="row"><span class="c">28</span>HALT</div>
-<div class="row"><span class="c">29</span>POKE</div><div class="row"><span class="c">2A</span>FONT</div>
-<div class="row"><span class="c">2B</span>STORER</div><div class="row"><span class="c">2C</span>STOREW</div>
-<div class="row"><span class="c">2D</span>JOY</div><div class="row"><span class="c">2E</span>PEEK</div>
-<div class="row"><span class="c">2F</span>STOREI</div><div class="row"><span class="c">30</span>POKER</div>
-<div class="row"><span class="c">31</span>RND</div><div class="row"><span class="c">32</span>SEED</div>
-<div class="hdr">NEW C-LIKE v6.0</div>
-<div class="row"><span class="c">33</span>CALL addr — call(RAM[DATA])</div>
-<div class="row"><span class="c">34</span>RET — return</div>
-<div class="row"><span class="c">35</span>NEG — B = -B</div>
-<div class="row"><span class="c">36</span>CMP — flags dari (B - C)</div>
-<div class="row"><span class="c">37</span>JLT addr</div>
-<div class="row"><span class="c">38</span>JGT addr</div>
-<div class="row"><span class="c">39</span>JEQ addr</div>
-<div class="row"><span class="c">3A</span>JNE addr</div>
-<div class="note">Format: <code>[OP, DATA, TAG, DEST]</code>. B = RAM[TAG], C = RAM[DATA].<br>Pola C: <code>CMP a b</code> lalu <code>JLT lbl</code> = <code>if(a&lt;b)goto lbl</code>. <code>CALL f</code>/<code>RET</code> = panggil fungsi.</div>
+<div class="row"><span class="c">26</span>SHL</div><div class="row"><span class="c">27</span>SHR</div>
+<div class="row"><span class="c">28</span>HALT</div><div class="row"><span class="c">29</span>POKE</div>
+<div class="row"><span class="c">2A</span>FONT</div><div class="row"><span class="c">2B</span>STORER</div>
+<div class="row"><span class="c">2C</span>STOREW</div><div class="row"><span class="c">2D</span>JOY</div>
+<div class="row"><span class="c">2E</span>PEEK</div><div class="row"><span class="c">2F</span>STOREI</div>
+<div class="row"><span class="c">30</span>POKER</div><div class="row"><span class="c">31</span>RND</div>
+<div class="row"><span class="c">32</span>SEED</div>
+<div class="hdr">OPCODE BARU (v6.0) · C-LIKE</div>
+<div class="row"><span class="c">33</span>CMP B C → flag Z/LT/GT</div>
+<div class="row"><span class="c">34</span>JLT addr</div>
+<div class="row"><span class="c">35</span>JGT addr</div>
+<div class="row"><span class="c">36</span>JEQ addr</div>
+<div class="row"><span class="c">37</span>JNE addr</div>
+<div class="row"><span class="c">38</span>CALL addr</div>
+<div class="row"><span class="c">39</span>RET</div>
+<div class="note"><b>Pola C:</b> <code>CMP a b</code> + <code>JLT L</code> = <code>if(a&lt;b)goto L</code>. <code>CALL f</code> / <code>RET</code> = fungsi. Call-stack 8-level.</div>
+<div class="hdr">FORMAT: [OP, DATA, TAG, DEST]</div>
+<div class="note">B = RAM[TAG], C = RAM[DATA]. Register umum di RAM[32..127]. Layar di RAM[0..31] (satu byte = satu sel karakter).</div>
 </div>
 </div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll=zoom · drag=pan · dblclick=fit · click switch</div>
+<div id="help">scroll = zoom · drag = pan · dblclick = fit · klik switch untuk interaksi</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
+
 <script>
-window.BUILTIN_PROJECTS={version:21,projects:[
+window.BUILTIN_PROJECTS={version:22,projects:[
 {id:"maze",name:"MAZE SCROLLER",description:"UP/DOWN scroll maze",storage:[
 [0,32],[1,32],[2,32],[3,32],[4,32],[5,32],[6,32],[7,32],
 [8,35],[9,35],[10,35],[11,35],[12,35],[13,35],[14,35],[15,32],
@@ -94,11 +104,11 @@ window.BUILTIN_PROJECTS={version:21,projects:[
 [0x01,64,0,19],[0x10,14,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-{id:"starfield",name:"STARFIELD",description:"Titik acak",program:[
+{id:"starfield",name:"STARFIELD",description:"Titik acak di layar",program:[
 [0x01,1,0,60],[0x01,31,0,63],[0x32,1,0,0],[0x31,0,0,62],[0x08,63,62,62],[0x01,46,0,61],[0x29,46,62,0],[0x12,1,0,0],[0x10,4,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-{id:"fireworks",name:"FIREWORKS",description:"Ledakan + SCLR",program:[
+{id:"fireworks",name:"FIREWORKS",description:"Ledakan bintang + SCLR",program:[
 [0x13,0,0,0],[0x01,31,0,63],[0x32,42,0,0],[0x01,0,0,64],
 [0x31,0,0,62],[0x08,63,62,62],[0x29,42,62,0],[0x0C,0,64,64],[0x05,10,64,65],[0x15,4,65,0],
 [0x12,8,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x10,4,0,0],
@@ -110,12 +120,11 @@ window.BUILTIN_PROJECTS={version:21,projects:[
 [0x04,61,60,60],[0x08,62,60,60],[0x16,60,0,0],[0x12,1,0,0],[0x10,5,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-{id:"storage-counter",name:"STORAGE COUNTER",description:"Counter persistent",program:[
-[0x13,0,0,0],[0x01,48,0,65],[0x01,9,0,66],[0x2B,0,0,64],
-[0x1F,0,0,0],[0x20,0,1,0],[0x04,65,64,67],[0x21,67,0,0],
-[0x12,4,0,0],[0x0C,0,64,64],[0x08,66,64,64],[0x2C,0,64,0],
-[0x1F,0,0,0],[0x10,5,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+{id:"joy-sprite",name:"JOY SPRITE",description:"Kendalikan sprite dengan joystick",program:[
+[0x13,0,0,0],[0x16,14,0,0],[0x17,7,0,0],[0x1C,0,0,0],
+[0x12,1,0,0],[0x10,3,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
 {id:"typewriter",name:"TYPEWRITER",description:"CHR demo",program:[
 [0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],
@@ -132,32 +141,34 @@ window.BUILTIN_PROJECTS={version:21,projects:[
 [0x12,3,0,0],[0x10,3,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-{id:"bold-walk",name:"BOLD WALK",description:"Bold marquee",program:[
-[0x13,0,0,0],[0x2A,1,0,0],[0x20,0,2,0],
-[0x1E,66,0,0],[0x1E,79,0,0],[0x1E,76,0,0],[0x1E,68,0,0],
-[0x1E,32,0,0],[0x1E,87,0,0],[0x1E,65,0,0],[0x1E,76,0,0],
-[0x1E,75,0,0],[0x1E,32,0,0],
-[0x12,3,0,0],[0x10,3,0,0],
+{id:"c-demo",name:"C-DEMO · FUNGSI + LOOP",description:"CALL/RET + CMP/JEQ: cetak ABCDEFGHIJ lewat fungsi",program:[
+[0x13,0,0,0],             // 0: SCRCLR
+[0x01,65,0,60],           // 1: R60 = 'A' (65)
+[0x01,0,0,61],            // 2: R61 = counter = 0
+[0x01,10,0,62],           // 3: R62 = limit = 10
+[0x01,0,0,50],            // 4: R50 = cursor pos = 0
+[0x33,62,61,0],           // 5: CMP  R61 vs R62  (B=RAM[61], C=RAM[62])
+[0x36,13,0,0],            // 6: JEQ  13 (done)
+[0x38,15,0,0],            // 7: CALL 15 (print_char)
+[0x0C,0,61,61],           // 8: INC R61
+[0x0C,0,60,60],           // 9: INC R60
+[0x10,5,0,0],             // 10: JMP 5
+[0x28,0,0,0],             // 11: HALT
+[0x28,0,0,0],             // 12: HALT (unused)
+[0x28,0,0,0],             // 13: HALT (done target)
+[0x00,0,0,0],             // 14: NOP
+[0x30,60,50,0],           // 15: POKER: RAM[RAM[50]] = RAM[60]  (tulis karakter ke cursor)
+[0x0C,0,50,50],           // 16: INC R50 (cursor++)
+[0x39,0,0,0],             // 17: RET
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"joy-sprite",name:"JOY SPRITE",description:"Sprite joystick",program:[
-[0x16,14,0,0],[0x17,7,0,0],[0x1C,0,0,0],[0x10,3,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"c-demo",name:"C-DEMO · CALL/CMP",description:"Fungsi + if + loop",program:[
-[0x13,0,0,0],[0x01,0,0,0],[0x01,1,0,1],[0x01,5,0,2],[0x01,0,0,60],
-[0x04,0,1,3],[0x02,0,1,0],[0x02,0,3,1],[0x33,15,0,0],
-[0x0D,0,2,2],[0x14,12,2,0],[0x10,5,0,0],[0x28,0,0,0],
-[0x00,0,0,0],[0x00,0,0,0],
-[0x01,0,1,0],[0x04,48,3,61],[0x21,61,0,0],[0x0C,0,60,60],[0x34,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]}
 ]};
 </script>
+
 <script>
 (function(){
 "use strict";
@@ -181,11 +192,11 @@ FONT[90]=[15,2,4,15];FONT[91]=[6,4,4,6];FONT[93]=[6,2,2,6];
 var FONT_BOLD={};
 for(var _k in FONT){var _g=FONT[_k],_b=[];for(var _r=0;_r<4;_r++){var _w=_g[_r];_b.push(_w|((_w<<1)&0xF));}FONT_BOLD[_k]=_b;}
 var SUPPORTED=Object.keys(FONT).map(Number);
-var SIZE_LED=22,SCR_W=32,SCR_H=16,CHAR_COLS=8,DISPLAY_CELLS=32;
+var SIZE_LED=22,SCR_W=32,SCR_H=16,CHAR_COLS=8,CHAR_ROWS=4,DISPLAY_CELLS=32;
 var RAM_SIZE=512,STORE_SIZE=128,QUEUE_START=128,QUEUE_SLOTS=64,ADDR_BITS=9,PTR_BITS=6;
 var CALL_DEPTH=8,CSP_BITS=3;
-var OP_NOP=0,OP_SET=1,OP_MOV=2,OP_ADD=4,OP_SUB=5,OP_MUL=6,OP_DIV=7,
-OP_AND=8,OP_OR=9,OP_XOR=10,OP_NOT=11,OP_INC=12,OP_DEC=13,
+var OP_NOP=0x00,OP_SET=0x01,OP_MOV=0x02,OP_ADD=0x04,OP_SUB=0x05,OP_MUL=0x06,OP_DIV=0x07,
+OP_AND=0x08,OP_OR=0x09,OP_XOR=0x0A,OP_NOT=0x0B,OP_INC=0x0C,OP_DEC=0x0D,
 OP_JMP=0x10,OP_CLR=0x11,OP_DELAY=0x12,OP_SCRCLR=0x13,OP_JZ=0x14,OP_JNZ=0x15,
 OP_SPX=0x16,OP_SPY=0x17,OP_SPXP=0x18,OP_SPXM=0x19,OP_SPYP=0x1A,OP_SPYM=0x1B,
 OP_SPSHOW=0x1C,OP_SPHIDE=0x1D,OP_SCROLL=0x1E,
@@ -194,14 +205,14 @@ OP_SCLR=0x24,OP_FILL=0x25,OP_SHL=0x26,OP_SHR=0x27,OP_HALT=0x28,OP_POKE=0x29,
 OP_FONT=0x2A,OP_STORER=0x2B,OP_STOREW=0x2C,
 OP_JOY=0x2D,OP_PEEK=0x2E,OP_STOREI=0x2F,OP_POKER=0x30,
 OP_RND=0x31,OP_SEED=0x32,
-OP_CALL=0x33,OP_RET=0x34,OP_NEG=0x35,OP_CMP=0x36,
-OP_JLT=0x37,OP_JGT=0x38,OP_JEQ=0x39,OP_JNE=0x3A;
+OP_CMP=0x33,OP_JLT=0x34,OP_JGT=0x35,OP_JEQ=0x36,OP_JNE=0x37,
+OP_CALL=0x38,OP_RET=0x39;
 var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,
 OP_NOT,OP_INC,OP_DEC,OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,
 OP_SPX,OP_SPY,OP_SPXP,OP_SPXM,OP_SPYP,OP_SPYM,OP_SPSHOW,OP_SPHIDE,OP_SCROLL,
 OP_HOME,OP_CUR,OP_CHR,OP_NL,OP_CLRLN,OP_SCLR,OP_FILL,OP_SHL,OP_SHR,OP_HALT,OP_POKE,
 OP_FONT,OP_STORER,OP_STOREW,OP_JOY,OP_PEEK,OP_STOREI,OP_POKER,OP_RND,OP_SEED,
-OP_CALL,OP_RET,OP_NEG,OP_CMP,OP_JLT,OP_JGT,OP_JEQ,OP_JNE];
+OP_CMP,OP_JLT,OP_JGT,OP_JEQ,OP_JNE,OP_CALL,OP_RET];
 var gates=[],sws=[],leds=[],latches=[],wires=[],sectionsData=[],frame43=null;
 var vp,lW_on,lW_off,lG,lL,lU,lS;
 var K0={v:0,x:0,y:0,virtual:true},K1={v:1,x:0,y:0,virtual:true};
@@ -280,10 +291,12 @@ function osc(pr,lb){var p=place(50,58);var s={v:0,o:N(0,0),px:p.x,py:p.y,label:l
 function led(inp,col,lb,sz){sz=sz||SIZE_LED;var p=place(sz,sz);var l={i:inp,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz};if(inp&&inp.x!==undefined&&!inp.virtual){var w={s:inp,l:l};l._w=w;wires.push(w);}leds.push(l);return l;}
 function ledPending(col,lb,sz){sz=sz||SIZE_LED;var p=place(sz,sz);var ph={v:0,x:p.x-2,y:p.y,virtual:true};var l={i:ph,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz,_ph:true,ph:ph};var w={s:ph,l:l};l._w=w;wires.push(w);leds.push(l);return l;}
 function rewireLed(l,newIn){if(l._w){l._w.s=newIn;l.i=newIn;return true;}return false;}
-function gateBody(t){
-switch(t){case "AND":return "M0,0 L14,0 A17,17 0 0 1 14,30 L0,30 Z";case "OR":return "M0,0 Q12,0 30,15 Q12,30 0,30 Q10,15 0,0 Z";case "NOT":return "M0,0 L30,15 L0,30 Z";case "XOR":return "M4,0 Q17,0 34,15 Q17,30 4,30 Q15,15 4,0 Z";}
-return "M0,0 L34,0 L34,30 L0,30 Z";
-}
+function gateBody(t){switch(t){
+case "AND":return "M0,0 L14,0 A17,17 0 0 1 14,30 L0,30 Z";
+case "OR":return "M0,0 Q12,0 30,15 Q12,30 0,30 Q10,15 0,0 Z";
+case "NOT":return "M0,0 L30,15 L0,30 Z";
+case "XOR":return "M4,0 Q17,0 34,15 Q17,30 4,30 Q15,15 4,0 Z";}
+return "M0,0 L34,0 L34,30 L0,30 Z";}
 function clearLayer(g){while(g.firstChild)g.removeChild(g.firstChild);}
 function renderSection(s){lS.appendChild(E("rect",{x:s.x,y:s.y,width:s.w,height:s.h,fill:"#fafafa",stroke:"#d4d4d4","stroke-width":0.5,"stroke-dasharray":"4 3"}));var t=E("text",{x:s.x+10,y:s.y+13,"font-size":10,"font-weight":700,fill:"#666"});t.textContent=s.title;lS.appendChild(t);}
 function renderGate(g){
@@ -383,8 +396,8 @@ function tickOsc(){for(var i=0;i<sws.length;i++){var s=sws[i];if(s.osc){s.t++;if
 function addN(a,b,cin,n){var c=cin||K0,s=[];for(var i=0;i<n;i++){var ab=XOR(a[i],b[i]);var sum=XOR(ab,c);var g1=AND(a[i],b[i]);var g2=AND(ab,c);c=OR(g1,g2);s.push(sum);}return {sum:s,carry:c};}
 function add8(a,b){return addN(a,b,K0,8).sum;}
 function sub8(a,b){var nb=[];for(var i=0;i<8;i++)nb.push(NOT(b[i]));return addN(a,nb,K1,8).sum;}
+function sub8full(a,b){var nb=[];for(var i=0;i<8;i++)nb.push(NOT(b[i]));return addN(a,nb,K1,8);}
 function subN(a,b,n){var nb=[];for(var i=0;i<n;i++)nb.push(NOT(b[i]));return addN(a,nb,K1,n).sum;}
-function subNfull(a,b,n){var nb=[];for(var i=0;i<n;i++)nb.push(NOT(b[i]));return addN(a,nb,K1,n);}
 function mul4low(a,b){var pp=[];for(var i=0;i<4;i++){pp[i]=[];for(var j=0;j<4;j++)pp[i][j]=AND(a[j],b[i]);}
 var s0=[pp[0][0],pp[0][1],pp[0][2],pp[0][3],K0,K0,K0,K0];
 var s1=add8(s0,[K0,pp[1][0],pp[1][1],pp[1][2],pp[1][3],K0,K0,K0]);
@@ -546,26 +559,25 @@ section("MUX · READ C (DATA)",48000,function(){for(b=0;b<8;b++){beginGroup(4000
 forceNewRow();
 section("CTRL · TAG ZERO",400,function(){var a=K0;for(b=0;b<8;b++)a=OR(a,srcB[b]);core.srcBZero=NOT(a);});
 
-// v6.0 CMP: flags Z, LT, GT from B - C
+// v6.0 CMP: flags Z, LT, GT computed from B - C via full-adder
 var flagZ=LAT(0),flagLT=LAT(0),flagGT=LAT(0);
 core.flagZ=flagZ;core.flagLT=flagLT;core.flagGT=flagGT;
-section("CTRL · CMP",1400,function(){
-var full=subNfull(srcB,srcC,8);
+section("CTRL · CMP FLAGS",1600,function(){
+var full=sub8full(srcB,srcC);
 var z=null;
 for(b=0;b<8;b++){var nz=NOT(full.sum[b]);z=(z===null)?nz:AND(z,nz);}
-var noBorrow=full.carry;
-var borrow=NOT(noBorrow);
-var gt=AND(noBorrow,NOT(z));
+var borrow=NOT(full.carry);
+var gt=AND(full.carry,NOT(z));
 var cp=AND(core.effRunEdge,opDec[OP_CMP]);
 setLat(flagZ,z,cp);
 setLat(flagLT,borrow,cp);
 setLat(flagGT,gt,cp);
 });
 
-// v6.0 CALL stack (8-deep × 6-bit PC)
+// v6.0 CALL stack: 8-deep × 6-bit PC, index by CSP (3-bit)
 core.callStack=[];
-section("CALL · STACK (8×6)",1200,function(){
-for(var s=0;s<CALL_DEPTH;s++){beginGroup(360);var e=[];for(b=0;b<PTR_BITS;b++)e.push(LAT(0));core.callStack.push(e);endGroup();}
+section("CALL · STACK 8×6",1200,function(){
+for(var s=0;s<CALL_DEPTH;s++){beginGroup(400);var e=[];for(b=0;b<PTR_BITS;b++)e.push(LAT(0));core.callStack.push(e);endGroup();}
 });
 core.csp=[];
 section("CALL · CSP (3)",300,function(){for(b=0;b<CSP_BITS;b++)core.csp.push(LAT(0));});
@@ -575,6 +587,7 @@ var rPulse=AND(core.effRunEdge,opDec[OP_RET]);
 var ptrNow=[];for(i=0;i<PTR_BITS;i++)ptrNow.push(core.ptr[i].o);
 var incOne=[K1];for(i=1;i<PTR_BITS;i++)incOne.push(K0);
 var incVal=addN(ptrNow,incOne,K0,PTR_BITS).sum;
+core.incVal=incVal;
 var cspBits=[];for(i=0;i<CSP_BITS;i++)cspBits.push(core.csp[i].o);
 var cspDec=makeDecoder(cspBits);
 var cspM1=subN(cspBits,[K1,K0,K0],CSP_BITS);
@@ -584,8 +597,7 @@ var retData=[];
 for(b=0;b<PTR_BITS;b++){var acc=null;for(var s=0;s<CALL_DEPTH;s++){var t=AND(cspM1Dec[s],core.callStack[s][b].o);acc=(acc===null)?t:OR(acc,t);}retData.push(acc);}
 core.retData=retData;
 var cspP1=addN(cspBits,[K1,K0,K0],K0,CSP_BITS).sum;
-var cspEn=OR(cPulse,rPulse);
-for(i=0;i<CSP_BITS;i++){var vp=AND(cPulse,cspP1[i]);var vm=AND(rPulse,cspM1[i]);setLat(core.csp[i],OR(vp,vm),cspEn);}
+for(i=0;i<CSP_BITS;i++){var vp=AND(cPulse,cspP1[i]);var vm=AND(rPulse,cspM1[i]);setLat(core.csp[i],OR(vp,vm),OR(cPulse,rPulse));}
 });
 
 var pokeDec;
@@ -608,7 +620,7 @@ section("POKER · WRITE",48000,function(){var pokerAct=AND(AND(core.effRunEdge,c
 core.halt=LAT(0);
 section("HALT · LATCH",600,function(){var haltSet=AND(AND(opDec[OP_HALT],core.effRunEdge),NOT(core.halt.o));var next=OR(haltSet,core.halt.o);setLat(core.halt,next,OR(haltSet,core.clrEdge));});
 
-// v6.0 PT UPDATE with new opcodes
+// v6.0 PT UPDATE: includes CALL/RET/JLT/JGT/JEQ/JNE
 section("QUEUE · PT UPDATE",4000,function(){
 var runEdge=core.effRunEdge;
 var jb=opDec[OP_JMP];
@@ -650,8 +662,12 @@ section("ALU · LOGIC",1400,function(){var aR=[],oR=[],xR=[],nR=[];for(b=0;b<8;b
 section("ALU · INC·DEC",1600,function(){addOp(OP_INC,add8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]));addOp(OP_DEC,sub8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]));});
 section("ALU · CLR",200,function(){addOp(OP_CLR,[K0,K0,K0,K0,K0,K0,K0,K0]);});
 section("ALU · SHL·SHR",1600,function(){var shl=[K0],shr=[K0];for(b=0;b<7;b++)shl.push(srcB[b]);for(b=1;b<8;b++)shr.push(srcB[b]);addOp(OP_SHL,shl);addOp(OP_SHR,shr);});
-section("ALU · NEG",800,function(){var nB=[];for(b=0;b<8;b++)nB.push(NOT(srcB[b]));addOp(OP_NEG,add8(nB,[K1,K0,K0,K0,K0,K0,K0,K0]));});
-section("ALU · INDIRECT",1000,function(){addOp(OP_JOY,joyByte.slice());addOp(OP_PEEK,peekRead.slice());addOp(OP_STOREI,storeiRead.slice());addOp(OP_STORER,storRead.slice());});
+section("ALU · INDIRECT",1000,function(){
+addOp(OP_JOY,joyByte.slice());
+addOp(OP_PEEK,peekRead.slice());
+addOp(OP_STOREI,storeiRead.slice());
+addOp(OP_STORER,storRead.slice());
+});
 section("ALU · RND",600,function(){var rr=[];for(b=0;b<8;b++)rr.push(core.rndReg[b].o);addOp(OP_RND,rr);});
 forceNewRow();
 section("OUTPUT MUX",5000,function(){
@@ -724,10 +740,10 @@ noWrite=OR(noWrite,opDec[OP_SCLR]);noWrite=OR(noWrite,opDec[OP_FILL]);
 noWrite=OR(noWrite,opDec[OP_HALT]);noWrite=OR(noWrite,opDec[OP_FONT]);
 noWrite=OR(noWrite,opDec[OP_STOREW]);noWrite=OR(noWrite,opDec[OP_POKER]);
 noWrite=OR(noWrite,opDec[OP_SEED]);
+noWrite=OR(noWrite,opDec[OP_CMP]);
+noWrite=OR(noWrite,opDec[OP_JLT]);noWrite=OR(noWrite,opDec[OP_JGT]);
+noWrite=OR(noWrite,opDec[OP_JEQ]);noWrite=OR(noWrite,opDec[OP_JNE]);
 noWrite=OR(noWrite,opDec[OP_CALL]);noWrite=OR(noWrite,opDec[OP_RET]);
-noWrite=OR(noWrite,opDec[OP_CMP]);noWrite=OR(noWrite,opDec[OP_JLT]);
-noWrite=OR(noWrite,opDec[OP_JGT]);noWrite=OR(noWrite,opDec[OP_JEQ]);
-noWrite=OR(noWrite,opDec[OP_JNE]);
 var doWrite=NOT(noWrite);
 var cellBit0=cCol[0].o;
 var cellBit1=cCol[1].o;
@@ -738,7 +754,14 @@ var cellBits=[cellBit0,cellBit1,cellBit2,cellBit3,cellBit4];
 var pokeAct=AND(runOk,opDec[OP_POKE]);
 var SPACE=[K0,K0,K0,K0,K0,K1,K0,K0];
 var rowMatchList=[];
-for(i=0;i<32;i++){var rsRow=(i>>3)&3;var rbRow=(i>>2)&1;var rs0=(rsRow&1)?cRow[0].o:NOT(cRow[0].o);var rs1=(rsRow&2)?cRow[1].o:NOT(cRow[1].o);var rowSmall=AND(rs0,rs1);var rowBig=(rbRow===1)?cRow[0].o:NOT(cRow[0].o);rowMatchList.push(OR(AND(nbig,rowSmall),AND(big,rowBig)));}
+for(i=0;i<32;i++){
+var rsRow=(i>>3)&3;var rbRow=(i>>2)&1;
+var rs0=(rsRow&1)?cRow[0].o:NOT(cRow[0].o);
+var rs1=(rsRow&2)?cRow[1].o:NOT(cRow[1].o);
+var rowSmall=AND(rs0,rs1);
+var rowBig=(rbRow===1)?cRow[0].o:NOT(cRow[0].o);
+rowMatchList.push(OR(AND(nbig,rowSmall),AND(big,rowBig)));
+}
 for(i=0;i<RAM_SIZE;i++){
 beginGroup(100);
 var wEn=AND(AND(wrPulse,destDec[i]),doWrite);
@@ -918,7 +941,7 @@ for(var a=0;a<STORE_SIZE;a++)for(var bb=0;bb<8;bb++)rewireLed(storeViewRows[7-bb
 forceNewRow();
 }
 
-var NOOP=[0x00,0x00,0x00,0x00];
+var NOOP=[0,0,0,0];
 function writeRamByte(arr,addr,val){if(addr<0||addr>=RAM_SIZE)return;for(var b=0;b<8;b++)latchReset(arr[addr][b],(val>>b)&1);}
 function writeStoreByte(addr,val){if(addr<0||addr>=STORE_SIZE)return;for(var b=0;b<8;b++)latchReset(core.STORE[addr][b],(val>>b)&1);}
 function clearMemory(){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);}
