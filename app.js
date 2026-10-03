@@ -54,29 +54,23 @@ label:lab,finish:fin
 };}
 
 /* ===================== PROJECTS ===================== */
-/* Registers 240..255 = free RAM (outside 240-byte screen area) */
 function buildCharSel(){
 var B=PB();
 var CX=240,TX=241,JY=242,PV=243,T1=244,T2=245,T3=246;
-var CR=247,CH=248;           // cell reg, char reg (for DRAWC)
-var TB=249;                  // textbuf 249..255 (7 slots)
+var CR=247,CH=248;
 B.SCRCLR();
-/* draw keys A..H at cells 10..17 (row 1 of screen) */
 for(var i=0;i<8;i++){
 B.SET(i,CH);
 B.SET(10+i,CR);
 B.DRAWC(CR,CH);
 }
-/* draw ENTER block at cell 18 */
 B.SET(40,CH);B.SET(18,CR);B.DRAWC(CR,CH);
-/* init text row (cells 20..27 = spaces) */
 for(var i=0;i<8;i++){
 B.SET(39,CH);B.SET(20+i,CR);B.DRAWC(CR,CH);
 }
 B.SET(0,CX);B.SET(0,TX);B.SET(0,PV);
 B.label("MAIN");
 B.JOY(JY);
-/* RIGHT (mask 8) */
 B.SET(8,T1);B.AND(JY,T1,T2);B.AND(PV,T1,T3);B.NOT(T3,T3);B.AND(T2,T3,T2);
 B.JZ(T2,"SKR");
 B.INC(CX,CX);
@@ -84,29 +78,23 @@ B.SET(9,T1);B.CMP(CX,T1);B.JEQ("WR");
 B.JMP("SKR");
 B.label("WR");B.SET(0,CX);
 B.label("SKR");
-/* LEFT (mask 4) */
 B.SET(4,T1);B.AND(JY,T1,T2);B.AND(PV,T1,T3);B.NOT(T3,T3);B.AND(T2,T3,T2);
 B.JZ(T2,"SKL");
 B.SET(0,T1);B.CMP(CX,T1);B.JEQ("SKL");
 B.DEC(CX,CX);
 B.label("SKL");
-/* POINT (mask 16) */
 B.SET(16,T1);B.AND(JY,T1,T2);B.AND(PV,T1,T3);B.NOT(T3,T3);B.AND(T2,T3,T2);
 B.JZ(T2,"SKP");
-/* if CX==8 => ENTER => clear text */
 B.SET(8,T1);B.CMP(CX,T1);B.JEQ("ENTER");
-/* else draw char CX at cell 20+TX */
-B.MOV(CX,CH);           // char = cur_x (0..7 -> A..H)
-B.ADD(TX,T1,T2);        // T2 = 20? need base
-B.SET(20,T1);B.ADD(TX,T1,T2);  // T2 = 20 + text_x
-B.MOV(T2,CR);           // cell = T2
+B.MOV(CX,CH);
+B.SET(20,T1);B.ADD(TX,T1,T2);
+B.MOV(T2,CR);
 B.DRAWC(CR,CH);
 B.INC(TX,TX);
 B.SET(8,T1);B.CMP(TX,T1);B.JNE("SKP");
 B.SET(0,TX);
 B.JMP("SKP");
 B.label("ENTER");
-/* clear text */
 for(var i=0;i<8;i++){
 B.SET(39,CH);B.SET(20+i,CR);B.DRAWC(CR,CH);
 }
@@ -214,9 +202,9 @@ B.SET(SCR_BYTES,LIM);
 B.label("L");B.SET(1,I);
 B.label("I");
 B.SET(1,T);B.SUB(T,I,T);
-B.MOV(T,L);  // L = RAM[I-1]
+B.MOV(T,L);
 B.SET(1,T);B.ADD(T,I,T);
-B.MOV(T,R);  // R = RAM[I+1]
+B.MOV(T,R);
 B.XOR(L,R,V);
 B.TIME(T);B.XOR(T,V,V);
 B.BYTE(V,I);
@@ -274,7 +262,6 @@ for(k=s.g0;k<s.g1;k++){var g=gates[k];g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
 for(k=s.s0;k<s.s1;k++){var q=sws[k];q.px+=dx;q.py+=dy;q.o.x+=dx;q.o.y+=dy;}
 for(k=s.l0;k<s.l1;k++){var l=leds[k];l.px+=dx;l.py+=dy;}
 for(k=s.lt0;k<s.lt1;k++){var lt=latches[k];lt.px+=dx;lt.py+=dy;lt.o.x+=dx;lt.o.y+=dy;}
-/* screen LEDs are not in leds[] — move manually for the SCREEN section */
 if(s.title==="SCREEN · GRID "+SCR_W+"×"+SCR_H){
 for(var r=0;r<SCR_H;r++)for(var c=0;c<SCR_W;c++){
 var led=screenLeds[r][c];led.px+=dx;led.py+=dy;}}
@@ -311,20 +298,45 @@ return{x:mnx,y:mny,w:mxx-mnx,h:mxy-mny};}
 
 /* ===================== SVG LAYERS ===================== */
 var vp=E("g",{});svg.appendChild(vp);
-var lS=E("g",{}),lWo=E("g",{}),lWn=E("g",{}),lG=E("g",{}),lL=E("g",{}),lU=E("g",{}),lScr=E("g",{});
+var lS=E("g",{}),lWo=E("g",{}),lWn=E("g",{}),lScr=E("g",{}),lG=E("g",{}),lL=E("g",{}),lU=E("g",{});
 vp.appendChild(lS);vp.appendChild(lWo);vp.appendChild(lWn);
-vp.appendChild(lScr);  /* screen under wires */
+vp.appendChild(lScr);
 vp.appendChild(lG);vp.appendChild(lL);vp.appendChild(lU);
 
-/* ===================== SCREEN PIXEL ELEMENTS ===================== */
-/* One <rect> per pixel; its fill is derived from the wired RAM latch node */
+/* =====================================================================
+   SCREEN PIXELS AS ROUND LEDS
+   Each LED: outer ring (dies/body) + inner fill (driven by RAM latch).
+   led.i is a direct reference to RAM[byte][bit].o — no JS forcing.
+   ===================================================================== */
 var pixEls=[];
+var LED_R = LED_SZ*0.52;   /* outer radius */
+var LED_RI = LED_SZ*0.32;  /* inner lit radius */
 function ensurePixelEls(){
 if(pixEls.length)return;
 for(var r=0;r<SCR_H;r++){pixEls.push([]);
-for(var c=0;c<SCR_W;c++){var led=screenLeds[r][c];
-var rc=E("rect",{x:led.px-LED_SZ/2,y:led.py-LED_SZ/2,width:LED_SZ,height:LED_SZ,fill:"#fff"});
-pixEls[r].push(rc);lScr.appendChild(rc);}}}
+for(var c=0;c<SCR_W;c++){
+var led=screenLeds[r][c];
+var g=E("g",{transform:"translate("+led.px+","+led.py+")"});
+/* LED body (outer ring) */
+g.appendChild(E("circle",{cx:0,cy:0,r:LED_R,fill:"#d8d8d8",stroke:"#555","stroke-width":0.5}));
+/* LED inner (driven) */
+var inner=E("circle",{cx:0,cy:0,r:LED_RI,fill:"#f4f4f4",stroke:"none"});
+g.appendChild(inner);
+lScr.appendChild(g);
+pixEls[r].push(inner);
+}}}
+
+/* Screen refresh: read wired latch node, update only on change */
+function refreshScreen(){
+for(var r=0;r<SCR_H;r++){
+for(var c=0;c<SCR_W;c++){
+var led=screenLeds[r][c];
+var on=led.i.v?1:0;
+if(led._lv!==on){
+led._lv=on;
+var el=pixEls[r][c];
+if(el)el.setAttribute("fill",on?"#ff2020":"#f4f4f4");
+}}}}
 
 /* ===================== RENDER ===================== */
 function clearLayer(g){while(g.firstChild)g.removeChild(g.firstChild);}
@@ -382,20 +394,6 @@ var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
 grp.appendChild(E("circle",{cx:0,cy:0,r:sz*0.4,fill:"#fff",stroke:"#222","stroke-width":1}));
 grp.appendChild(E("circle",{cx:0,cy:0,r:sz*0.22,fill:fill}));
 lL.appendChild(grp);}
-
-/* screen pixel refresh: reads wired node, updates only if changed */
-function refreshScreen(){
-var dirty=false;
-for(var r=0;r<SCR_H;r++){
-for(var c=0;c<SCR_W;c++){
-var led=screenLeds[r][c];
-var on=led.i.v?1:0;
-if(led._lv!==on){
-led._lv=on;
-var el=pixEls[r][c];
-if(el)el.setAttribute("fill",on?"#111":"#fff");
-dirty=true;}}}
-return dirty;}
 
 var _cachedRect=null,_cacheT=0;
 function getRect(){var n=performance.now();
@@ -505,9 +503,6 @@ document.getElementById("gcount").textContent=
 "· "+total.toLocaleString()+" gates · "+latches.length.toLocaleString()+" FFs";}
 
 /* ===================== PROJECT SELECT ===================== */
-function loadProject(p){CPU.loadProgram(p);
-for(var i=0;i<6;i++)CPU.simulate();}
-
 function initProj(){
 var box=document.getElementById("projSel");
 var dd=document.getElementById("projDropdown");
