@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v8.0</title><style>
+<title>CPU 64 v9.0</title><style>
 *{box-sizing:border-box}html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
 svg{display:block;width:100vw;height:100vh;background:#fff;touch-action:none;cursor:grab}svg.drag{cursor:grabbing}
 text{font-family:inherit;user-select:none;pointer-events:none}
@@ -17,37 +17,197 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 #zoomCtrl button:active{background:#333;color:#fff}
 #err{position:fixed;top:170px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;white-space:pre-wrap}
 </style></head><body>
-<div id="title">CPU 64 v8.0<small id="gcount"></small></div>
-<div id="hud">PTR=<b id="hudPTR">?</b> SP=<b id="hudSP">?</b> TMR=<b id="hudTMR">?</b> KBD=<b id="hudKBD">?</b><br>IR=<span class="ir" id="hudIR">----</span> <span id="hudMN">NOP</span></div>
+<div id="title">CPU 64 v9.0<small id="gcount"></small></div>
+<div id="hud">PTR=<b id="hudPTR">?</b> SP=<b id="hudSP">?</b> TMR=<b id="hudTMR">?</b> CUR=<b id="hudCUR">?</b><br>IR=<span class="ir" id="hudIR">----</span> <span id="hudMN">NOP</span></div>
 <div id="busLegend"><span class="sw" style="background:#4a9eff"></span>INPUT<br><span class="sw" style="background:#ffb020"></span>CONTROL<br><span class="sw" style="background:#a060ff"></span>STORAGE<br><span class="sw" style="background:#39d353"></span>ALU<br><span class="sw" style="background:#ff4d4d"></span>OUTPUT<br><span class="sw" style="background:#999"></span>OFF</div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll=zoom · drag=pan · dblclick=layar · ⟲=peta · joystick=nav keyboard</div>
+<div id="help">scroll=zoom · drag=pan · dblclick=layar · ⟲=peta · joystick+enter=control program</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <script>
-// ===== Character grid for on-screen keyboard (8x5 = 40 chars) =====
-window.KBD_CHARS=[
- "ABCDEFGH","IJKLMNOP","QRSTUVWX","YZ012345","6789.,!? "
+// ============================================================
+// 8x8 FONT ROM - 40 chars (A-Z, 0-9, ., ,, !, space)
+// Each char = 8 bytes, MSB = leftmost pixel
+// ============================================================
+window.FONT8=[
+0x00,0x70,0x88,0x88,0xF8,0x88,0x88,0x00, // A
+0x00,0xF0,0x88,0x88,0xF0,0x88,0x88,0xF0, // B
+0x00,0x78,0x80,0x80,0x80,0x80,0x80,0x78, // C
+0x00,0xF0,0x88,0x88,0x88,0x88,0x88,0xF0, // D
+0x00,0xF8,0x80,0x80,0xF0,0x80,0x80,0xF8, // E
+0x00,0xF8,0x80,0x80,0xF0,0x80,0x80,0x80, // F
+0x00,0x78,0x80,0x80,0xB8,0x88,0x88,0x78, // G
+0x00,0x88,0x88,0x88,0xF8,0x88,0x88,0x88, // H
+0x00,0xF8,0x20,0x20,0x20,0x20,0x20,0xF8, // I
+0x00,0x08,0x08,0x08,0x08,0x88,0x88,0x70, // J
+0x00,0x88,0x90,0xA0,0xC0,0xA0,0x90,0x88, // K
+0x00,0x80,0x80,0x80,0x80,0x80,0x80,0xF8, // L
+0x00,0x88,0xD8,0xA8,0xA8,0x88,0x88,0x88, // M
+0x00,0x88,0xC8,0xA8,0x98,0x88,0x88,0x88, // N
+0x00,0x70,0x88,0x88,0x88,0x88,0x88,0x70, // O
+0x00,0xF0,0x88,0x88,0xF0,0x80,0x80,0x80, // P
+0x00,0x70,0x88,0x88,0x88,0xA8,0x90,0x68, // Q
+0x00,0xF0,0x88,0x88,0xF0,0xA0,0x90,0x88, // R
+0x00,0x78,0x80,0x80,0x70,0x08,0x08,0xF0, // S
+0x00,0xF8,0x20,0x20,0x20,0x20,0x20,0x20, // T
+0x00,0x88,0x88,0x88,0x88,0x88,0x88,0x70, // U
+0x00,0x88,0x88,0x88,0x88,0x88,0x50,0x20, // V
+0x00,0x88,0x88,0x88,0xA8,0xA8,0xD8,0x88, // W
+0x00,0x88,0x88,0x50,0x20,0x50,0x88,0x88, // X
+0x00,0x88,0x88,0x88,0x70,0x20,0x20,0x20, // Y
+0x00,0xF8,0x08,0x10,0x20,0x40,0x80,0xF8, // Z
+0x00,0x70,0x88,0x98,0xA8,0xC8,0x88,0x70, // 0
+0x00,0x20,0x60,0x20,0x20,0x20,0x20,0x70, // 1
+0x00,0x70,0x88,0x08,0x30,0x40,0x80,0xF8, // 2
+0x00,0xF0,0x08,0x08,0x70,0x08,0x08,0xF0, // 3
+0x00,0x10,0x30,0x50,0x90,0xF8,0x10,0x10, // 4
+0x00,0xF8,0x80,0x80,0xF0,0x08,0x08,0xF0, // 5
+0x00,0x70,0x80,0x80,0xF0,0x88,0x88,0x70, // 6
+0x00,0xF8,0x08,0x10,0x20,0x40,0x40,0x40, // 7
+0x00,0x70,0x88,0x88,0x70,0x88,0x88,0x70, // 8
+0x00,0x70,0x88,0x88,0x78,0x08,0x08,0x70, // 9
+0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x00, // .
+0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x10, // ,
+0x00,0x20,0x20,0x20,0x20,0x20,0x00,0x20, // !
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00  // (space)
 ];
+window.KBD_CHARS=["ABCDEFGH","IJKLMNOP","QRSTUVWX","YZ012345","6789.,!? "];
 
-window.BUILTIN_PROJECTS={version:40,projects:[
+window.BUILTIN_PROJECTS={version:41,projects:[
+// ===== 1. CHAR SELECTOR (interactive text editor) =====
+{id:"charsel",name:"CHAR SELECTOR",description:"Interactive text editor - joystick + ENTER",program:[
+// R240=cursorX  R241=cursorY  R242=i  R243=charIdx  R244=x  R245=y
+// R246=tmp  R247=joy  R248=textCount  R249=tmp2  R250=tmp3
+[0x00,0x01,0,0,240],       // 0: SET 0 R240 (cursorX)
+[0x00,0x01,0,0,241],       // 1: SET 0 R241 (cursorY)
+[0x00,0x01,0,0,248],       // 2: SET 0 R248 (textCount)
+[0x00,0x13,0,0,0],         // 3: SCRCLR
+[0x00,0x01,3,0,0],         // 4: SET 3 COLOR (set colorReg=3? actually just bit0)
+// MAIN LOOP
+[0x00,0x01,0,0,242],       // 5: SET 0 R242 (i=0)
+// DRAW keyboard row (8 chars at cell row 2, cells 1..8)
+[0x00,0x02,241,0,243],     // 6: MOV R241 R243 (R243=cursorY)
+[0x00,0x21,0,243,243],     // 7: SHL R243 R243
+[0x00,0x21,0,243,243],     // 8: SHL
+[0x00,0x21,0,243,243],     // 9: SHL (R243=cursorY*8)
+[0x00,0x04,242,243,243],   // 10: ADD R243+R242 -> R243 (charIdx)
+[0x00,0x01,1,0,244],       // 11: SET 1 R244 (x=1)
+[0x00,0x04,242,244,244],   // 12: ADD R244+R242 (x=i+1)
+[0x00,0x01,2,0,245],       // 13: SET 2 R245 (y=2)
+[0x00,0x34,245,244,243],   // 14: DRAWC (dataR=245 y, tagR=244 x, charR=243)
+[0x00,0x0C,0,242,242],     // 15: INC R242
+[0x00,0x01,8,0,246],       // 16: SET 8 R246
+[0x00,0x20,246,242,0],     // 17: CMP R242,R246
+[0x00,0x16,0,0,6],         // 18: JLT -> 6
+// Cursor marker: draw a block at cursor pos (row 1) using DRAWC with char=0x27 ('space'? no, use a solid)
+// Simple: draw cursor as cell with charIdx=0 (A) in different position? Skip for now.
+// READ joystick
+[0x00,0x2C,0,0,247],       // 19: JOY R247
+// RIGHT
+[0x00,0x01,8,0,246],       // 20: mask=8
+[0x00,0x08,246,247,249],   // 21: R249 = R247 & R246
+[0x00,0x14,0,249,26],      // 22: JZ R249 -> 26
+[0x00,0x0C,0,240,240],     // 23: INC cursorX
+[0x00,0x20,246,240,0],     // 24: CMP cursorX,8
+[0x00,0x16,0,0,26],        // 25: JLT -> 26
+[0x00,0x01,0,0,240],       // 26: SET 0 cursorX (wrap)
+// LEFT (bit 4 of joy = 4)
+[0x00,0x01,4,0,246],       // 27: mask=4
+[0x00,0x08,246,247,249],   // 28: R249 = joy & 4
+[0x00,0x14,0,249,34],      // 29: JZ skip
+[0x00,0x0D,0,240,240],     // 30: DEC cursorX
+[0x00,0x20,246,240,0],     // 31: CMP cursorX,4
+[0x00,0x18,0,0,34],        // 32: JEQ -> 34 (skip if no underflow)
+// underflow happened (cursorX=255), set to 7
+[0x00,0x01,7,0,240],       // 33: SET 7 cursorX
+// DOWN (bit 2)
+[0x00,0x01,2,0,246],       // 34: mask=2
+[0x00,0x08,246,247,249],   // 35: R249 = joy & 2
+[0x00,0x14,0,249,41],      // 36: JZ skip
+[0x00,0x0C,0,241,241],     // 37: INC cursorY
+[0x00,0x01,5,0,246],       // 38: R246=5
+[0x00,0x20,246,241,0],     // 39: CMP cursorY,5
+[0x00,0x16,0,0,41],        // 40: JLT skip
+[0x00,0x01,0,0,241],       // 41: SET 0 cursorY
+// UP (bit 1)
+[0x00,0x01,1,0,246],       // 42: mask=1
+[0x00,0x08,246,247,249],   // 43: R249 = joy & 1
+[0x00,0x14,0,249,49],      // 44: JZ skip
+[0x00,0x0D,0,241,241],     // 45: DEC cursorY
+[0x00,0x20,246,241,0],     // 46: CMP cursorY,1
+[0x00,0x18,0,0,49],        // 47: JEQ skip
+[0x00,0x01,4,0,241],       // 48: SET 4 cursorY
+// ENTER (bit 5 of joy)
+[0x00,0x01,32,0,246],      // 49: mask=32
+[0x00,0x08,246,247,249],   // 50: R249 = joy & 32
+[0x00,0x14,0,249,57],      // 51: JZ skip
+// Draw selected char at (textCount+1, 0)
+[0x00,0x02,241,0,243],     // 52: R243=cursorY
+[0x00,0x21,0,243,243],     // 53: SHL
+[0x00,0x21,0,243,243],     // 54: SHL
+[0x00,0x21,0,243,243],     // 55: SHL
+[0x00,0x04,240,243,243],   // 56: R243 += cursorX -> charIdx
+[0x00,0x01,1,0,244],       // 57: R244 = 1
+[0x00,0x04,248,244,244],   // 58: R244 += textCount (x=1+count)
+[0x00,0x01,0,0,245],       // 59: R245 = 0 (y=0, text row)
+[0x00,0x34,245,244,243],   // 60: DRAWC
+[0x00,0x0C,0,248,248],     // 61: INC textCount
+[0x00,0x01,8,0,246],       // 62: R246=8
+[0x00,0x20,246,248,0],     // 63: CMP textCount,8
+[0x00,0x16,0,0,66],        // 64: JLT -> 66
+[0x00,0x01,0,0,248],       // 65: wrap textCount
+// Delay and loop
+[0x00,0x12,2,0,0],         // 66: DELAY 2
+[0x00,0x10,0,0,5],         // 67: JMP -> 5
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
+
+// ===== 2. SCROLLING TEXT =====
+{id:"scroll",name:"SCROLL DEMO",description:"Typed text scrolls left",program:[
+[0x00,0x01,240,0,240],
+[0x00,0x01,0,0,241],
+[0x00,0x30,0,0,242],
+[0x00,0x02,241,0,11],
+[0x00,0x04,242,241,242],
+[0x00,0x02,242,0,10],
+[0x00,0x2F,10,11,0],
+[0x00,0x0C,241,0,241],
+[0x00,0x20,241,240,0],
+[0x00,0x19,0,0,3],
+[0x00,0x12,2,0,0],
+[0x00,0x10,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
+
+// ===== 3. PLASMA =====
 {id:"plasma",name:"PLASMA STORM",description:"Animated plasma pattern",program:[
-[0x00,0x01,240,0,240],   // R240=240 (end)
-[0x00,0x30,0,0,241],     // R241 = TIME
-[0x00,0x01,0,0,242],     // R242 = addr
-[0x00,0x04,242,241,243], // R243 = addr + time
-[0x00,0x04,243,242,243], // R243 = R243 + addr (mix)
-[0x00,0x0A,243,241,243], // R243 ^= time
-[0x00,0x02,243,0,11],    // R11 (data) = R243
-[0x00,0x02,242,0,10],    // R10 (addr) = R242
-[0x00,0x2F,10,11,0],     // RAM[RAM[10]] = RAM[11]
-[0x00,0x0C,242,0,242],   // INC R242
-[0x00,0x20,242,240,0],   // CMP R242, 240
-[0x00,0x19,0,0,2],       // JNE back
-[0x00,0x12,3,0,0],       // DELAY 3
-[0x00,0x10,0,0,1],       // JMP 1
+[0x00,0x01,240,0,240],
+[0x00,0x30,0,0,241],
+[0x00,0x01,0,0,242],
+[0x00,0x04,242,241,243],
+[0x00,0x04,243,242,243],
+[0x00,0x0A,243,241,243],
+[0x00,0x21,243,0,243],
+[0x00,0x0A,243,242,243],
+[0x00,0x02,243,0,11],
+[0x00,0x02,242,0,10],
+[0x00,0x2F,10,11,0],
+[0x00,0x0C,242,0,242],
+[0x00,0x20,242,240,0],
+[0x00,0x19,0,0,3],
+[0x00,0x12,3,0,0],
+[0x00,0x10,0,0,1],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
@@ -55,24 +215,24 @@ window.BUILTIN_PROJECTS={version:40,projects:[
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
 
-{id:"starfield",name:"STARFIELD",description:"Hyperspace stars",program:[
-[0x00,0x30,0,0,241],     // R241 = TIME
-[0x00,0x01,0,0,242],     // R242 = 0
-[0x00,0x01,240,0,240],   // R240 = 240
-[0x00,0x2A,0,0,243],     // R243 = RND
-[0x00,0x04,242,243,243], // R243 += addr
-[0x00,0x0A,243,241,243], // R243 ^= time
-[0x00,0x08,243,243,243], // R243 &= R243 (noop-ish)
-[0x00,0x0A,243,241,244], // R244 = R243 ^ time
-[0x00,0x0A,244,242,244], // R244 ^= addr
-[0x00,0x02,244,0,11],    // R11 = R244
-[0x00,0x02,242,0,10],    // R10 = R242
-[0x00,0x2F,10,11,0],     // RAM[addr] = value
-[0x00,0x0C,242,0,242],   // INC addr
-[0x00,0x20,242,240,0],   // CMP
-[0x00,0x19,0,0,3],       // JNE back
-[0x00,0x12,1,0,0],       // DELAY
-[0x00,0x10,0,0,0],       // JMP
+// ===== 4. STARFIELD =====
+{id:"starfield",name:"HYPERSPACE",description:"Warp star streaks",program:[
+[0x00,0x01,240,0,240],
+[0x00,0x01,0,0,242],
+[0x00,0x2A,0,0,243],
+[0x00,0x30,0,0,241],
+[0x00,0x04,242,243,243],
+[0x00,0x0A,243,241,243],
+[0x00,0x21,243,0,243],
+[0x00,0x04,243,241,244],
+[0x00,0x02,244,0,11],
+[0x00,0x02,242,0,10],
+[0x00,0x2F,10,11,0],
+[0x00,0x0C,242,0,242],
+[0x00,0x20,242,240,0],
+[0x00,0x19,0,0,3],
+[0x00,0x12,1,0,0],
+[0x00,0x10,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
@@ -80,22 +240,23 @@ window.BUILTIN_PROJECTS={version:40,projects:[
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
 
-{id:"moire",name:"MOIRE",description:"Interference pattern",program:[
-[0x00,0x01,240,0,240],   // end
-[0x00,0x30,0,0,241],     // time
-[0x00,0x01,0,0,242],     // addr
-[0x00,0x0A,242,241,243], // addr ^ time
-[0x00,0x21,243,0,243],   // SHL
-[0x00,0x21,243,0,243],   // SHL
-[0x00,0x0A,243,242,243], // ^ addr
-[0x00,0x02,243,0,11],    // val
-[0x00,0x02,242,0,10],    // addr
-[0x00,0x2F,10,11,0],     // write
-[0x00,0x0C,242,0,242],   // inc
-[0x00,0x20,242,240,0],   // cmp
-[0x00,0x19,0,0,3],       // jne
-[0x00,0x12,2,0,0],       // delay
-[0x00,0x10,0,0,1],       // jmp
+// ===== 5. MOIRE =====
+{id:"moire",name:"MOIRE",description:"Interference ripples",program:[
+[0x00,0x01,240,0,240],
+[0x00,0x30,0,0,241],
+[0x00,0x01,0,0,242],
+[0x00,0x0A,242,241,243],
+[0x00,0x21,243,0,243],
+[0x00,0x21,243,0,243],
+[0x00,0x0A,243,242,243],
+[0x00,0x02,243,0,11],
+[0x00,0x02,242,0,10],
+[0x00,0x2F,10,11,0],
+[0x00,0x0C,242,0,242],
+[0x00,0x20,242,240,0],
+[0x00,0x19,0,0,3],
+[0x00,0x12,2,0,0],
+[0x00,0x10,0,0,1],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
@@ -103,14 +264,15 @@ window.BUILTIN_PROJECTS={version:40,projects:[
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
 
-{id:"mandel",name:"MANDELBROT",description:"Fractal scanline",program:[
-[0x00,0x01,240,0,240],   // end
-[0x00,0x30,0,0,241],     // time
-[0x00,0x01,0,0,242],     // addr
-[0x00,0x0A,242,241,243], // mix
+// ===== 6. MANDELBROT =====
+{id:"mandel",name:"MANDELBROT",description:"Fractal scanner",program:[
+[0x00,0x01,240,0,240],
+[0x00,0x30,0,0,241],
+[0x00,0x01,0,0,242],
+[0x00,0x0A,242,241,243],
 [0x00,0x04,243,241,243],
 [0x00,0x06,243,242,243],
-[0x00,0x22,243,0,243],   // SHR
+[0x00,0x22,243,0,243],
 [0x00,0x0A,243,241,243],
 [0x00,0x02,243,0,11],
 [0x00,0x02,242,0,10],
@@ -127,26 +289,25 @@ window.BUILTIN_PROJECTS={version:40,projects:[
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
 
-{id:"turing",name:"TURING TAPE",description:"Rule 90 cellular automaton",program:[
-// Simple 1D CA: each byte = new state from neighbors
-[0x00,0x01,240,0,240],   // end
-[0x00,0x01,0,0,242],     // addr
-[0x00,0x0C,242,0,242],   // addr=1 (skip byte 0)
-[0x00,0x02,242,0,243],   // R243 = RAM[addr] (current)
+// ===== 7. CELLULAR AUTOMATON =====
+{id:"turing",name:"RULE 90",description:"Cellular automaton",program:[
+[0x00,0x01,240,0,240],
+[0x00,0x01,1,0,242],
+[0x00,0x02,242,0,243],
 [0x00,0x01,1,0,244],
-[0x00,0x05,242,244,245], // R245 = addr-1
-[0x00,0x02,245,0,246],   // R246 = RAM[addr-1]
-[0x00,0x04,242,244,247], // R247 = addr+1
-[0x00,0x02,247,0,248],   // R248 = RAM[addr+1]
-[0x00,0x0A,246,248,249], // R249 = L XOR R
-[0x00,0x22,243,0,243],   // R243 >>= 1
-[0x00,0x0A,243,249,243], // R243 ^= (L XOR R)
-[0x00,0x02,243,0,11],    // R11 = R243
-[0x00,0x02,242,0,10],    // R10 = R242
-[0x00,0x2F,10,11,0],     // write back
+[0x00,0x05,242,244,245],
+[0x00,0x02,245,0,246],
+[0x00,0x04,242,244,247],
+[0x00,0x02,247,0,248],
+[0x00,0x0A,246,248,249],
+[0x00,0x22,243,0,243],
+[0x00,0x0A,243,249,243],
+[0x00,0x02,243,0,11],
+[0x00,0x02,242,0,10],
+[0x00,0x2F,10,11,0],
 [0x00,0x0C,242,0,242],
 [0x00,0x20,242,240,0],
-[0x00,0x16,0,0,3],       // JLT
+[0x00,0x16,0,0,3],
 [0x00,0x12,2,0,0],
 [0x00,0x10,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
@@ -156,39 +317,17 @@ window.BUILTIN_PROJECTS={version:40,projects:[
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
 
-{id:"sorter",name:"SORT VISUALIZER",description:"Animated bit shuffle",program:[
+// ===== 8. LAVA =====
+{id:"lava",name:"LAVA LAMP",description:"Smooth heat flow",program:[
 [0x00,0x01,240,0,240],
 [0x00,0x30,0,0,241],
 [0x00,0x01,0,0,242],
-[0x00,0x04,242,241,243], // mix
-[0x00,0x21,243,0,243],   // SHL
-[0x00,0x0A,243,242,243], // XOR
-[0x00,0x0A,243,241,244], // XOR time
-[0x00,0x02,244,0,11],
-[0x00,0x02,242,0,10],
-[0x00,0x2F,10,11,0],
-[0x00,0x0C,242,0,242],
-[0x00,0x20,242,240,0],
-[0x00,0x19,0,0,3],
-[0x00,0x12,2,0,0],
-[0x00,0x10,0,0,1],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
-
-{id:"lava",name:"LAVA LAMP",description:"Smooth flowing gradient",program:[
-[0x00,0x01,240,0,240],
-[0x00,0x30,0,0,241],
-[0x00,0x01,0,0,242],
-[0x00,0x02,241,0,243],   // R243 = RAM[time] (value at time addr)
-[0x00,0x04,242,241,244], // addr + time
-[0x00,0x08,244,243,244], // & time value
-[0x00,0x0A,244,242,244], // ^ addr
-[0x00,0x22,244,0,245],   // SHR
-[0x00,0x04,244,245,244], // ADD
+[0x00,0x02,241,0,243],
+[0x00,0x04,242,241,244],
+[0x00,0x08,244,243,244],
+[0x00,0x0A,244,242,244],
+[0x00,0x22,244,0,245],
+[0x00,0x04,244,245,244],
 [0x00,0x02,244,0,11],
 [0x00,0x02,242,0,10],
 [0x00,0x2F,10,11,0],
@@ -204,21 +343,20 @@ window.BUILTIN_PROJECTS={version:40,projects:[
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
 
+// ===== 9. BIT MATRIX =====
 {id:"matrix",name:"BIT MATRIX",description:"Digital rain",program:[
-[0x00,0x2A,0,0,241],     // R241 = RND
-[0x00,0x08,241,242,241], // & mask 0x1F
-[0x00,0x04,241,240,241], // + base
-[0x00,0x2A,0,0,243],     // random value
-[0x00,0x02,243,0,11],
+[0x00,0x01,31,0,242],
+[0x00,0x01,0,0,240],
+[0x00,0x01,240,0,243],
+[0x00,0x2A,0,0,241],
+[0x00,0x08,242,241,241],
+[0x00,0x04,241,240,241],
+[0x00,0x2A,0,0,244],
+[0x00,0x02,244,0,11],
 [0x00,0x02,241,0,10],
 [0x00,0x2F,10,11,0],
 [0x00,0x12,1,0,0],
 [0x00,0x10,0,0,0],
-[0x00,0x01,240,0,242],   // R242=240 (end)
-[0x00,0x01,0,0,240],     // R240 = 0 (base)
-[0x00,0x01,31,0,242],    // R242=31 (mask)
-[0x00,0x13,0,0,0],       // SCRCLR
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
@@ -226,14 +364,14 @@ window.BUILTIN_PROJECTS={version:40,projects:[
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
 
-{id:"testpattern",name:"TEST PATTERN",description:"SMPTE-style bars",program:[
+// ===== 10. TEST PATTERN =====
+{id:"testpat",name:"TEST PATTERN",description:"SMPTE bars + text",program:[
 [0x00,0x01,240,0,240],
 [0x00,0x01,0,0,242],
-// addr, value = addr ^ (addr>>4) * something
 [0x00,0x02,242,0,243],
-[0x00,0x22,243,0,244],   // SHR 4
-[0x00,0x0A,243,244,243], // XOR
-[0x00,0x0C,243,0,243],   // +1
+[0x00,0x22,243,0,244],
+[0x00,0x0A,243,244,243],
+[0x00,0x0C,243,0,243],
 [0x00,0x02,243,0,11],
 [0x00,0x02,242,0,10],
 [0x00,0x2F,10,11,0],
@@ -242,51 +380,6 @@ window.BUILTIN_PROJECTS={version:40,projects:[
 [0x00,0x19,0,0,3],
 [0x00,0x12,2,0,0],
 [0x00,0x10,0,0,1],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
-
-{id:"interference",name:"INTERFERENCE",description:"Wave collision",program:[
-[0x00,0x01,240,0,240],
-[0x00,0x30,0,0,241],
-[0x00,0x01,0,0,242],
-[0x00,0x0A,242,241,243],
-[0x00,0x0A,243,242,244], // A ^ (A^t) = t
-[0x00,0x04,244,241,244], // t + t = 2t
-[0x00,0x0A,244,242,245], // 2t ^ A
-[0x00,0x21,245,0,245],   // SHL
-[0x00,0x0A,245,243,245], // combine
-[0x00,0x02,245,0,11],
-[0x00,0x02,242,0,10],
-[0x00,0x2F,10,11,0],
-[0x00,0x0C,242,0,242],
-[0x00,0x20,242,240,0],
-[0x00,0x19,0,0,3],
-[0x00,0x12,2,0,0],
-[0x00,0x10,0,0,1],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
-[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
-
-{id:"keytest",name:"TEXT MODE",description:"Type with joystick",program:[
-[0x00,0x13,0,0,0],       // SCRCLR
-[0x00,0x01,0,0,242],     // R242 = 0 (byte addr)
-[0x00,0x2C,0,0,241],     // R241 = JOY
-[0x00,0x01,0,0,11],      // R11 = 0
-[0x00,0x08,241,242,240], // R240 = joy & (something) - just show joy value
-[0x00,0x02,240,0,11],    // R11 = R240
-[0x00,0x01,0,0,10],
-[0x00,0x2F,10,11,0],     // RAM[0] = value
-[0x00,0x12,2,0,0],
-[0x00,0x10,0,0,2],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
 [0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
@@ -303,10 +396,11 @@ function E(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribu
 function showErr(m){var el=document.getElementById("err");el.style.display="block";el.textContent="ERROR: "+m;console.error(m);}
 window.addEventListener("error",function(e){showErr(e.message+" @"+e.lineno);});
 
-// ===== CORE CONFIG =====
-var SCR_W=80,SCR_H=24,LED_SZ=6,SCR_BYTES=Math.ceil(SCR_W*SCR_H/8); // 240 bytes
-var RAM_SIZE=1024,STORE_SIZE=0,QUEUE_SLOTS=64,PTR_BITS=6,STACK_DEPTH=16,SP_BITS=4;
-var KBD_ROWS=5,KBD_COLS=8;
+// ===== CONFIG =====
+var SCR_W=80,SCR_H=45,LED_SZ=4;
+var CELL_COLS=10,CELL_ROWS=6,CELL_SZ=8;
+var SCR_BYTES=CELL_COLS*CELL_ROWS*CELL_SZ; // 480
+var RAM_SIZE=1024,QUEUE_SLOTS=128,PTR_BITS=7,STACK_DEPTH=16,SP_BITS=4;
 
 var OP_NOP=0x0000,OP_SET=0x0001,OP_MOV=0x0002,OP_ADD=0x0004,OP_SUB=0x0005,OP_MUL=0x0006,OP_DIV=0x0007,
 OP_AND=0x0008,OP_OR=0x0009,OP_XOR=0x000A,OP_NOT=0x000B,OP_INC=0x000C,OP_DEC=0x000D,
@@ -315,11 +409,12 @@ OP_JLT=0x0016,OP_JGT=0x0017,OP_JEQ=0x0018,OP_JNE=0x0019,
 OP_CMP=0x0020,OP_SHL=0x0021,OP_SHR=0x0022,OP_HALT=0x0023,
 OP_RND=0x002A,OP_SEED=0x002B,OP_JOY=0x002C,
 OP_CHR=0x002E,OP_BYTE=0x002F,OP_TIME=0x0030,
-OP_KBD=0x0031,OP_TXT=0x0032,
+OP_ENTER=0x0033,OP_DRAWC=0x0034,OP_COLOR=0x0035,
 OP_PUSH=0x0100,OP_POP=0x0101,OP_DUP=0x0102,OP_SWAP=0x0103;
 var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,OP_NOT,OP_INC,OP_DEC,
 OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,OP_JLT,OP_JGT,OP_JEQ,OP_JNE,
-OP_CMP,OP_SHL,OP_SHR,OP_HALT,OP_RND,OP_SEED,OP_JOY,OP_CHR,OP_BYTE,OP_TIME,OP_KBD,OP_TXT,OP_PUSH,OP_POP,OP_DUP,OP_SWAP];
+OP_CMP,OP_SHL,OP_SHR,OP_HALT,OP_RND,OP_SEED,OP_JOY,OP_CHR,OP_BYTE,OP_TIME,OP_ENTER,OP_DRAWC,OP_COLOR,
+OP_PUSH,OP_POP,OP_DUP,OP_SWAP];
 var MNEMONICS={};MNEMONICS[OP_NOP]="NOP";MNEMONICS[OP_SET]="SET";MNEMONICS[OP_MOV]="MOV";MNEMONICS[OP_ADD]="ADD";
 MNEMONICS[OP_SUB]="SUB";MNEMONICS[OP_MUL]="MUL";MNEMONICS[OP_DIV]="DIV";MNEMONICS[OP_AND]="AND";MNEMONICS[OP_OR]="OR";
 MNEMONICS[OP_XOR]="XOR";MNEMONICS[OP_NOT]="NOT";MNEMONICS[OP_INC]="INC";MNEMONICS[OP_DEC]="DEC";MNEMONICS[OP_JMP]="JMP";
@@ -327,18 +422,17 @@ MNEMONICS[OP_CLR]="CLR";MNEMONICS[OP_DELAY]="DELAY";MNEMONICS[OP_SCRCLR]="SCRCLR
 MNEMONICS[OP_JNZ]="JNZ";MNEMONICS[OP_JLT]="JLT";MNEMONICS[OP_JGT]="JGT";MNEMONICS[OP_JEQ]="JEQ";MNEMONICS[OP_JNE]="JNE";
 MNEMONICS[OP_CMP]="CMP";MNEMONICS[OP_SHL]="SHL";MNEMONICS[OP_SHR]="SHR";MNEMONICS[OP_HALT]="HALT";
 MNEMONICS[OP_RND]="RND";MNEMONICS[OP_SEED]="SEED";MNEMONICS[OP_JOY]="JOY";MNEMONICS[OP_CHR]="CHR";MNEMONICS[OP_BYTE]="BYTE";
-MNEMONICS[OP_TIME]="TIME";MNEMONICS[OP_KBD]="KBD";MNEMONICS[OP_TXT]="TXT";MNEMONICS[OP_PUSH]="PUSH";MNEMONICS[OP_POP]="POP";MNEMONICS[OP_DUP]="DUP";MNEMONICS[OP_SWAP]="SWAP";
+MNEMONICS[OP_TIME]="TIME";MNEMONICS[OP_ENTER]="ENTER";MNEMONICS[OP_DRAWC]="DRAWC";MNEMONICS[OP_COLOR]="COLOR";
+MNEMONICS[OP_PUSH]="PUSH";MNEMONICS[OP_POP]="POP";MNEMONICS[OP_DUP]="DUP";MNEMONICS[OP_SWAP]="SWAP";
 
 var gates=[],sws=[],leds=[],latches=[],wires=[],sectionsData=[],frame43=null;
 var vp,lW_on,lW_off,lG,lL,lU,lS;
 var K0={v:0,x:0,y:0,virtual:true},K1={v:1,x:0,y:0,virtual:true};
 var groupStack=[],GAPX=4,GAPY=4,jseed=7,core={};
 var _curSect="";
-var hwTimerJS=0;
 function jr(){jseed=(jseed*1103515245+12345)&0x7fffffff;return jseed/0x7fffffff;}
 function reset(){while(svg.firstChild)svg.removeChild(svg.firstChild);
 gates=[];sws=[];leds=[];latches=[];wires=[];sectionsData=[];frame43=null;jseed=7;core={};
-hwTimerJS=0;
 groupStack=[{x:20,y:80,rowH:0,maxW:60000,maxXUsed:0,maxYUsed:0,gStart:0,sStart:0,lStart:0,ltStart:0}];
 vp=E("g",{});svg.appendChild(vp);lS=E("g",{});
 lW_off=E("g",{});lW_on=E("g",{});
@@ -359,10 +453,10 @@ for(i=f.ltStart;i<latches.length;i++){var lt=latches[i];lt.px+=dx;lt.py+=dy;}}
 function forceNewRow(){var f=groupStack[0];if(!f)return;f.x=0;f.y+=f.rowH+30;f.rowH=0;}
 function sectionColor(title){
 if(/^INPUT/.test(title)) return "#4a9eff";
-if(/^(STORAGE|QUEUE|STACK|RAM|SCREEN)/.test(title)) return "#a060ff";
+if(/^(STORAGE|QUEUE|STACK|RAM|SCREEN|FONT)/.test(title)) return "#a060ff";
 if(/^(FETCH|CTRL|MUX|INDIRECT)/.test(title)) return "#ffb020";
 if(/^ALU/.test(title)) return "#39d353";
-if(/^(OUTPUT|POP|HALT|JOY|RND|HW|KBD|TEXT)/.test(title)) return "#ff4d4d";
+if(/^(OUTPUT|POP|HALT|JOY|RND|HW|KBD|TEXT|ENTER)/.test(title)) return "#ff4d4d";
 return "#666";}
 function section(title,mw,fn){_curSect=title;
 var g0=gates.length,s0=sws.length,l0=leds.length,lt0=latches.length;
@@ -421,13 +515,13 @@ grp.appendChild(E("line",{x1:w,y1:23,x2:w+12,y2:23,stroke:"#222","stroke-width":
 if(s.label){var t=E("text",{x:w/2,y:h+11,"text-anchor":"middle","font-size":8,"font-weight":700,fill:"#222"});t.textContent=s.label;grp.appendChild(t);}
 if(!s.osc){var hit=E("rect",{x:0,y:0,width:w,height:h,fill:"transparent",cursor:"pointer",class:"swhit"});grp.appendChild(hit);
 hit.addEventListener("pointerdown",function(ev){ev.stopPropagation();ev.preventDefault();s.v=s.v?0:1;
-if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT"||s.label==="POINT")){setTimeout(function(){s.v=0;},250);}});}
+if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT"||s.label==="POINT"||s.label==="ENTER")){setTimeout(function(){s.v=0;},250);}});}
 lU.appendChild(grp);}
 function renderLed(l){var sz=l.sz||LED_SZ;var isPixel=(l.forceColor!==undefined);
 var on=isPixel?(l.forceV||0):l.i.v;var fill=isPixel?(on?l.forceColor:"#fff"):(on?l.c:"#e8e8e8");
 var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
 if(isPixel){var side=sz+GAPX;
-grp.appendChild(E("rect",{x:-side/2,y:-side/2,width:side,height:side,fill:fill,stroke:"#ddd","stroke-width":0.4}));}
+grp.appendChild(E("rect",{x:-side/2,y:-side/2,width:side,height:side,fill:fill,stroke:"#ddd","stroke-width":0.3}));}
 else{var rO=sz*0.4,rI=sz*0.22;grp.appendChild(E("circle",{cx:0,cy:0,r:rO,fill:"#fff",stroke:"#222","stroke-width":1}));grp.appendChild(E("circle",{cx:0,cy:0,r:rI,fill:fill}));}
 lL.appendChild(grp);}
 function busColor(sect){
@@ -435,8 +529,8 @@ if(!sect) return "#888";
 if(/^INPUT/.test(sect)) return "#4a9eff";
 if(/^ALU/.test(sect)) return "#39d353";
 if(/^(FETCH|MUX|CTRL|INDIRECT)/.test(sect)) return "#ffb020";
-if(/^(STORAGE|QUEUE|STACK|RAM|SCREEN)/.test(sect)) return "#a060ff";
-if(/^(OUTPUT|POP|HALT|JOY|RND|HW|KBD|TEXT)/.test(sect)) return "#ff4d4d";
+if(/^(STORAGE|QUEUE|STACK|RAM|SCREEN|FONT)/.test(sect)) return "#a060ff";
+if(/^(OUTPUT|POP|HALT|JOY|RND|HW|KBD|TEXT|ENTER)/.test(sect)) return "#ff4d4d";
 return "#888";}
 function pathFor(sx,sy,dx,dy,mx,simple){if(simple)return "M"+sx+","+sy+"L"+dx+","+dy;
 if(Math.abs(sy-dy)<3)return "M"+sx+","+sy+"H"+dx;
@@ -504,6 +598,8 @@ function eqN(bits,val,n){var acc=null;for(var i=0;i<n;i++){var b=(val>>i)&1;var 
 function makeDecoder(bits){var n=bits.length;if(n===0)return[K1];if(n===1)return[NOT(bits[0]),bits[0]];var half=n>>1;var low=makeDecoder(bits.slice(0,half));var high=makeDecoder(bits.slice(half));var out=[];var lm=(1<<half)-1;for(var i=0;i<(1<<n);i++)out.push(AND(high[i>>half],low[i&lm]));return out;}
 function decodeOps(obHi,obLo){var hi={},lo={};for(var i=0;i<256;i++){hi[i]=eqN(obHi,i,8);lo[i]=eqN(obLo,i,8);}
 var d={};for(var i=0;i<ALL_OPS.length;i++){var code=ALL_OPS[i];d[code]=AND(hi[(code>>8)&0xFF],lo[code&0xFF]);}return d;}
+function bitShift(bits,n,dir){var out=[];if(dir>0){for(var i=0;i<8;i++)out.push(i<n?K0:bits[i-n]);}
+else{for(var i=0;i<8;i++)out.push(i>=8-n?K0:bits[i+n]);}return out;}
 
 function buildFrontend(){var OP_HI=[],OP_LO=[],D=[],T=[],A=[],i;
 section("INPUT · OP_HI",920,function(){for(i=7;i>=0;i--)OP_HI[i]=sw("H"+i);});
@@ -520,7 +616,7 @@ forceNewRow();
 core.hwTimer=[];
 section("HW · TIMER 8-bit",900,function(){for(i=0;i<8;i++)core.hwTimer.push(LAT(0));});}
 
-function buildJoystick(){var bw=50,bh=58,g=6,gridW=3*bw+2*g,gridH=3*bh+2*g;
+function buildJoystick(){var bw=50,bh=58,g=6,gridW=4*bw+3*g,gridH=3*bh+2*g;
 var anchor=place(gridW,gridH);var bx=anchor.x,by=anchor.y;
 function mk(lb,px,py){var s={v:0,o:N(0,0),px:px,py:py,label:lb,osc:false};s.o.x=px+44;s.o.y=py+20;sws.push(s);return s;}
 section("INPUT · JOYSTICK",gridW+8,function(){
@@ -528,11 +624,12 @@ core.BTN_UP=mk("UP",bx+bw+g,by);
 core.BTN_LEFT=mk("LEFT",bx,by+bh+g);
 core.BTN_POINT=mk("POINT",bx+bw+g,by+bh+g);
 core.BTN_RIGHT=mk("RIGHT",bx+2*(bw+g),by+bh+g);
-core.BTN_DOWN=mk("DOWN",bx+bw+g,by+2*(bh+g));});
+core.BTN_DOWN=mk("DOWN",bx+bw+g,by+2*(bh+g));
+core.BTN_ENTER=mk("ENTER",bx+3*(bw+g),by+bh+g);});
 forceNewRow();}
 
 function buildQueue(){var slots=[],ptr=[],ptrSel2=[],i,b,s;
-section("QUEUE · STORAGE 64×5×8",32000,function(){
+section("QUEUE · STORAGE "+QUEUE_SLOTS+"×5×8",QUEUE_SLOTS*500,function(){
 for(s=0;s<QUEUE_SLOTS;s++){beginGroup(400);var sl={bytes:[]};
 for(var bi=0;bi<5;bi++){beginGroup(80);var bb=[];for(b=0;b<8;b++)bb.push(LAT(0));sl.bytes.push(bb);endGroup();}
 slots.push(sl);endGroup();}});
@@ -548,11 +645,11 @@ function muxByte(bi){var bits=[];for(b=0;b<8;b++){var acc=null;
 for(s=0;s<QUEUE_SLOTS;s++){var t=AND(ptrSel2[s],slotSel[s].bytes[bi][b].o);acc=(acc===null)?t:OR(acc,t);}
 bits.push(acc);}return bits;}
 var qOpHi,qOpLo,qData,qTag,qDest;
-section("FETCH · OP_HI",16000,function(){qOpHi=muxByte(0);});
-section("FETCH · OP_LO",16000,function(){qOpLo=muxByte(1);});
-section("FETCH · DATA",16000,function(){qData=muxByte(2);});
-section("FETCH · TAG",16000,function(){qTag=muxByte(3);});
-section("FETCH · DEST",16000,function(){qDest=muxByte(4);});
+section("FETCH · OP_HI",QUEUE_SLOTS*250,function(){qOpHi=muxByte(0);});
+section("FETCH · OP_LO",QUEUE_SLOTS*250,function(){qOpLo=muxByte(1);});
+section("FETCH · DATA",QUEUE_SLOTS*250,function(){qData=muxByte(2);});
+section("FETCH · TAG",QUEUE_SLOTS*250,function(){qTag=muxByte(3);});
+section("FETCH · DEST",QUEUE_SLOTS*250,function(){qDest=muxByte(4);});
 forceNewRow();
 var ms=core.RUNQo||K0;var nms=NOT(ms);
 var fOpHi=[],fOpLo=[],fData=[],fTag=[],fDest=[];
@@ -611,6 +708,7 @@ var z=null;for(b=0;b<8;b++){var nz=NOT(full.sum[b]);z=(z===null)?nz:AND(z,nz);}
 var borrow=NOT(full.carry);var gt=AND(full.carry,NOT(z));
 var cp=AND(core.effRunEdge,opDec[OP_CMP]);
 setLat(flagZ,z,cp);setLat(flagLT,borrow,cp);setLat(flagGT,gt,cp);});
+// STACK
 core.dataStack=[];
 section("STACK · DATA 16×8",2560,function(){
 for(var s=0;s<STACK_DEPTH;s++){beginGroup(300);
@@ -633,15 +731,13 @@ var spM2Dec=makeDecoder(spM2);
 for(b=0;b<8;b++){
 var dacc=null;
 for(var s=0;s<STACK_DEPTH;s++){var t=AND(spM1Dec[s],core.dataStack[s][b].o);dacc=(dacc===null)?t:OR(dacc,t);}
-var aacc=null;
-for(var s=0;s<STACK_DEPTH;s++){var t=AND(spM1Dec[s],core.dataStack[s][b].o);aacc=(aacc===null)?t:OR(aacc,t);}
 var bacc=null;
 for(var s=0;s<STACK_DEPTH;s++){var t=AND(spM2Dec[s],core.dataStack[s][b].o);bacc=(bacc===null)?t:OR(bacc,t);}
 var wrP=AND(pushAct,core.finalDest[b]);
 var wrD=AND(dupAct,dacc);
 var wrToTop=OR(wrP,wrD);
 var wrSwapToSp1=AND(swapAct,bacc);
-var wrSwapToSp2=AND(swapAct,aacc);
+var wrSwapToSp2=AND(swapAct,dacc);
 for(var s=0;s<STACK_DEPTH;s++){
 var weTop=AND(spDec[s],wrToTop);
 var weSwap1=AND(spM1Dec[s],wrSwapToSp1);
@@ -658,7 +754,7 @@ var spEn=OR(OR(pushAct,dupAct),popAct);
 for(i=0;i<SP_BITS;i++){var vUp=AND(OR(pushAct,dupAct),spP1[i]);var vDn=AND(popAct,spM1[i]);
 setLat(core.sp[i], OR(vUp,vDn), spEn);}});
 var joyByte=[];
-section("JOY · READ",600,function(){joyByte.push(core.BTN_UP.o,core.BTN_DOWN.o,core.BTN_LEFT.o,core.BTN_RIGHT.o,core.BTN_POINT.o,K0,K0,K0);});
+section("JOY · READ",700,function(){joyByte.push(core.BTN_UP.o,core.BTN_DOWN.o,core.BTN_LEFT.o,core.BTN_RIGHT.o,core.BTN_POINT.o,core.BTN_ENTER.o,K0,K0);});
 core.joyByte=joyByte;
 core.halt=LAT(0);
 section("HALT · LATCH",600,function(){var haltSet=AND(AND(opDec[OP_HALT],core.effRunEdge),NOT(core.halt.o));var next=OR(haltSet,core.halt.o);setLat(core.halt,next,OR(haltSet,core.clrEdge));});
@@ -677,6 +773,7 @@ var incOne=[K1];for(i=1;i<PTR_BITS;i++)incOne.push(K0);
 var incVal=addN(ptrNow,incOne,K0,PTR_BITS).sum;
 for(i=0;i<PTR_BITS;i++){var jv=core.finalDest[i];
 var v=OR(AND(jmpEn,jv),AND(NOT(jmpEn),incVal[i]));setLat(core.ptr[i],v,en);}});
+// ALU ops
 var opR={},opList=[];
 function addOp(code,bits){opR[code]=bits;opList.push(code);}
 section("ALU · SET·MOV",900,function(){var r0=[];for(b=0;b<8;b++)r0.push(core.finalData[b]);addOp(OP_SET,r0);addOp(OP_MOV,srcB.slice());});
@@ -686,15 +783,53 @@ forceNewRow();
 section("ALU · LOGIC",1400,function(){var aR=[],oR=[],xR=[],nR=[];for(b=0;b<8;b++){aR.push(AND(srcB[b],srcC[b]));oR.push(OR(srcB[b],srcC[b]));xR.push(XOR(srcB[b],srcC[b]));nR.push(NOT(srcB[b]));}addOp(OP_AND,aR);addOp(OP_OR,oR);addOp(OP_XOR,xR);addOp(OP_NOT,nR);});
 section("ALU · INC·DEC",1600,function(){addOp(OP_INC,add8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]));addOp(OP_DEC,sub8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]));});
 section("ALU · CLR",200,function(){addOp(OP_CLR,[K0,K0,K0,K0,K0,K0,K0,K0]);});
-section("ALU · SHL·SHR",1600,function(){var shl=[K0],shr=[K0];for(b=0;b<7;b++)shl.push(srcB[b]);for(b=1;b<8;b++)shr.push(srcB[b]);addOp(OP_SHL,shl);addOp(OP_SHR,shr);});
+section("ALU · SHL·SHR",1600,function(){addOp(OP_SHL,bitShift(srcB,1,1));addOp(OP_SHR,bitShift(srcB,1,-1));});
 section("ALU · JOY",500,function(){addOp(OP_JOY,joyByte.slice());});
+section("ALU · ENTER",300,function(){var e=[core.BTN_ENTER.o,K0,K0,K0,K0,K0,K0,K0];addOp(OP_ENTER,e);});
 section("ALU · RND",600,function(){var rr=[];for(b=0;b<8;b++)rr.push(core.rndReg[b].o);addOp(OP_RND,rr);});
 section("ALU · TIME",600,function(){var tt=[];for(b=0;b<8;b++)tt.push(core.hwTimer[b].o);addOp(OP_TIME,tt);});
-section("ALU · KBD",500,function(){var kb=[];for(b=0;b<8;b++)kb.push(core.KBDo?core.KBDo[b]:K0);addOp(OP_KBD,kb);});
 forceNewRow();
 section("OUTPUT MUX",5000,function(){for(b=0;b<8;b++){beginGroup(700);var acc=null;for(var ii=0;ii<opList.length;ii++){var opv=opList[ii];var t=AND(opDec[opv],opR[opv][b]);acc=(acc===null)?t:OR(acc,t);}if(acc===null)acc=K0;finalR.push(acc);endGroup();}});
+
+// ===== FONT ROM =====
+var fontOut=null;
+section("FONT · ROM 40×8×8",1800,function(){
+var charIdx=core.finalDest.slice(0,6);
+var charEqs=[];
+for(var ci=0;ci<40;ci++)charEqs.push(eqN(charIdx,ci,6));
+fontOut=[];
+for(var r=0;r<8;r++){
+fontOut[r]=[];
+for(var bit=0;bit<8;bit++){
+var acc=K0;
+for(var ci=0;ci<40;ci++){
+if((window.FONT8[ci*8+r]>>(7-bit))&1) acc=OR(acc,charEqs[ci]);
+}
+fontOut[r].push(acc);}}});
+core.fontOut=fontOut;
+
+// ===== DRAWC source =====
+// x = srcB (0-9 cell col), y = srcC (0-5 cell row), charIdx = RAM[dest]
+var drawcCellDec=null,drawcDataBytes=null;
+section("DRAWC · ADDR",2500,function(){
+// cellIdx = y*10 + x  (6-bit)
+var y8=bitShift(srcC,3,1); // y<<3
+var y2=bitShift(srcC,1,1); // y<<1
+var y10=add8(y8,y2);
+var cellIdx=add8(y10,srcB);
+drawcCellDec=makeDecoder([cellIdx[0],cellIdx[1],cellIdx[2],cellIdx[3],cellIdx[4],cellIdx[5]]);
+});
+section("DRAWC · DATA BUS",800,function(){
+// For each of the 60 cells and 8 rows, we select fontOut[r]
+// Simplified: data byte for a cell at row r is fontOut[r]
+// We just wire fontOut rows; the write logic picks by (i&7)
+drawcDataBytes=fontOut;
+});
+
+// OUTPUT WRITE EN
 section("OUTPUT · WRITE EN",96000,function(){var wrEnable=core.effRunEdge;
 var scrClrAct=AND(core.effRunEdge,opDec[OP_SCRCLR]);
+var drawcAct=AND(core.effRunEdge,opDec[OP_DRAWC]);
 var noWrite=K0;
 noWrite=OR(noWrite,opDec[OP_NOP]);noWrite=OR(noWrite,opDec[OP_JMP]);
 noWrite=OR(noWrite,opDec[OP_JZ]);noWrite=OR(noWrite,opDec[OP_JNZ]);
@@ -705,18 +840,30 @@ noWrite=OR(noWrite,opDec[OP_HALT]);noWrite=OR(noWrite,opDec[OP_CMP]);
 noWrite=OR(noWrite,opDec[OP_POP]);noWrite=OR(noWrite,opDec[OP_PUSH]);
 noWrite=OR(noWrite,opDec[OP_DUP]);noWrite=OR(noWrite,opDec[OP_SWAP]);
 noWrite=OR(noWrite,opDec[OP_BYTE]);noWrite=OR(noWrite,opDec[OP_SCRCLR]);
-noWrite=OR(noWrite,opDec[OP_TXT]);
+noWrite=OR(noWrite,opDec[OP_DRAWC]);noWrite=OR(noWrite,opDec[OP_COLOR]);
 var doWrite=NOT(noWrite);
 for(i=0;i<RAM_SIZE;i++){beginGroup(100);
 var wEn=AND(AND(wrEnable,destDec[i]),doWrite);
 var clrEn=(i<SCR_BYTES)?scrClrAct:K0;
-var en=OR(OR(wEn,core.clrEdge),clrEn);
+// DRAWC write path
+var drawcEn=K0;
+var drawcData=[];
+for(b=0;b<8;b++)drawcData.push(K0);
+if(i<SCR_BYTES){
+var myCell=i>>3;
+var myRow=i&7;
+var cellSel=(myCell<60)?drawcCellDec[myCell]:K0;
+drawcEn=AND(drawcAct,cellSel);
+for(b=0;b<8;b++)drawcData[b]=AND(drawcEn,fontOut[myRow][b]);
+}
+var en=OR(OR(OR(wEn,core.clrEdge),clrEn),drawcEn);
 for(b=0;b<8;b++){
 var useW=AND(wEn,finalR[b]);
 var useC=AND(clrEn,K0);
-var d=OR(useW,useC);
+var d=OR(OR(useW,useC),drawcData[b]);
 setLat(RAM[i][b],d,en);}
 endGroup();}});
+// Other indirect writes
 section("CHR · WRITE",96000,function(){var chrAct=AND(core.effRunEdge,opDec[OP_CHR]);
 for(i=0;i<RAM_SIZE;i++){beginGroup(80);var we=AND(chrAct,destDec[i]);
 for(b=0;b<8;b++)setLat(RAM[i][b],core.finalData[b],we);endGroup();}});
@@ -727,28 +874,14 @@ for(b=0;b<8;b++)setLat(RAM[i][b],srcC[b],we);endGroup();}});
 section("POP · WRITE TO RAM",96000,function(){var popAct=AND(core.effRunEdge,opDec[OP_POP]);
 for(i=0;i<RAM_SIZE;i++){beginGroup(80);var we=AND(popAct,destDec[i]);
 for(b=0;b<8;b++)setLat(RAM[i][b],core.dupRead[b],we);endGroup();}});
-// TXT: write keyboard char into RAM[dest]
-section("TXT · WRITE CHAR",96000,function(){var txtAct=AND(core.effRunEdge,opDec[OP_TXT]);
-for(i=0;i<RAM_SIZE;i++){beginGroup(80);var we=AND(txtAct,destDec[i]);
-for(b=0;b<8;b++)setLat(RAM[i][b],core.KBDo?core.KBDo[b]:K0,we);endGroup();}});
 forceNewRow();
-section("SCREEN · GRID 80×24",SCR_W*(LED_SZ+GAPX)+GAPX,function(){
+
+// ===== SCREEN (80×45) =====
+section("SCREEN · GRID 80×45",SCR_W*(LED_SZ+GAPX)+GAPX,function(){
 for(var row=0;row<SCR_H;row++){beginGroup(SCR_W*(LED_SZ+GAPX)+GAPX);screenLeds.push([]);
 for(var col=0;col<SCR_W;col++)screenLeds[row].push(ledPending("#111","",LED_SZ));
 endGroup();}});
 core.screenLeds=screenLeds;}
-
-// ===== KEYBOARD (JS-driven UI + gate-computed char) =====
-function buildKeyboard(){
-  core.kbd={cx:0,cy:0,text:"",kbdo:[]};
-  section("KBD · CHAR ROM",1200,function(){
-    for(var b=0;b<8;b++)core.kbd.kbdo.push({v:0,x:0,y:0,virtual:true});
-  });
-  section("KBD · CHAR OUT",600,function(){
-    // 8-bit virtual node array for KBD char, will be JS-driven
-    core.KBDo=core.kbd.kbdo;
-  });
-}
 
 var NOOP5=[0,0,0,0,0];
 function writeRamByte(arr,addr,val){if(addr<0||addr>=RAM_SIZE)return;for(var b=0;b<8;b++)latchReset(arr[addr][b],(val>>b)&1);}
@@ -805,7 +938,7 @@ for(i=0;i<inputTitles.length;i++){var sc=byTitle[inputTitles[i]];if(!sc)continue
 moveSection(sc,x,y);y+=sc.h+GY;if(sc.w>inW)inW=sc.w;}
 var scrX=M+inW+GX*2;
 var scrY=M;
-var screenSec=byTitle["SCREEN · GRID 80×24"];
+var screenSec=byTitle["SCREEN · GRID 80×45"];
 var joySec=byTitle["INPUT · JOYSTICK"];
 var rightH=0;
 if(screenSec){moveSection(screenSec,scrX,scrY);scrY+=screenSec.h+GY;rightH+=screenSec.h+GY;}
@@ -815,7 +948,7 @@ var logicX=M, logicY=logicTop, rowH=0;
 var maxW=Math.max(3000,window.innerWidth*4);
 var used={};
 for(i=0;i<inputTitles.length;i++)used[inputTitles[i]]=1;
-used["SCREEN · GRID 80×24"]=1;used["INPUT · JOYSTICK"]=1;
+used["SCREEN · GRID 80×45"]=1;used["INPUT · JOYSTICK"]=1;
 var logics=[];
 for(i=0;i<sectionsData.length;i++){if(!used[sectionsData[i].title])logics.push(sectionsData[i]);}
 logics.sort(function(a,b){return b.h-a.h;});
@@ -835,7 +968,7 @@ view.k=k;view.x=(r.width-frame43.w*k)/2-frame43.x*k;view.y=(r.height-frame43.h*k
 function fitScreen(){var r=svg.getBoundingClientRect();
 var x1=Infinity,y1=Infinity,x2=-Infinity,y2=-Infinity,found=false;
 for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];
-if(s.title==="SCREEN · GRID 80×24"||s.title==="INPUT · JOYSTICK"){
+if(s.title==="SCREEN · GRID 80×45"||s.title==="INPUT · JOYSTICK"){
 found=true;if(s.x<x1)x1=s.x;if(s.y<y1)y1=s.y;
 if(s.x+s.w>x2)x2=s.x+s.w;if(s.y+s.h>y2)y2=s.y+s.h;}}
 if(!found){fitAll();return;}
@@ -845,102 +978,34 @@ if(k<0.03)k=0.03;if(k>1.5)k=1.5;
 view.k=k;view.x=r.width/2-cx*k;view.y=r.height/2-cy*k;applyView();}
 function updateGateCount(){var total=gates.length+sws.length+leds.length;
 document.getElementById("gcount").textContent="· "+total.toLocaleString()+" gates · "+latches.length.toLocaleString()+" FFs";}
-var hudPTR=document.getElementById("hudPTR"),hudSP=document.getElementById("hudSP"),hudTMR=document.getElementById("hudTMR"),hudKBD=document.getElementById("hudKBD"),hudIR=document.getElementById("hudIR"),hudMN=document.getElementById("hudMN");
+var hudPTR=document.getElementById("hudPTR"),hudSP=document.getElementById("hudSP"),hudTMR=document.getElementById("hudTMR"),hudCUR=document.getElementById("hudCUR"),hudIR=document.getElementById("hudIR"),hudMN=document.getElementById("hudMN");
 function readLatches8(arr,idx){var v=0;if(!arr[idx])return 0;for(var b=0;b<8;b++){if(arr[idx][b]&&arr[idx][b].o.v)v|=(1<<b);}return v;}
 function readPTR(){var v=0;for(var b=0;b<PTR_BITS;b++){if(core.ptr&&core.ptr[b]&&core.ptr[b].o.v)v|=(1<<b);}return v;}
 function readSP(){var v=0;for(var b=0;b<SP_BITS;b++){if(core.sp&&core.sp[b]&&core.sp[b].o.v)v|=(1<<b);}return v;}
 function readTMR(){var v=0;if(!core.hwTimer)return 0;for(var b=0;b<8;b++){if(core.hwTimer[b]&&core.hwTimer[b].o.v)v|=(1<<b);}return v;}
-function readKBD(){return kbdChar();}
+function readCUR(){return readLatches8(core.RAM,240)+"/"+readLatches8(core.RAM,241);}
 function readIR(){var hi=0,lo=0;for(var b=0;b<8;b++){if(core.finalOpHi&&core.finalOpHi[b]&&core.finalOpHi[b].v)hi|=(1<<b);}
 for(var b=0;b<8;b++){if(core.finalOpLo&&core.finalOpLo[b]&&core.finalOpLo[b].v)lo|=(1<<b);}return (hi<<8)|lo;}
 function updateHUD(){hudPTR.textContent=readPTR();hudSP.textContent=readSP();hudTMR.textContent=readTMR();
-hudKBD.textContent="'"+readKBD()+"'";
+hudCUR.textContent=readCUR();
 var ir=readIR();var hex=ir.toString(16).toUpperCase();while(hex.length<4)hex="0"+hex;
 hudIR.textContent=hex;hudMN.textContent=MNEMONICS[ir]||"?";}
+// Screen decoding: cell-major layout
 function updateScreen(){if(!core.screenLeds||!core.RAM)return;
-for(var r=0;r<SCR_H;r++){for(var c=0;c<SCR_W;c++){
-var pixelIdx=r*SCR_W+c;
-var byteIdx=pixelIdx>>3;
-var bit=pixelIdx&7;
+for(var row=0;row<SCR_H;row++){for(var col=0;col<SCR_W;col++){
+var cy=row>>3,cx=col>>3,ipy=row&7,ipx=col&7;
+var cellIdx=cy*CELL_COLS+cx;
+var byteIdx=cellIdx*8+ipy;
 var byteVal=readLatches8(core.RAM,byteIdx);
-var on=(byteVal>>(7-bit))&1;
-var led=core.screenLeds[r][c];
+var bit=7-ipx;
+var on=(byteVal>>bit)&1;
+var led=core.screenLeds[row][col];
 led.forceV=1;led.forceColor=on?"#111":"#fff";}}}
-
-// ===== Keyboard driver =====
-var kbdX=0,kbdY=0,kbdText="";
-var lastBtn={up:0,down:0,left:0,right:0,point:0};
-function kbdChar(){return (window.KBD_CHARS[kbdY]||" ").charAt(kbdX)||" ";}
-function kbdCharCode(){return kbdChar().charCodeAt(0);}
-function updateKbdUI(){
-  // Update the virtual KBDo bits used by KBD opcode
-  if(core.KBDo){
-    var code=kbdCharCode();
-    for(var b=0;b<8;b++)core.KBDo[b].v=(code>>b)&1;
-  }
-  // Update DOM
-  var txtEl=document.getElementById("kbdtxt");
-  if(txtEl)txtEl.textContent=kbdText||"_";
-  for(var y=0;y<KBD_ROWS;y++){
-    for(var x=0;x<KBD_COLS;x++){
-      var cell=document.getElementById("kbdc"+y+"_"+x);
-      if(cell){
-        var sel=(x===kbdX&&y===kbdY);
-        cell.setAttribute("fill",sel?"#ff4d4d":"#fff");
-        cell.setAttribute("stroke",sel?"#ff4d4d":"#222");
-      }
-      var tc=document.getElementById("kbdt"+y+"_"+x);
-      if(tc){tc.setAttribute("fill",(x===kbdX&&y===kbdY)?"#fff":"#222");}
-    }
-  }
-}
-function tickKbd(){
-  if(!core.BTN_UP)return;
-  var up=core.BTN_UP.o.v,dn=core.BTN_DOWN.o.v,lt=core.BTN_LEFT.o.v,rt=core.BTN_RIGHT.o.v,pt=core.BTN_POINT.o.v;
-  var changed=false;
-  if(rt&&!lastBtn.right){kbdX=(kbdX+1)%KBD_COLS;changed=true;}
-  if(lt&&!lastBtn.left){kbdX=(kbdX-1+KBD_COLS)%KBD_COLS;changed=true;}
-  if(dn&&!lastBtn.down){kbdY=(kbdY+1)%KBD_ROWS;changed=true;}
-  if(up&&!lastBtn.up){kbdY=(kbdY-1+KBD_ROWS)%KBD_ROWS;changed=true;}
-  if(pt&&!lastBtn.point){kbdText+=kbdChar();if(kbdText.length>40)kbdText=kbdText.slice(-40);changed=true;}
-  lastBtn.up=up;lastBtn.down=dn;lastBtn.left=lt;lastBtn.right=rt;lastBtn.point=pt;
-  if(changed)updateKbdUI();
-}
-
 function loadProject(){try{
-reset();buildFrontend();buildJoystick();buildQueue();buildExecutor();buildBackend();buildKeyboard();
+reset();buildFrontend();buildJoystick();buildQueue();buildExecutor();buildBackend();
 frame43=relayout43();routeWires();initProj();simulate();updateHUD();updateScreen();updateGateCount();
-buildKbdDOM();updateKbdUI();
 fitScreen();renderFrame();
 }catch(e){showErr((e&&e.message)||String(e));console.error(e);if(e&&e.stack)console.error(e.stack);}}
-
-// ===== Keyboard DOM overlay (inside SVG) =====
-function buildKbdDOM(){
-  var g=E("g",{id:"kbdGroup",transform:"translate(0,0)"});
-  // spectator line
-  var boxW=KBD_COLS*26+20,boxH=KBD_ROWS*26+70;
-  g.appendChild(E("rect",{x:0,y:0,width:boxW,height:boxH,fill:"#fff",stroke:"#333","stroke-width":2}));
-  g.appendChild(E("text",{x:10,y:20,"font-size":11,"font-weight":700,fill:"#333"})).textContent="SPECTATOR";
-  g.appendChild(E("rect",{x:8,y:26,width:boxW-16,height:22,fill:"#111"}));
-  var txt=E("text",{id:"kbdtxt",x:14,y:42,"font-size":14,fill:"#0f0","font-family":"monospace"});
-  txt.textContent="_";g.appendChild(txt);
-  // char grid
-  for(var y=0;y<KBD_ROWS;y++){
-    for(var x=0;x<KBD_COLS;x++){
-      var cx=10+x*26, cy=54+y*26;
-      g.appendChild(E("rect",{id:"kbdc"+y+"_"+x,x:cx,y:cy,width:22,height:22,fill:"#fff",stroke:"#222","stroke-width":1}));
-      var t=E("text",{id:"kbdt"+y+"_"+x,x:cx+11,y:cy+16,"font-size":13,"text-anchor":"middle",fill:"#222","font-weight":700});
-      t.textContent=window.KBD_CHARS[y].charAt(x)||" ";
-      g.appendChild(t);
-    }
-  }
-  // Position it near the joystick section
-  var joy=null;
-  for(var i=0;i<sectionsData.length;i++)if(sectionsData[i].title==="INPUT · JOYSTICK")joy=sectionsData[i];
-  if(joy){g.setAttribute("transform","translate("+joy.x+","+(joy.y+joy.h+20)+")");}
-  vp.appendChild(g);
-}
-
 var view={x:0,y:0,k:1};var MIN_K=0.0002,MAX_K=30;
 function applyView(){if(vp)vp.setAttribute("transform","translate("+view.x+","+view.y+") scale("+view.k+")");}
 function setZoomAt(nk,cx,cy){nk=Math.min(MAX_K,Math.max(MIN_K,nk));var s=nk/view.k;
@@ -978,7 +1043,7 @@ document.getElementById("zoomIn").addEventListener("click",function(){zoomC(1.3)
 document.getElementById("zoomOut").addEventListener("click",function(){zoomC(1/1.3);});
 document.getElementById("zoomReset").addEventListener("click",function(){fitAll();});
 loadProject();
-setInterval(function(){try{tickOsc();simulate();tickKbd();updateHUD();updateScreen();}catch(e){showErr((e&&e.message)||String(e));}},20);
+setInterval(function(){try{tickOsc();simulate();updateHUD();updateScreen();}catch(e){showErr((e&&e.message)||String(e));}},20);
 var lastR=0;
 requestAnimationFrame(function loop(t){requestAnimationFrame(loop);if(t-lastR<33)return;lastR=t;
 try{renderFrame();}catch(e){showErr((e&&e.message)||String(e));}});
