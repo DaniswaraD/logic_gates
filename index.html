@@ -3,19 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v4.2</title>
+<title>CPU 64 v5.0 · PURE GATES</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
 svg{display:block;width:100vw;height:100vh;background:#fff;touch-action:none;cursor:grab}
 svg.drag{cursor:grabbing}
 text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-events:none}
-#title{position:fixed;top:10px;left:12px;z-index:10;font-size:14px;font-weight:700;color:#222;background:#fff;padding:4px 8px;border:2px solid #333}
+#title{position:fixed;top:10px;left:12px;z-index:10;font-size:13px;font-weight:700;color:#222;background:#fff;padding:4px 8px;border:2px solid #333}
+#title small{font-weight:400;color:#666;margin-left:8px}
 #help{position:fixed;bottom:10px;left:12px;font-size:11px;color:#888;z-index:10}
 #projSel{position:fixed;top:10px;right:12px;z-index:21;background:#fff;border:2px solid #333;padding:5px 8px;font-size:11px;display:none;align-items:center;gap:6px}
 #projSel label{font-weight:700;letter-spacing:1px;color:#333}
 #projSel select{font-family:inherit;font-size:11px;padding:3px 6px;border:1px solid #888;background:#fff;max-width:280px}
-#cheat{position:fixed;top:52px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:420px;font-size:11px;line-height:1.4}
+#cheat{position:fixed;top:52px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:430px;font-size:11px;line-height:1.4}
 #cheat .bar{background:#333;color:#fff;padding:6px 10px;font-weight:700;font-size:11px;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 #cheat .bar .btn{font-size:16px;font-weight:700;padding:0 6px}
 #cheat .body{padding:10px;max-height:80vh;overflow:auto}
@@ -30,11 +31,11 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 </style>
 </head>
 <body>
-<div id="title">CPU 64 v4.2</div>
+<div id="title">CPU 64 v5.0 · PURE GATES<small id="gcount"></small></div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="cheat" class="min">
-<div class="bar" id="cheatBar"><span>CHEAT SHEET · v4.2</span><span class="btn" id="cheatMin">+</span></div>
+<div class="bar" id="cheatBar"><span>CHEAT SHEET · v5.0</span><span class="btn" id="cheatMin">+</span></div>
 <div class="body">
 <div class="hdr">OPCODE</div>
 <div class="row"><span class="c">00</span>NOP</div>
@@ -59,19 +60,20 @@ text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-
 <div class="row"><span class="c">2B</span>STORER</div><div class="row"><span class="c">2C</span>STOREW</div>
 <div class="row"><span class="c">2D</span>JOY</div><div class="row"><span class="c">2E</span>PEEK</div>
 <div class="row"><span class="c">2F</span>STOREI</div><div class="row"><span class="c">30</span>POKER</div>
-<div class="hdr">v4.2 NEW</div>
-<div class="row"><span class="c">31</span>RND   RAM[DEST]=LFSR byte (auto-advance)</div>
-<div class="row"><span class="c">32</span>SEED  LFSR &lt;- DATA (reset from constant)</div>
+<div class="row"><span class="c">31</span>RND</div><div class="row"><span class="c">32</span>SEED</div>
+<div class="hdr">v5.0 · PURE LOGIC</div>
+<div class="row">Setiap latch = 10 gerbang (2 buffer + 8 NAND master-slave D-FF)</div>
+<div class="row">Tidak ada state tersembunyi. Semua nilai hidup di kabel.</div>
 <div class="hdr">FORMAT: [OP, DATA, TAG, DEST]</div>
 </div>
 </div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll = zoom · drag = pan · dblclick = reset</div>
+<div id="help">scroll = zoom · drag = pan · dblclick = fit</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <script>
 window.BUILTIN_PROJECTS = {
-version: 17,
+version: 18,
 projects: [
 {id:"maze",name:"MAZE SCROLLER",description:"UP/DOWN scroll maze",storage:[
 [0,32],[1,32],[2,32],[3,32],[4,32],[5,32],[6,32],[7,32],
@@ -97,81 +99,35 @@ projects: [
 [0x01,64,0,19],[0x10,14,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-
 {id:"starfield",name:"STARFIELD",description:"Titik acak di layar",program:[
-[0x01,1,0,60],              // seed
-[0x32,1,0,0],               // SEED 1
-[0x31,0,0,62],              // RND -> RAM[62]
-[0x08,63,62,62],            // AND RAM[62] & 31 -> posisi 0..31
-[0x01,46,0,61],             // DATA = '.' (46)
-[0x29,46,62,0],             // POKE '.' at RAM[RAM[62]]
-[0x12,1,0,0],
-[0x10,2,0,0],               // JMP 2
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+[0x01,1,0,60],[0x32,1,0,0],[0x31,0,0,62],[0x08,63,62,62],[0x01,46,0,61],[0x29,46,62,0],[0x12,1,0,0],[0x10,2,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-
 {id:"fireworks",name:"FIREWORKS",description:"Ledakan bintang acak + SCLR",program:[
-[0x13,0,0,0],               // SCRCLR
-[0x32,42,0,0],              // SEED 42
-[0x01,0,0,64],              // i = 0
-[0x31,0,0,62],              // RND
-[0x08,63,62,62],            // & 31
-[0x29,42,62,0],             // POKE '*' (42) di cell acak
-[0x0C,0,64,64],             // i++
-[0x05,10,64,65],            // i - 10
-[0x15,3,65,0],              // JNZ ke 3
-[0x12,8,0,0],               // DELAY
-[0x24,32,0,0],              // SCLR
-[0x24,32,0,0],
-[0x24,32,0,0],
-[0x24,32,0,0],
-[0x10,1,0,0],               // JMP 1
+[0x13,0,0,0],[0x32,42,0,0],[0x01,0,0,64],[0x31,0,0,62],[0x08,63,62,62],[0x29,42,62,0],[0x0C,0,64,64],[0x05,10,64,65],[0x15,3,65,0],
+[0x12,8,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x10,1,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-
 {id:"pingpong",name:"PING-PONG",description:"Sprite bolak-balik",program:[
-[0x01,0,0,60],[0x01,1,0,61],[0x01,15,0,62],
-[0x16,14,0,0],[0x17,0,0,0],[0x1C,0,0,0],
-[0x04,61,60,60],[0x08,62,60,60],
-[0x17,0,0,0],[0x12,1,0,0],[0x10,6,0,0],
+[0x01,0,0,60],[0x01,1,0,61],[0x01,15,0,62],[0x16,14,0,0],[0x17,0,0,0],[0x1C,0,0,0],[0x04,61,60,60],[0x08,62,60,60],[0x17,0,0,0],[0x12,1,0,0],[0x10,6,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-
 {id:"storage-counter",name:"STORAGE COUNTER",description:"Counter persistent",program:[
-[0x13,0,0,0],[0x01,48,0,65],[0x01,9,0,66],[0x2B,0,0,64],
-[0x1F,0,0,0],[0x20,0,1,0],[0x04,65,64,67],[0x21,67,0,0],
-[0x12,4,0,0],[0x0C,0,64,64],[0x08,66,64,64],[0x2C,0,64,0],
-[0x1F,0,0,0],[0x10,5,0,0],
+[0x13,0,0,0],[0x01,48,0,65],[0x01,9,0,66],[0x2B,0,0,64],[0x1F,0,0,0],[0x20,0,1,0],[0x04,65,64,67],[0x21,67,0,0],[0x12,4,0,0],[0x0C,0,64,64],[0x08,66,64,64],[0x2C,0,64,0],[0x1F,0,0,0],[0x10,5,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-
 {id:"typewriter",name:"TYPEWRITER",description:"CHR demo",program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],
-[0x21,67,0,0],[0x21,80,0,0],[0x21,85,0,0],[0x21,32,0,0],
-[0x21,54,0,0],[0x21,52,0,0],[0x22,0,0,0],
-[0x21,82,0,0],[0x21,69,0,0],[0x21,65,0,0],[0x21,68,0,0],[0x21,89,0,0],
-[0x12,10,0,0],[0x10,0,0,0],
+[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],[0x21,67,0,0],[0x21,80,0,0],[0x21,85,0,0],[0x21,32,0,0],[0x21,54,0,0],[0x21,52,0,0],[0x22,0,0,0],[0x21,82,0,0],[0x21,69,0,0],[0x21,65,0,0],[0x21,68,0,0],[0x21,89,0,0],[0x12,10,0,0],[0x10,0,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-
 {id:"big-cpu",name:"BIG CPU",description:"Big marquee",program:[
-[0x13,0,0,0],[0x2A,2,0,0],[0x20,0,1,0],
-[0x1E,67,0,0],[0x1E,80,0,0],[0x1E,85,0,0],[0x1E,32,0,0],
-[0x1E,54,0,0],[0x1E,52,0,0],[0x1E,33,0,0],[0x1E,32,0,0],
-[0x12,3,0,0],[0x10,3,0,0],
+[0x13,0,0,0],[0x2A,2,0,0],[0x20,0,1,0],[0x1E,67,0,0],[0x1E,80,0,0],[0x1E,85,0,0],[0x1E,32,0,0],[0x1E,54,0,0],[0x1E,52,0,0],[0x1E,33,0,0],[0x1E,32,0,0],[0x12,3,0,0],[0x10,3,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-
 {id:"bold-walk",name:"BOLD WALK",description:"Bold marquee",program:[
-[0x13,0,0,0],[0x2A,1,0,0],[0x20,0,2,0],
-[0x1E,66,0,0],[0x1E,79,0,0],[0x1E,76,0,0],[0x1E,68,0,0],
-[0x1E,32,0,0],[0x1E,87,0,0],[0x1E,65,0,0],[0x1E,76,0,0],
-[0x1E,75,0,0],[0x1E,32,0,0],
-[0x12,3,0,0],[0x10,3,0,0],
+[0x13,0,0,0],[0x2A,1,0,0],[0x20,0,2,0],[0x1E,66,0,0],[0x1E,79,0,0],[0x1E,76,0,0],[0x1E,68,0,0],[0x1E,32,0,0],[0x1E,87,0,0],[0x1E,65,0,0],[0x1E,76,0,0],[0x1E,75,0,0],[0x1E,32,0,0],[0x12,3,0,0],[0x10,3,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-
 {id:"joy-sprite",name:"JOY SPRITE",description:"Sprite joystick",program:[
 [0x16,14,0,0],[0x17,7,0,0],[0x1C,0,0,0],[0x10,3,0,0],
 [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
@@ -206,12 +162,7 @@ for(var _k in FONT){var _g=FONT[_k],_b=[];for(var _r=0;_r<4;_r++){var _w=_g[_r];
 var SUPPORTED=Object.keys(FONT).map(Number);
 
 var SIZE_LED=22,SCR_W=32,SCR_H=16,CHAR_COLS=8,CHAR_ROWS=4,DISPLAY_CELLS=32;
-var RAM_SIZE=512;
-var STORE_SIZE=128;
-var QUEUE_START=128;
-var QUEUE_SLOTS=64;
-var ADDR_BITS=9;
-var PTR_BITS=6;
+var RAM_SIZE=512, STORE_SIZE=128, QUEUE_START=128, QUEUE_SLOTS=64, ADDR_BITS=9, PTR_BITS=6;
 
 var OP_NOP=0x00,OP_SET=0x01,OP_MOV=0x02,OP_ADD=0x04,OP_SUB=0x05,OP_MUL=0x06,OP_DIV=0x07,
 OP_AND=0x08,OP_OR=0x09,OP_XOR=0x0A,OP_NOT=0x0B,OP_INC=0x0C,OP_DEC=0x0D,
@@ -230,19 +181,20 @@ OP_SPX,OP_SPY,OP_SPXP,OP_SPXM,OP_SPYP,OP_SPYM,OP_SPSHOW,OP_SPHIDE,OP_SCROLL,
 OP_HOME,OP_CUR,OP_CHR,OP_NL,OP_CLRLN,OP_SCLR,OP_FILL,OP_SHL,OP_SHR,OP_HALT,OP_POKE,
 OP_FONT,OP_STORER,OP_STOREW,OP_JOY,OP_PEEK,OP_STOREI,OP_POKER,OP_RND,OP_SEED];
 
-var gates=[],sws=[],leds=[],wires=[],sectionsData=[],frame43=null;
-var vp,lW,lG,lL,lU,lS;
+var gates=[],sws=[],leds=[],latches=[],wires=[],sectionsData=[],frame43=null;
+var vp,lW_on,lW_off,lG,lL,lU,lS,lF;
 var K0={v:0,x:0,y:0,virtual:true},K1={v:1,x:0,y:0,virtual:true};
 var groupStack=[],GAPX=4,GAPY=4,jseed=7,core={};
 function jr(){jseed=(jseed*1103515245+12345)&0x7fffffff;return jseed/0x7fffffff;}
 
 function reset(){
 while(svg.firstChild)svg.removeChild(svg.firstChild);
-gates=[];sws=[];leds=[];wires=[];sectionsData=[];frame43=null;jseed=7;core={};
+gates=[];sws=[];leds=[];latches=[];wires=[];sectionsData=[];frame43=null;jseed=7;core={};
 groupStack=[{x:20,y:80,rowH:0,maxW:60000,maxXUsed:0,maxYUsed:0,gStart:0,sStart:0,lStart:0}];
 vp=E("g",{});svg.appendChild(vp);
-lS=E("g",{});lW=E("g",{});lG=E("g",{});lL=E("g",{});lU=E("g",{});
-vp.appendChild(lS);vp.appendChild(lW);vp.appendChild(lG);vp.appendChild(lL);vp.appendChild(lU);
+lS=E("g",{});lW_off=E("path",{fill:"none",stroke:"#cfcfcf","stroke-width":1,"stroke-linejoin":"round"});lW_on=E("path",{fill:"none",stroke:"#111","stroke-width":1.5,"stroke-linejoin":"round"});
+lG=E("g",{});lF=E("g",{});lL=E("g",{});lU=E("g",{});
+vp.appendChild(lS);vp.appendChild(lW_off);vp.appendChild(lW_on);vp.appendChild(lG);vp.appendChild(lF);vp.appendChild(lL);vp.appendChild(lU);
 }
 function curFrame(){return groupStack[groupStack.length-1];}
 function framePlaceIn(f,w,h){
@@ -257,9 +209,9 @@ function endGroup(){
 var f=groupStack.pop();if(!f)return;
 var w=f.maxXUsed||10,h=f.maxYUsed||10;
 var pos=framePlaceIn(curFrame(),w,h);var dx=pos.x,dy=pos.y,i;
-for(i=f.gStart;i<gates.length;i++){var g=gates[i];g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
+for(i=f.gStart;i<gates.length;i++){var g=gates[i];if(g._hidden)continue;g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
 for(i=f.sStart;i<sws.length;i++){var s=sws[i];s.px+=dx;s.py+=dy;s.o.x+=dx;s.o.y+=dy;}
-for(i=f.lStart;i<leds.length;i++){var l=leds[i];l.px+=dx;l.py+=dy;}
+for(i=f.lStart;i<leds.length;i++){var l=leds[i];l.px+=dx;l.py+=dy;if(l.ph){l.ph.x=l.px-2;l.ph.y=l.py;}}
 }
 function forceNewRow(){var f=groupStack[0];if(!f)return;f.x=0;f.y+=f.rowH+30;f.rowH=0;}
 function section(title,mw,fn){
@@ -267,7 +219,7 @@ var g0=gates.length,s0=sws.length,l0=leds.length;
 beginGroup(mw);fn();endGroup();
 var mnx=Infinity,mny=Infinity,mxx=-Infinity,mxy=-Infinity;
 function ext(x1,y1,x2,y2){if(x1<mnx)mnx=x1;if(y1<mny)mny=y1;if(x2>mxx)mxx=x2;if(y2>mxy)mxy=y2;}
-for(var i=g0;i<gates.length;i++){var g=gates[i];ext(g.px-6,g.py-2,g.px+41,g.py+32);}
+for(var i=g0;i<gates.length;i++){var g=gates[i];if(g._hidden)continue;ext(g.px-6,g.py-2,g.px+41,g.py+32);}
 for(var i=s0;i<sws.length;i++){var s=sws[i];ext(s.px-2,s.py-2,s.px+52,s.py+59);}
 for(var i=l0;i<leds.length;i++){var l=leds[i];var r=l.sz?l.sz*0.4:10;ext(l.px-r-3,l.py-r-11,l.px+r+3,l.py+r+3);}
 if(!isFinite(mnx))return;var pad=8;
@@ -281,18 +233,94 @@ var g={t:t,i:ins,o:N(0,d),px:p.x,py:p.y+jy};g.o.x=g.px+34;g.o.y=g.py+15;
 for(var i=0;i<ins.length;i++){var iy=ins.length===1?15:(i===0?10:20);if(ins[i]&&ins[i].x!==undefined&&!ins[i].virtual)wires.push({s:ins[i],g:g,py:iy});}
 gates.push(g);return g;
 }
+// Hidden internal gate (no place, no wire)
+function mkGH(t,ins){
+var d=0;for(var i=0;i<ins.length;i++)d=Math.max(d,(ins[i]&&ins[i].d)||0);d=d+1;
+var g={t:t,i:ins,o:N(0,d),px:0,py:0,_hidden:true};
+gates.push(g);return g;
+}
 function AND(a,b){return mkGate("AND",[a,b]).o;}
 function OR(a,b){return mkGate("OR",[a,b]).o;}
 function NOT(a){return mkGate("NOT",[a]).o;}
 function XOR(a,b){return mkGate("XOR",[a,b]).o;}
-function LAT(init){var p=place(44,36);var jy=Math.floor(jr()*7);var g={t:"LAT",i:[K0,K0],o:N(0,1),px:p.x,py:p.y+jy,prev:init|0,prevEn:0};g.o.x=g.px+34;g.o.y=g.py+15;gates.push(g);return g;}
-function setLat(g,d,en){g.i[0]=d;g.i[1]=en;if(d&&d.x!==undefined&&!d.virtual)wires.push({s:d,g:g,py:10});if(en&&en.x!==undefined&&!en.virtual)wires.push({s:en,g:g,py:20});}
+
+// =============================================================
+// LAT: master-slave D flip-flop from NAND gates (10 gates)
+//  - 2 input buffers (AND identity)
+//  - nD = NAND(D,D)
+//  - nC = NAND(CLK,CLK)
+//  - Master latch: Sm=NAND(D,nC), Rm=NAND(nD,nC), Qm=NAND(Sm,Qmb), Qmb=NAND(Rm,Qm)
+//  - Slave latch:  Ss=NAND(Qm,C), Rs=NAND(Qmb,C), Qs=NAND(Ss,Qsb), Qsb=NAND(Rs,Qs)
+// =============================================================
+function LAT(init){
+init=init|0;
+var dIn=mkGH("AND",[K0,K1]);
+var cIn=mkGH("AND",[K0,K1]);
+var nD=mkGH("NAND",[dIn.o,dIn.o]);
+var nC=mkGH("NAND",[cIn.o,cIn.o]);
+// Master
+var Sm=mkGH("NAND",[dIn.o,nC.o]);
+var Rm=mkGH("NAND",[nD.o,nC.o]);
+var QmPh=N(init,3);
+var Qm=mkGH("NAND",[Sm.o,QmPh]);
+var Qmb=mkGH("NAND",[Rm.o,Qm.o]);
+Qm.i[1]=Qmb.o;
+// Slave
+var Ss=mkGH("NAND",[Qm.o,cIn.o]);
+var Rs=mkGH("NAND",[Qmb.o,cIn.o]);
+var QsPh=N(init,3);
+var Qs=mkGH("NAND",[Ss.o,QsPh]);
+var Qsb=mkGH("NAND",[Rs.o,Qs.o]);
+Qs.i[1]=Qsb.o;
+// Init state
+Qm.o.v=init; Qmb.o.v=(~init)&1;
+Qs.o.v=init; Qsb.o.v=(~init)&1;
+// Reserve visual space for wrapper
+var p=place(46,38);
+// Position D/CLK input buffers & Q output at wrapper location
+dIn.px=p.x; dIn.py=p.y+2; dIn.o.x=p.x+46; dIn.o.y=p.y+2+15;
+cIn.px=p.x; cIn.py=p.y+20; cIn.o.x=p.x+46; cIn.o.y=p.y+20+15;
+Qs.o.x=p.x+46; Qs.o.y=p.y+19;
+var wrapper={
+  t:"LATX",
+  i:[dIn.o,cIn.o],
+  o:Qs.o,
+  px:p.x, py:p.y,
+  _dIn:dIn, _cIn:cIn,
+  _Qm:Qm, _Qmb:Qmb, _Qs:Qs, _Qsb:Qsb,
+  _init:init
+};
+latches.push(wrapper);
+return wrapper;
+}
+function setLat(wrapper,d,en){
+wrapper._dIn.i[0]=d;
+wrapper._cIn.i[0]=en;
+if(d&&d.x!==undefined&&!d.virtual)wires.push({s:d,g:wrapper._dIn,py:15});
+if(en&&en.x!==undefined&&!en.virtual)wires.push({s:en,g:wrapper._cIn,py:15});
+}
+function latchReset(l,v){
+l._Qm.o.v=v; l._Qmb.o.v=(~v)&1;
+l._Qs.o.v=v; l._Qsb.o.v=(~v)&1;
+}
+
 function sw(lb){var p=place(50,58);var s={v:0,o:N(0,0),px:p.x,py:p.y,label:lb||"",osc:false};s.o.x=p.x+44;s.o.y=p.y+20;sws.push(s);return s;}
 function osc(pr,lb){var p=place(50,58);var s={v:0,o:N(0,0),px:p.x,py:p.y,label:lb||"OSC",osc:true,period:pr|0||6,t:0};s.o.x=p.x+44;s.o.y=p.y+20;sws.push(s);return s;}
-function led(inp,col,lb,sz){sz=sz||SIZE_LED;var p=place(sz,sz);var l={i:inp,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz};if(inp&&inp.x!==undefined&&!inp.virtual)wires.push({s:inp,l:l});leds.push(l);return l;}
-function ledPending(col,lb,sz){sz=sz||SIZE_LED;var p=place(sz,sz);var ph={v:0,x:p.x-2,y:p.y,virtual:true};var l={i:ph,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz,_ph:true,ph:ph};wires.push({s:ph,l:l});leds.push(l);return l;}
-function rewireLed(l,newIn){for(var i=0;i<wires.length;i++){if(wires[i].l===l){wires[i].s=newIn;l.i=newIn;return true;}}return false;}
-function gateBody(t){switch(t){case "AND":return "M0,0 L14,0 A17,17 0 0 1 14,30 L0,30 Z";case "OR":return "M0,0 Q12,0 30,15 Q12,30 0,30 Q10,15 0,0 Z";case "NOT":return "M0,0 L30,15 L0,30 Z";case "XOR":return "M4,0 Q17,0 34,15 Q17,30 4,30 Q15,15 4,0 Z";}return "M0,0 L34,0 L34,30 L0,30 Z";}
+function led(inp,col,lb,sz){sz=sz||SIZE_LED;var p=place(sz,sz);var l={i:inp,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz};if(inp&&inp.x!==undefined&&!inp.virtual){var w={s:inp,l:l};l._w=w;wires.push(w);}leds.push(l);return l;}
+function ledPending(col,lb,sz){sz=sz||SIZE_LED;var p=place(sz,sz);var ph={v:0,x:p.x-2,y:p.y,virtual:true};var l={i:ph,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz,_ph:true,ph:ph};var w={s:ph,l:l};l._w=w;wires.push(w);leds.push(l);return l;}
+function rewireLed(l,newIn){if(l._w){l._w.s=newIn;l.i=newIn;return true;}return false;}
+function gateBody(t){
+switch(t){
+case "AND":return "M0,0 L14,0 A17,17 0 0 1 14,30 L0,30 Z";
+case "OR":return "M0,0 Q12,0 30,15 Q12,30 0,30 Q10,15 0,0 Z";
+case "NOT":return "M0,0 L30,15 L0,30 Z";
+case "XOR":return "M4,0 Q17,0 34,15 Q17,30 4,30 Q15,15 4,0 Z";
+case "NAND":return "M0,0 L14,0 A17,17 0 0 1 14,30 L0,30 Z";
+case "NOR":return "M0,0 Q12,0 30,15 Q12,30 0,30 Q10,15 0,0 Z";
+case "XNOR":return "M4,0 Q17,0 34,15 Q17,30 4,30 Q15,15 4,0 Z";
+}
+return "M0,0 L34,0 L34,30 L0,30 Z";
+}
 function clearLayer(g){while(g.firstChild)g.removeChild(g.firstChild);}
 function renderSection(s){
 lS.appendChild(E("rect",{x:s.x,y:s.y,width:s.w,height:s.h,fill:"#fafafa",stroke:"#d4d4d4","stroke-width":0.5,"stroke-dasharray":"4 3"}));
@@ -301,12 +329,25 @@ var t=E("text",{x:s.x+10,y:s.y+13,"font-size":10,"font-weight":700,fill:"#666"})
 function renderGate(g){
 var grp=E("g",{transform:"translate("+g.px+","+g.py+")"});
 grp.appendChild(E("path",{d:gateBody(g.t),fill:"#fff",stroke:"#222","stroke-width":1}));
-if(g.t==="XOR")grp.appendChild(E("path",{d:"M0,0 Q10,15 0,30",fill:"none",stroke:"#222","stroke-width":1}));
-if(g.t==="NOT")grp.appendChild(E("circle",{cx:33,cy:15,r:3,fill:"#fff",stroke:"#222","stroke-width":1}));
-var n=g.t==="NOT"?1:2;for(var i=0;i<n;i++){var y=n===1?15:(i===0?10:20);grp.appendChild(E("line",{x1:-6,y1:y,x2:0,y2:y,stroke:"#222","stroke-width":1}));}
+if(g.t==="XOR"||g.t==="XNOR")grp.appendChild(E("path",{d:"M0,0 Q10,15 0,30",fill:"none",stroke:"#222","stroke-width":1}));
+if(g.t==="NOT"||g.t==="NAND")grp.appendChild(E("circle",{cx:33,cy:15,r:3,fill:"#fff",stroke:"#222","stroke-width":1}));
+if(g.t==="NOR")grp.appendChild(E("circle",{cx:33,cy:15,r:3,fill:"#fff",stroke:"#222","stroke-width":1}));
+var n=(g.t==="NOT")?1:2;for(var i=0;i<n;i++){var y=n===1?15:(i===0?10:20);grp.appendChild(E("line",{x1:-6,y1:y,x2:0,y2:y,stroke:"#222","stroke-width":1}));}
 grp.appendChild(E("line",{x1:34,y1:15,x2:40,y2:15,stroke:"#222","stroke-width":1}));
-if(g.t==="LAT"){var t=E("text",{x:16,y:18,"text-anchor":"middle","font-size":7,fill:"#222","font-weight":700});t.textContent="D";grp.appendChild(t);}
+var lbl=(g.t==="NAND")?"&":(g.t==="NOR")?"≥1":(g.t==="XNOR")?"=1":"";
+if(lbl){var lt=E("text",{x:16,y:19,"text-anchor":"middle","font-size":8,fill:"#222","font-weight":700});lt.textContent=lbl;grp.appendChild(lt);}
 lG.appendChild(grp);
+}
+function renderLatch(l){
+var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
+grp.appendChild(E("rect",{x:0,y:0,width:46,height:38,fill:"#fff",stroke:"#222","stroke-width":1}));
+grp.appendChild(E("line",{x1:-6,y1:17,x2:0,y2:17,stroke:"#222","stroke-width":1}));
+grp.appendChild(E("line",{x1:-6,y1:35,x2:0,y2:35,stroke:"#222","stroke-width":1}));
+grp.appendChild(E("line",{x1:46,y1:19,x2:52,y2:19,stroke:"#222","stroke-width":1}));
+var t1=E("text",{x:6,y:20,"font-size":7,fill:"#222","font-weight":700});t1.textContent="D";grp.appendChild(t1);
+var t2=E("text",{x:6,y:37,"font-size":7,fill:"#222","font-weight":700});t2.textContent="C";grp.appendChild(t2);
+var t3=E("text",{x:38,y:20,"font-size":7,fill:"#222","font-weight":700});t3.textContent="Q";grp.appendChild(t3);
+lF.appendChild(grp);
 }
 function renderSwitch(s){
 var w=38,h=46;var grp=E("g",{transform:"translate("+s.px+","+s.py+")"});
@@ -324,7 +365,7 @@ var hit=E("rect",{x:0,y:0,width:w,height:h,fill:"transparent",cursor:"pointer",c
 grp.appendChild(hit);
 hit.addEventListener("pointerdown",function(ev){
 ev.stopPropagation();ev.preventDefault();s.v=s.v?0:1;
-if(s.label==="DESTRUCT"&&s.v){for(var q=0;q<gates.length;q++)if(gates[q].t==="LAT")gates[q].prev=0;setTimeout(function(){s.v=0;},200);}
+if(s.label==="DESTRUCT"&&s.v){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);setTimeout(function(){s.v=0;},200);}
 if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT"||s.label==="POINT")){setTimeout(function(){s.v=0;},100);}
 });
 }
@@ -338,18 +379,17 @@ grp.appendChild(E("circle",{cx:0,cy:0,r:rI,fill:on?l.c:"#e8e8e8"}));
 if(l.label&&sz>=20){var t=E("text",{x:0,y:-rO-3,"text-anchor":"middle","font-size":7,fill:"#555"});t.textContent=l.label;grp.appendChild(t);}
 lL.appendChild(grp);
 }
-function renderWire(sx,sy,dx,dy,on,mx,simple){
-var path;
-if(simple){path="M"+sx+","+sy+"L"+dx+","+dy;}
-else if(Math.abs(sy-dy)<3){path="M"+sx+","+sy+"H"+dx;}
-else{var m=(mx===undefined)?sx+(dx-sx)/2:mx;path="M"+sx+","+sy+"H"+m+"V"+dy+"H"+dx;}
-var sw2=simple?(on?0.9:0.35):(on?1.5:1);
-var st=simple?(on?"#444":"#dcdcdc"):(on?"#111":"#cfcfcf");
-lW.appendChild(E("path",{d:path,fill:"none",stroke:st,"stroke-width":sw2}));
+function pathFor(sx,sy,dx,dy,mx,simple){
+if(simple)return "M"+sx+","+sy+"L"+dx+","+dy;
+if(Math.abs(sy-dy)<3)return "M"+sx+","+sy+"H"+dx;
+var m=(mx===undefined)?sx+(dx-sx)/2:mx;
+return "M"+sx+","+sy+"H"+m+"V"+dy+"H"+dx;
 }
+var _cachedRect=null,_cacheT=0;
+function getRect(){var now=performance.now();if(!_cachedRect||now-_cacheT>200){_cachedRect=svg.getBoundingClientRect();_cacheT=now;}return _cachedRect;}
 function renderFrame(){
 if(!vp)return;
-var r=svg.getBoundingClientRect();
+var r=getRect();
 var vx1=-view.x/view.k,vy1=-view.y/view.k,vx2=vx1+r.width/view.k,vy2=vy1+r.height/view.k;
 var lod=view.k,pad=40;
 var minimal=lod<0.015;
@@ -357,22 +397,58 @@ var showSections=lod>0.020;
 var showGates=lod>0.060;
 var showSwitches=lod>0.080;
 var showLeds=lod>0.100;
-clearLayer(lW);clearLayer(lG);clearLayer(lL);clearLayer(lU);clearLayer(lS);
+var showWires=lod>0.004;
+var showLatches=lod>0.045;
+clearLayer(lG);clearLayer(lF);clearLayer(lL);clearLayer(lU);clearLayer(lS);
 if(frame43&&lod>0.010){lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:frame43.w,height:frame43.h,fill:"none",stroke:"#aaa","stroke-width":0.4}));}
 if(showSections){for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];if(s.x+s.w<vx1||s.x>vx2||s.y+s.h<vy1||s.y>vy2)continue;renderSection(s);}}
-for(var i=0;i<wires.length;i++){var w=wires[i];var sx=w.s.x,sy=w.s.y;if(sx===undefined||sy===undefined)continue;var dx,dy;if(w.l){dx=w.l.px-(w.l.sz||22)*0.4-2;dy=w.l.py;}else{dx=w.g.px-6;dy=w.g.py+w.py;}var mxw=(w.mx===undefined?sx:w.mx);var minx=Math.min(sx,dx,mxw),maxx=Math.max(sx,dx,mxw);var miny=Math.min(sy,dy),maxy=Math.max(sy,dy);if(maxx<vx1-pad||minx>vx2+pad||maxy<vy1-pad||miny>vy2+pad)continue;renderWire(sx,sy,dx,dy,w.s.v,w.mx,minimal);}
-if(showGates){for(var i=0;i<gates.length;i++){var g=gates[i];if(g.px+50<vx1-pad||g.px>vx2+pad)continue;if(g.py+44<vy1-pad||g.py>vy2+pad)continue;renderGate(g);}}
+var onD="",offD="";
+if(showWires){
+for(var i=0;i<wires.length;i++){
+var w=wires[i];var sx=w.s.x,sy=w.s.y;if(sx===undefined||sy===undefined)continue;
+var dx,dy;
+if(w.l){dx=w.l.px-(w.l.sz||22)*0.4-2;dy=w.l.py;}
+else{dx=w.g.px-6;dy=w.g.py+w.py;}
+var mxw=(w.mx===undefined?sx:w.mx);
+var minx=Math.min(sx,dx,mxw),maxx=Math.max(sx,dx,mxw);
+var miny=Math.min(sy,dy),maxy=Math.max(sy,dy);
+if(maxx<vx1-pad||minx>vx2+pad||maxy<vy1-pad||miny>vy2+pad)continue;
+var p=pathFor(sx,sy,dx,dy,w.mx,minimal);
+if(w.s.v)onD+=p;else offD+=p;
+}
+}
+lW_on.setAttribute("d",onD);
+lW_off.setAttribute("d",offD);
+lW_on.setAttribute("stroke-width",minimal?0.9:1.5);
+lW_off.setAttribute("stroke-width",minimal?0.35:1);
+lW_off.setAttribute("stroke",minimal?"#dcdcdc":"#cfcfcf");
+if(showGates){for(var i=0;i<gates.length;i++){var g=gates[i];if(g._hidden)continue;if(g.px+50<vx1-pad||g.px>vx2+pad)continue;if(g.py+44<vy1-pad||g.py>vy2+pad)continue;renderGate(g);}}
+if(showLatches){for(var i=0;i<latches.length;i++){var l=latches[i];if(l.px+50<vx1-pad||l.px>vx2+pad)continue;if(l.py+44<vy1-pad||l.py>vy2+pad)continue;renderLatch(l);}}
 if(showSwitches){for(var i=0;i<sws.length;i++){var s=sws[i];if(s.px+70<vx1-pad||s.px>vx2+pad)continue;if(s.py+86<vy1-pad||s.py>vy2+pad)continue;renderSwitch(s);}}
 if(showLeds){for(var i=0;i<leds.length;i++){var l=leds[i];var rad=(l.sz||22)*0.5+4;if(l.px+rad<vx1||l.px-rad>vx2)continue;if(l.py+rad<vy1||l.py-rad>vy2)continue;renderLed(l);}}
 }
-function evalComb(g){var a=g.i[0]?g.i[0].v:0,b=g.i[1]?g.i[1].v:0;switch(g.t){case "AND":return a&b;case "OR":return a|b;case "NOT":return a?0:1;case "XOR":return a^b;}return 0;}
+function evalComb(g){
+var a=g.i[0]?g.i[0].v:0,b=g.i[1]?g.i[1].v:0;
+switch(g.t){
+case "AND":return a&b;
+case "OR":return a|b;
+case "NOT":return a?0:1;
+case "XOR":return a^b;
+case "NAND":return (a&b)?0:1;
+case "NOR":return (a|b)?0:1;
+case "XNOR":return (a^b)?0:1;
+}
+return 0;
+}
+var _simCount=0;
 function simulate(){
-var iter,i,g;
-for(iter=0;iter<8;iter++){for(i=0;i<sws.length;i++)sws[i].o.v=sws[i].v;for(i=0;i<gates.length;i++){g=gates[i];if(g.t==="LAT"){g.o.v=g.prev;continue;}g.o.v=evalComb(g);}}
-var snap=[];
-for(i=0;i<gates.length;i++){g=gates[i];if(g.t!=="LAT")continue;snap.push({g:g,d:g.i[0]?g.i[0].v:0,en:g.i[1]?g.i[1].v:0});}
-for(i=0;i<snap.length;i++){var s=snap[i];if(s.en&&!s.g.prevEn)s.g.prev=s.d;s.g.prevEn=s.en;s.g.o.v=s.g.prev;}
-for(iter=0;iter<4;iter++){for(i=0;i<sws.length;i++)sws[i].o.v=sws[i].v;for(i=0;i<gates.length;i++){g=gates[i];if(g.t==="LAT"){g.o.v=g.prev;continue;}g.o.v=evalComb(g);}}
+for(var iter=0;iter<128;iter++){
+var changed=false;
+for(var i=0;i<sws.length;i++){var s=sws[i];if(s.o.v!==s.v){s.o.v=s.v;changed=true;}}
+for(var i=0;i<gates.length;i++){var g=gates[i];var nv=evalComb(g);if(g.o.v!==nv){g.o.v=nv;changed=true;}}
+if(!changed){_simCount=iter+1;return;}
+}
+_simCount=128;
 }
 function tickOsc(){for(var i=0;i<sws.length;i++){var s=sws[i];if(s.osc){s.t++;if(s.t>=s.period){s.t=0;s.v=s.v?0:1;}}}}
 
@@ -406,10 +482,10 @@ section("INPUT · CLK",240,function(){core.CLKo=osc(1,"CLK").o;});
 forceNewRow();
 core.OP=OP;core.D=D;core.T=T;core.A=A;
 core.RAM=[];
-section("STORAGE · RAM 512×8",48000,function(){for(i=0;i<RAM_SIZE;i++){beginGroup(140);core.RAM.push([]);for(var b=0;b<8;b++){beginGroup(18);core.RAM[i].push(LAT(0));endGroup();}endGroup();}});
+section("STORAGE · RAM 512×8 (PURE FF)",48000,function(){for(i=0;i<RAM_SIZE;i++){beginGroup(140);core.RAM.push([]);for(var b=0;b<8;b++){beginGroup(18);core.RAM[i].push(LAT(0));endGroup();}endGroup();}});
 forceNewRow();
 core.STORE=[];
-section("STORAGE · FLASH 128×8",12800,function(){for(i=0;i<STORE_SIZE;i++){beginGroup(140);core.STORE.push([]);for(var b=0;b<8;b++){beginGroup(18);core.STORE[i].push(LAT(0));endGroup();}endGroup();}});
+section("STORAGE · FLASH 128×8 (PURE FF)",12800,function(){for(i=0;i<STORE_SIZE;i++){beginGroup(140);core.STORE.push([]);for(var b=0;b<8;b++){beginGroup(18);core.STORE[i].push(LAT(0));endGroup();}endGroup();}});
 forceNewRow();
 }
 
@@ -478,12 +554,11 @@ section("FETCH · OP",12000,function(){for(var bb=0;bb<8;bb++){beginGroup(2000);
 section("FETCH · DATA",12000,function(){for(var bb=0;bb<8;bb++){beginGroup(2000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=1)?qDec[j-1]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qData.push(acc);endGroup();}});
 forceNewRow();
 section("FETCH · TAG",12000,function(){for(var bb=0;bb<8;bb++){beginGroup(2000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=2)?qDec[j-2]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qTag.push(acc);endGroup();}});
-// FIX: ADDR only 8-bit stored (bytes are 8-bit)
 section("FETCH · ADDR",12000,function(){
 for(var bb=0;bb<8;bb++){beginGroup(2000);var acc=null;
 for(var j=0;j<RAM_SIZE;j++){var s=(j>=3)?qDec[j-3]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}
 qDest.push(acc);endGroup();}
-qDest.push(K0); // bit 8 always 0
+qDest.push(K0);
 });
 forceNewRow();
 var ms=core.RUNQo;var nms=NOT(ms);
@@ -529,7 +604,6 @@ var fontA=AND(core.effRunEdge,opDec[OP_FONT]);
 for(i=0;i<2;i++){var v=core.finalData[i];var nv=OR(AND(fontA,v),AND(NOT(fontA),fontMode[i].o));setLat(fontMode[i],nv,fontA);}
 });
 
-// === RND · LFSR 8-bit ===
 var rndReg=[];
 for(i=0;i<8;i++)rndReg.push(LAT(i===0?1:0));
 core.rndReg=rndReg;
@@ -625,7 +699,7 @@ endGroup();
 core.halt=LAT(0);
 section("HALT · LATCH",600,function(){
 var haltSet=AND(AND(opDec[OP_HALT],core.effRunEdge),NOT(core.halt.o));
-var next=OR(haltSet,AND(NOT(core.clrEdge),core.halt.o));
+var next=OR(haltSet,core.halt.o);
 setLat(core.halt,next,OR(haltSet,core.clrEdge));
 });
 
@@ -651,29 +725,30 @@ setLat(core.ptr[i],v,en);
 }
 });
 
-var opR={};
-section("ALU · SET·MOV",900,function(){var r0=[];for(b=0;b<8;b++)r0.push(core.finalData[b]);opR[OP_SET]=r0;opR[OP_MOV]=srcB.slice();});
-section("ALU · ADD·SUB",1600,function(){opR[OP_ADD]=add8(srcB,srcC);opR[OP_SUB]=sub8(srcB,srcC);});
-section("ALU · MUL·DIV",2000,function(){opR[OP_MUL]=mul4low([srcB[0],srcB[1],srcB[2],srcB[3]],[srcC[0],srcC[1],srcC[2],srcC[3]]);opR[OP_DIV]=div4([srcB[0],srcB[1],srcB[2],srcB[3]],[srcC[0],srcC[1],srcC[2],srcC[3]]);});
+var opR={},opList=[];
+function addOp(code,bits){opR[code]=bits;opList.push(code);}
+section("ALU · SET·MOV",900,function(){var r0=[];for(b=0;b<8;b++)r0.push(core.finalData[b]);addOp(OP_SET,r0);addOp(OP_MOV,srcB.slice());});
+section("ALU · ADD·SUB",1600,function(){addOp(OP_ADD,add8(srcB,srcC));addOp(OP_SUB,sub8(srcB,srcC));});
+section("ALU · MUL·DIV",2000,function(){addOp(OP_MUL,mul4low([srcB[0],srcB[1],srcB[2],srcB[3]],[srcC[0],srcC[1],srcC[2],srcC[3]]));addOp(OP_DIV,div4([srcB[0],srcB[1],srcB[2],srcB[3]],[srcC[0],srcC[1],srcC[2],srcC[3]]));});
 forceNewRow();
-section("ALU · LOGIC",1400,function(){var aR=[],oR=[],xR=[],nR=[];for(b=0;b<8;b++){aR.push(AND(srcB[b],srcC[b]));oR.push(OR(srcB[b],srcC[b]));xR.push(XOR(srcB[b],srcC[b]));nR.push(NOT(srcB[b]));}opR[OP_AND]=aR;opR[OP_OR]=oR;opR[OP_XOR]=xR;opR[OP_NOT]=nR;});
-section("ALU · INC·DEC",1600,function(){opR[OP_INC]=add8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]);opR[OP_DEC]=sub8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]);});
-section("ALU · CLR",200,function(){opR[OP_CLR]=[K0,K0,K0,K0,K0,K0,K0,K0];});
-section("ALU · SHL·SHR",1600,function(){var shl=[K0],shr=[K0];for(b=0;b<7;b++)shl.push(srcB[b]);for(b=1;b<8;b++)shr.push(srcB[b]);opR[OP_SHL]=shl;opR[OP_SHR]=shr;});
+section("ALU · LOGIC",1400,function(){var aR=[],oR=[],xR=[],nR=[];for(b=0;b<8;b++){aR.push(AND(srcB[b],srcC[b]));oR.push(OR(srcB[b],srcC[b]));xR.push(XOR(srcB[b],srcC[b]));nR.push(NOT(srcB[b]));}addOp(OP_AND,aR);addOp(OP_OR,oR);addOp(OP_XOR,xR);addOp(OP_NOT,nR);});
+section("ALU · INC·DEC",1600,function(){addOp(OP_INC,add8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]));addOp(OP_DEC,sub8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]));});
+section("ALU · CLR",200,function(){addOp(OP_CLR,[K0,K0,K0,K0,K0,K0,K0,K0]);});
+section("ALU · SHL·SHR",1600,function(){var shl=[K0],shr=[K0];for(b=0;b<7;b++)shl.push(srcB[b]);for(b=1;b<8;b++)shr.push(srcB[b]);addOp(OP_SHL,shl);addOp(OP_SHR,shr);});
 section("ALU · INDIRECT",1000,function(){
-opR[OP_JOY]=joyByte.slice();
-opR[OP_PEEK]=peekRead.slice();
-opR[OP_STOREI]=storeiRead.slice();
-opR[OP_STORER]=storRead.slice();
+addOp(OP_JOY,joyByte.slice());
+addOp(OP_PEEK,peekRead.slice());
+addOp(OP_STOREI,storeiRead.slice());
+addOp(OP_STORER,storRead.slice());
 });
 section("ALU · RND",600,function(){
 var rr=[];for(b=0;b<8;b++)rr.push(core.rndReg[b].o);
-opR[OP_RND]=rr;
+addOp(OP_RND,rr);
 });
 forceNewRow();
 section("OUTPUT MUX",5000,function(){
 for(b=0;b<8;b++){beginGroup(700);var acc=null;
-for(var kk in opR){var opv=parseInt(kk,10);var t=AND(opDec[opv],opR[kk][b]);acc=(acc===null)?t:OR(acc,t);}
+for(var ii=0;ii<opList.length;ii++){var opv=opList[ii];var t=AND(opDec[opv],opR[opv][b]);acc=(acc===null)?t:OR(acc,t);}
 if(acc===null)acc=K0;finalR.push(acc);endGroup();}
 });
 
@@ -736,32 +811,19 @@ var scrClrPulse=AND(runOk,opDec[OP_SCRCLR]);
 var scrollPulse=AND(runOk,opDec[OP_SCROLL]);
 var storerAct=AND(runOk,opDec[OP_STORER]);
 var noWrite=K0;
-noWrite=OR(noWrite,opDec[OP_NOP]);
-noWrite=OR(noWrite,opDec[OP_JMP]);
-noWrite=OR(noWrite,opDec[OP_JZ]);
-noWrite=OR(noWrite,opDec[OP_JNZ]);
-noWrite=OR(noWrite,opDec[OP_DELAY]);
-noWrite=OR(noWrite,opDec[OP_SCRCLR]);
-noWrite=OR(noWrite,opDec[OP_SCROLL]);
-noWrite=OR(noWrite,opDec[OP_SPX]);
-noWrite=OR(noWrite,opDec[OP_SPY]);
-noWrite=OR(noWrite,opDec[OP_SPXP]);
-noWrite=OR(noWrite,opDec[OP_SPXM]);
-noWrite=OR(noWrite,opDec[OP_SPYP]);
-noWrite=OR(noWrite,opDec[OP_SPYM]);
-noWrite=OR(noWrite,opDec[OP_SPSHOW]);
-noWrite=OR(noWrite,opDec[OP_SPHIDE]);
-noWrite=OR(noWrite,opDec[OP_HOME]);
-noWrite=OR(noWrite,opDec[OP_CUR]);
-noWrite=OR(noWrite,opDec[OP_CHR]);
-noWrite=OR(noWrite,opDec[OP_NL]);
-noWrite=OR(noWrite,opDec[OP_CLRLN]);
-noWrite=OR(noWrite,opDec[OP_SCLR]);
-noWrite=OR(noWrite,opDec[OP_FILL]);
-noWrite=OR(noWrite,opDec[OP_HALT]);
-noWrite=OR(noWrite,opDec[OP_FONT]);
-noWrite=OR(noWrite,opDec[OP_STOREW]);
-noWrite=OR(noWrite,opDec[OP_POKER]);
+noWrite=OR(noWrite,opDec[OP_NOP]);noWrite=OR(noWrite,opDec[OP_JMP]);
+noWrite=OR(noWrite,opDec[OP_JZ]);noWrite=OR(noWrite,opDec[OP_JNZ]);
+noWrite=OR(noWrite,opDec[OP_DELAY]);noWrite=OR(noWrite,opDec[OP_SCRCLR]);
+noWrite=OR(noWrite,opDec[OP_SCROLL]);noWrite=OR(noWrite,opDec[OP_SPX]);
+noWrite=OR(noWrite,opDec[OP_SPY]);noWrite=OR(noWrite,opDec[OP_SPXP]);
+noWrite=OR(noWrite,opDec[OP_SPXM]);noWrite=OR(noWrite,opDec[OP_SPYP]);
+noWrite=OR(noWrite,opDec[OP_SPYM]);noWrite=OR(noWrite,opDec[OP_SPSHOW]);
+noWrite=OR(noWrite,opDec[OP_SPHIDE]);noWrite=OR(noWrite,opDec[OP_HOME]);
+noWrite=OR(noWrite,opDec[OP_CUR]);noWrite=OR(noWrite,opDec[OP_CHR]);
+noWrite=OR(noWrite,opDec[OP_NL]);noWrite=OR(noWrite,opDec[OP_CLRLN]);
+noWrite=OR(noWrite,opDec[OP_SCLR]);noWrite=OR(noWrite,opDec[OP_FILL]);
+noWrite=OR(noWrite,opDec[OP_HALT]);noWrite=OR(noWrite,opDec[OP_FONT]);
+noWrite=OR(noWrite,opDec[OP_STOREW]);noWrite=OR(noWrite,opDec[OP_POKER]);
 noWrite=OR(noWrite,opDec[OP_SEED]);
 var doWrite=NOT(noWrite);
 
@@ -922,35 +984,104 @@ endGroup();
 }
 });
 forceNewRow();
+
+// ============================================================
+// Row-code font rendering (saves ~30k gates)
+// ============================================================
+var rowCodeSmall=[], rowCodeSmallBold=[], rowCodeBig=[], rowCodeBigBold=[];
+section("SCREEN · ROWCODE",20000,function(){
+// Small: 32 cells × 4 rows × 4 bits
+for(var ci=0;ci<DISPLAY_CELLS;ci++){
+var rc=[];
+for(r=0;r<4;r++){
+var bits=[null,null,null,null];
+for(b=0;b<4;b++){
+var acc=null;
+for(var si=0;si<SUPPORTED.length;si++){
+var ch=SUPPORTED[si];
+if((FONT[ch][r]>>b)&1){
+var m=charSels[ci][si];
+acc=(acc===null)?m:OR(acc,m);
+}
+}
+if(acc===null)acc=K0;
+bits[b]=acc;
+}
+rc.push(bits);
+}
+rowCodeSmall.push(rc);
+}
+// Big: 8 cells × 4 rows × 4 bits
+for(var ci=0;ci<8;ci++){
+var rc=[];
+for(r=0;r<4;r++){
+var bits=[null,null,null,null];
+for(b=0;b<4;b++){
+var acc=null;
+for(var si=0;si<SUPPORTED.length;si++){
+var ch=SUPPORTED[si];
+if((FONT[ch][r]>>b)&1){
+// big uses RAM cells 0..7 only
+var m=charSels[ci][si];
+acc=(acc===null)?m:OR(acc,m);
+}
+}
+if(acc===null)acc=K0;
+bits[b]=acc;
+}
+rc.push(bits);
+}
+rowCodeBig.push(rc);
+}
+// Bold variants: bold[i] = plain[i] | plain[i+1]
+for(var ci=0;ci<DISPLAY_CELLS;ci++){
+var rc=[];
+for(r=0;r<4;r++){
+var bits=[null,null,null,null];
+bits[3]=rowCodeSmall[ci][r][3];
+bits[2]=OR(rowCodeSmall[ci][r][2],rowCodeSmall[ci][r][3]);
+bits[1]=OR(rowCodeSmall[ci][r][1],rowCodeSmall[ci][r][2]);
+bits[0]=OR(rowCodeSmall[ci][r][0],rowCodeSmall[ci][r][1]);
+rc.push(bits);
+}
+rowCodeSmallBold.push(rc);
+}
+for(var ci=0;ci<8;ci++){
+var rc=[];
+for(r=0;r<4;r++){
+var bits=[null,null,null,null];
+bits[3]=rowCodeBig[ci][r][3];
+bits[2]=OR(rowCodeBig[ci][r][2],rowCodeBig[ci][r][3]);
+bits[1]=OR(rowCodeBig[ci][r][1],rowCodeBig[ci][r][2]);
+bits[0]=OR(rowCodeBig[ci][r][0],rowCodeBig[ci][r][1]);
+rc.push(bits);
+}
+rowCodeBigBold.push(rc);
+}
+});
+forceNewRow();
 section("SCREEN · GRID",SCR_W*(SIZE_LED+GAPX)+GAPX,function(){for(r=0;r<SCR_H;r++){beginGroup(SCR_W*(SIZE_LED+GAPX)+GAPX);screenLeds.push([]);for(c=0;c<SCR_W;c++)screenLeds[r].push(ledPending("#111","",SIZE_LED));endGroup();}});
 
 section("SCREEN · FONT",20000,function(){
 for(r=0;r<SCR_H;r++){beginGroup(8000);
 for(c=0;c<SCR_W;c++){beginGroup(5000);
+// small coords
 var ci_small=(r>>2)*CHAR_COLS+(c>>2);
-var ci_big=(r>>3)*4+(c>>3);
 var spx=c&3,spy=r&3;
+var bs=3-spx;
+var sP=rowCodeSmall[ci_small][spy][bs];
+var sB=rowCodeSmallBold[ci_small][spy][bs];
+// big coords
+var ci_big=(r>>3)*4+(c>>3);
 var bpx=(c>>1)&3,bpy=(r>>1)&3;
-var acc=null;
-for(var si=0;si<SUPPORTED.length;si++){
-var ch=SUPPORTED[si];
-var v_sn=(FONT[ch][spy]>>(3-spx))&1;
-var v_sb=(FONT_BOLD[ch][spy]>>(3-spx))&1;
-var v_bn=(FONT[ch][bpy]>>(3-bpx))&1;
-var v_bb=(FONT_BOLD[ch][bpy]>>(3-bpx))&1;
-var anyS=v_sn|v_sb;
-var anyB=v_bn|v_bb;
-if(!anyS&&!anyB)continue;
-var mS=charSels[ci_small][si];
-var mB=charSels[ci_big][si];
-var tS=K0,tB=K0;
-if(anyS){var bitS=v_sn?(v_sb?K1:nbold):(v_sb?bold:K0);tS=AND(AND(mS,nbig),bitS);}
-if(anyB){var bitB=v_bn?(v_bb?K1:nbold):(v_bb?bold:K0);tB=AND(AND(mB,big),bitB);}
-var term=OR(tS,tB);
-acc=(acc===null)?term:OR(acc,term);
-}
-if(acc===null)acc=K0;
-rewireLed(screenLeds[r][c],acc);
+var bb=3-bpx;
+var bP=rowCodeBig[ci_big][bpy][bb];
+var bB=rowCodeBigBold[ci_big][bpy][bb];
+// Select bold/plain, then big/small
+var pixS=OR(AND(nbold,sP),AND(bold,sB));
+var pixB=OR(AND(nbold,bP),AND(bold,bB));
+var pix=OR(AND(nbig,pixS),AND(big,pixB));
+rewireLed(screenLeds[r][c],pix);
 endGroup();}
 endGroup();}
 });
@@ -990,33 +1121,11 @@ forceNewRow();
 }
 
 var NOOP=[0x00,0x00,0x00,0x00];
-function writeRamByte(arr,addr,val){if(addr<0||addr>=RAM_SIZE)return;for(var b=0;b<8;b++)arr[addr][b].prev=(val>>b)&1;}
-function writeStoreByte(addr,val){if(addr<0||addr>=STORE_SIZE)return;for(var b=0;b<8;b++)core.STORE[addr][b].prev=(val>>b)&1;}
+function writeRamByte(arr,addr,val){if(addr<0||addr>=RAM_SIZE)return;for(var b=0;b<8;b++)latchReset(arr[addr][b],(val>>b)&1);}
+function writeStoreByte(addr,val){if(addr<0||addr>=STORE_SIZE)return;for(var b=0;b<8;b++)latchReset(core.STORE[addr][b],(val>>b)&1);}
 
 function clearMemory(){
-var i,b;
-for(i=0;i<RAM_SIZE;i++)for(b=0;b<8;b++){core.RAM[i][b].prev=0;core.RAM[i][b].prevEn=0;}
-for(var s=0;s<QUEUE_SLOTS;s++){for(b=0;b<ADDR_BITS;b++)core.slots[s].addr[b].prev=0;core.slots[s].valid.prev=0;core.slots[s].valid.prevEn=0;}
-if(core.ptr)for(i=0;i<PTR_BITS;i++){core.ptr[i].prev=0;core.ptr[i].prevEn=0;}
-if(core.delayReg)for(i=0;i<4;i++){core.delayReg[i].prev=0;core.delayReg[i].prevEn=0;}
-if(core.delayOpPrev){core.delayOpPrev.prev=0;core.delayOpPrev.prevEn=0;}
-if(core.sx)for(i=0;i<5;i++){core.sx[i].prev=0;core.sx[i].prevEn=0;}
-if(core.sy)for(i=0;i<4;i++){core.sy[i].prev=0;core.sy[i].prevEn=0;}
-if(core.sprVis){core.sprVis.prev=0;core.sprVis.prevEn=0;}
-if(core.cCol)for(i=0;i<3;i++){core.cCol[i].prev=0;core.cCol[i].prevEn=0;}
-if(core.cRow)for(i=0;i<2;i++){core.cRow[i].prev=0;core.cRow[i].prevEn=0;}
-if(core.fontMode)for(i=0;i<2;i++){core.fontMode[i].prev=0;core.fontMode[i].prevEn=0;}
-if(core.rndReg)for(i=0;i<8;i++){core.rndReg[i].prev=(i===0?1:0);core.rndReg[i].prevEn=0;}
-if(core.halt){core.halt.prev=0;core.halt.prevEn=0;}
-if(core.queuePrev){core.queuePrev.prev=0;core.queuePrev.prevEn=0;}
-if(core.clrqPrev){core.clrqPrev.prev=0;core.clrqPrev.prevEn=0;}
-if(core.runPrev){core.runPrev.prev=0;core.runPrev.prevEn=0;}
-if(core.clrPrev){core.clrPrev.prev=0;core.clrPrev.prevEn=0;}
-if(core.upPrev){core.upPrev.prev=0;core.upPrev.prevEn=0;}
-if(core.dnPrev){core.dnPrev.prev=0;core.dnPrev.prevEn=0;}
-if(core.lfPrev){core.lfPrev.prev=0;core.lfPrev.prevEn=0;}
-if(core.rtPrev){core.rtPrev.prev=0;core.rtPrev.prevEn=0;}
-if(core.ptPrev){core.ptPrev.prev=0;core.ptPrev.prevEn=0;}
+for(var q=0;q<latches.length;q++)latchReset(latches[q],latches[q]._init);
 }
 function loadProgram(proj){
 clearMemory();
@@ -1031,16 +1140,12 @@ writeRamByte(core.RAM,addr,ins[0]&0xFF);
 writeRamByte(core.RAM,addr+1,ins[1]&0xFF);
 writeRamByte(core.RAM,addr+2,ins[2]&0xFF);
 writeRamByte(core.RAM,addr+3,ins[3]&0xFF);
-for(var b=0;b<ADDR_BITS;b++)core.slots[i].addr[b].prev=(addr>>b)&1;
-core.slots[i].valid.prev=1;
+for(var b=0;b<ADDR_BITS;b++)latchReset(core.slots[i].addr[b],(addr>>b)&1);
+latchReset(core.slots[i].valid,1);
 addr+=4;
 }
 }
-function autoStart(){
-for(var i=0;i<sws.length;i++){
-if(sws[i].label==="RUN_Q"){sws[i].v=1;}
-}
-}
+function autoStart(){for(var i=0;i<sws.length;i++){if(sws[i].label==="RUN_Q"){sws[i].v=1;}}}
 function initProj(){
 var box=document.getElementById("projSel");var dd=document.getElementById("projDropdown");
 if(!window.BUILTIN_PROJECTS||!window.BUILTIN_PROJECTS.projects||!window.BUILTIN_PROJECTS.projects.length){box.style.display="none";loadProgram({program:[NOOP.slice()]});autoStart();return;}
@@ -1104,12 +1209,42 @@ for(var t=0;t<=30;t++){var Wp=maxW*Math.pow(totW/maxW,t/30);var p=pack(Wp),f2=fi
 for(i=0;i<n;i++){
 var sc2=secs[i],nx=M+best.p.pos[i].x,ny=TOP+best.p.pos[i].y;
 var dx=nx-sc2.x,dy=ny-sc2.y;
-for(k=sc2.g0;k<sc2.g1;k++){var g=gates[k];g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
+for(k=sc2.g0;k<sc2.g1;k++){var g=gates[k];if(g._hidden)continue;g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
 for(k=sc2.s0;k<sc2.s1;k++){var q2=sws[k];q2.px+=dx;q2.py+=dy;q2.o.x+=dx;q2.o.y+=dy;}
-for(k=sc2.l0;k<sc2.l1;k++){var l=leds[k];l.px+=dx;l.py+=dy;if(l.ph){l.ph.x=l.px-(l.sz||22)*0.4-2;l.ph.y=l.py;}}
+for(k=sc2.l0;k<sc2.l1;k++){var l=leds[k];l.px+=dx;l.py+=dy;if(l.ph){l.ph.x=l.px-2;l.ph.y=l.py;}}
 sc2.x=nx;sc2.y=ny;
 }
+// reposition latches inside sections
+for(i=0;i<latches.length;i++){
+var l=latches[i];
+// find containing section
+for(k=0;k<n;k++){
+var s3=secs[k];
+if(l.px>=s3.x-100&&l.px<=s3.x+s3.w+100&&l.py>=s3.y-100&&l.py<=s3.y+s3.h+100){
+// already moved by gate loop above (dIn/dIn.o moved), but latch px/py is stale
+// find the actual delta by checking dIn
+var d=l._dIn;
+var deltaX=d.px-l.px;
+var deltaY=d.py-l.py;
+l.px=d.px;l.py=d.py-2;
+break;
+}
+}
+}
 return {x:0,y:0,w:best.f.W,h:best.f.H};
+}
+function fitView(){
+if(!frame43)return;
+var r=svg.getBoundingClientRect();
+var k=Math.min(r.width/frame43.w, r.height/frame43.h)*0.95;
+view.k=k;
+view.x=(r.width - frame43.w*k)/2 - frame43.x*k;
+view.y=(r.height - frame43.h*k)/2 - frame43.y*k;
+applyView();
+}
+function updateGateCount(){
+var total=gates.length+sws.length+leds.length;
+document.getElementById("gcount").textContent="· "+total.toLocaleString()+" gates";
 }
 function loadProject(){
 try{
@@ -1123,6 +1258,8 @@ frame43=relayout43();
 routeWires();
 initProj();
 simulate();
+fitView();
+updateGateCount();
 renderFrame();
 }catch(e){showErr((e&&e.message)||String(e));console.error(e);if(e&&e.stack)console.error(e.stack);}
 }
@@ -1167,16 +1304,16 @@ else if(ids.length===1){mode="pan";var id=ids[0];panS={x:ptrs[id].x,y:ptrs[id].y
 svg.addEventListener("pointerup",endPtr);
 svg.addEventListener("pointercancel",endPtr);
 svg.addEventListener("pointerleave",function(e){if(ptrs[e.pointerId])endPtr(e);});
-svg.addEventListener("dblclick",function(){view.x=0;view.y=0;view.k=1;applyView();});
+svg.addEventListener("dblclick",function(){fitView();});
 document.getElementById("zoomIn").addEventListener("click",function(){zoomC(1.3);});
 document.getElementById("zoomOut").addEventListener("click",function(){zoomC(1/1.3);});
-document.getElementById("zoomReset").addEventListener("click",function(){view.x=0;view.y=0;view.k=1;applyView();});
+document.getElementById("zoomReset").addEventListener("click",function(){fitView();});
 var cheatEl=document.getElementById("cheat");var cheatMin=document.getElementById("cheatMin");
 document.getElementById("cheatBar").addEventListener("click",function(){cheatEl.classList.toggle("min");cheatMin.textContent=cheatEl.classList.contains("min")?"+":"−";});
 loadProject();
-setInterval(function(){tickOsc();simulate();},60);
+setInterval(function(){try{tickOsc();simulate();}catch(e){showErr((e&&e.message)||String(e));}},60);
 var lastR=0;
-requestAnimationFrame(function loop(t){requestAnimationFrame(loop);if(t-lastR<33)return;lastR=t;renderFrame();});
+requestAnimationFrame(function loop(t){requestAnimationFrame(loop);if(t-lastR<33)return;lastR=t;try{renderFrame();}catch(e){showErr((e&&e.message)||String(e));}});
 })();
 </script>
 </body>
