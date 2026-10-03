@@ -1,116 +1,125 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v6.1</title><style>
+<title>CPU 64 v6.2 · MAZE</title><style>
 *{box-sizing:border-box}html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
 svg{display:block;width:100vw;height:100vh;background:#fff;touch-action:none;cursor:grab}svg.drag{cursor:grabbing}
 text{font-family:inherit;user-select:none;pointer-events:none}
 #title{position:fixed;top:10px;left:12px;z-index:10;font-size:13px;font-weight:700;color:#222;background:#fff;padding:4px 8px;border:2px solid #333}#title small{font-weight:400;color:#666;margin-left:8px}
 #help{position:fixed;bottom:10px;left:12px;font-size:11px;color:#888;z-index:10}
-#projSel{position:fixed;top:10px;right:12px;z-index:21;background:#fff;border:2px solid #333;padding:5px 8px;font-size:11px;display:none;align-items:center;gap:6px}
-#projSel label{font-weight:700;color:#333}#projSel select{font-family:inherit;font-size:11px;padding:3px 6px;border:1px solid #888;background:#fff;max-width:280px}
-#cheat{position:fixed;top:52px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:400px;font-size:11px;line-height:1.4}
+#cheat{position:fixed;top:10px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:280px;font-size:11px;line-height:1.4}
 #cheat .bar{background:#333;color:#fff;padding:6px 10px;font-weight:700;display:flex;justify-content:space-between;cursor:pointer}
 #cheat .body{padding:10px;max-height:80vh;overflow:auto}#cheat.min .body{display:none}
 #cheat .hdr{font-weight:700;color:#222;margin:6px 0 3px;border-bottom:1px solid #ddd}
-#cheat .row{margin:1px 0}#cheat .c{color:#0a7;font-weight:700;display:inline-block;width:52px}
-#cheat .note{background:#f6f8fa;padding:6px 8px;margin:4px 0;border-left:3px solid #0a7;font-size:10px}
+#cheat .row{margin:1px 0}#cheat .note{background:#f6f8fa;padding:6px 8px;margin:4px 0;border-left:3px solid #0a7;font-size:10px}
 #zoomCtrl{position:fixed;bottom:14px;right:14px;z-index:30;display:flex;flex-direction:column;gap:6px}
 #zoomCtrl button{width:52px;height:52px;font-size:22px;font-weight:700;font-family:inherit;border:2px solid #333;background:#fff;cursor:pointer;padding:0}
 #zoomCtrl button:active{background:#333;color:#fff}
 #err{position:fixed;top:110px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;white-space:pre-wrap}
 </style></head><body>
-<div id="title">CPU 64 v6.1<small id="gcount"></small></div>
+<div id="title">CPU 64 v6.2 · MAZE<small id="gcount"></small></div>
 <div id="err"></div>
-<div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
-<div id="cheat" class="min"><div class="bar" id="cheatBar"><span>CHEAT · v6.1</span><span id="cheatMin">+</span></div>
+<div id="cheat" class="min"><div class="bar" id="cheatBar"><span>CHEAT · MAZE</span><span id="cheatMin">+</span></div>
 <div class="body">
-<div class="hdr">OPCODE LAMA</div>
-<div class="row"><span class="c">00</span>NOP</div><div class="row"><span class="c">01</span>SET</div>
-<div class="row"><span class="c">02</span>MOV</div><div class="row"><span class="c">04-07</span>ADD SUB MUL DIV</div>
-<div class="row"><span class="c">08-0B</span>AND OR XOR NOT</div><div class="row"><span class="c">0C-0D</span>INC DEC</div>
-<div class="row"><span class="c">10</span>JMP</div><div class="row"><span class="c">11</span>CLR</div>
-<div class="row"><span class="c">12</span>DELAY</div><div class="row"><span class="c">13</span>SCRCLR</div>
-<div class="row"><span class="c">14</span>JZ</div><div class="row"><span class="c">15</span>JNZ</div>
-<div class="row"><span class="c">16-1D</span>SPX SPY ± SPSHOW SPHIDE</div>
-<div class="row"><span class="c">1E</span>SCROLL</div><div class="row"><span class="c">1F</span>HOME</div>
-<div class="row"><span class="c">20</span>CUR</div><div class="row"><span class="c">21</span>CHR</div>
-<div class="row"><span class="c">22</span>NL</div><div class="row"><span class="c">23</span>CLRLN</div>
-<div class="row"><span class="c">24</span>SCLR</div><div class="row"><span class="c">25</span>FILL</div>
-<div class="row"><span class="c">26-27</span>SHL SHR</div><div class="row"><span class="c">28</span>HALT</div>
-<div class="row"><span class="c">29</span>POKE</div><div class="row"><span class="c">2A</span>FONT</div>
-<div class="row"><span class="c">2B</span>STORER</div><div class="row"><span class="c">2C</span>STOREW</div>
-<div class="row"><span class="c">2D</span>JOY</div><div class="row"><span class="c">2E</span>PEEK</div>
-<div class="row"><span class="c">2F</span>STOREI</div><div class="row"><span class="c">30</span>POKER</div>
-<div class="row"><span class="c">31</span>RND</div><div class="row"><span class="c">32</span>SEED</div>
-<div class="hdr">BARU v6 · C-LIKE</div>
-<div class="row"><span class="c">33</span>CMP B C → flag Z/LT/GT</div>
-<div class="row"><span class="c">34</span>JLT addr</div><div class="row"><span class="c">35</span>JGT addr</div>
-<div class="row"><span class="c">36</span>JEQ addr</div><div class="row"><span class="c">37</span>JNE addr</div>
-<div class="row"><span class="c">38</span>CALL addr</div><div class="row"><span class="c">39</span>RET</div>
-<div class="note"><b>Pola C:</b> <code>CMP a b</code> + <code>JLT L</code> = <code>if(a&lt;b)goto L</code>. <code>CALL f</code>/<code>RET</code> = fungsi. Call-stack 8 level, semua dari gerbang.<br><br>Format: <code>[OP, DATA, TAG, DEST]</code>. B=RAM[TAG], C=RAM[DATA].</div>
+<div class="hdr">KONTROL</div>
+<div class="note">Klik tombol <b>UP/DOWN/LEFT/RIGHT</b> di joystick untuk gerakkan <b>@</b>. Mencapai <b>*</b> = menang.</div>
+<div class="hdr">ARSITEKTUR</div>
+<div class="note">Logika 100% dari gerbang AND/OR/NOT/XOR. RAM = 512×8 flip-flop. FLASH = 128×8 flip-flop. CPU: FETCH → DECODE → ALU → WRITE.</div>
+<div class="note">Program maze berjalan dari RAM[128..]. DATA maze di FLASH[0..31]. Tampilan di RAM[0..31].</div>
+<div class="hdr">OPCODE (subset yg dipakai game)</div>
+<div class="row">01 SET · 02 MOV · 04 ADD · 06 MUL</div>
+<div class="row">08 AND · 0C INC · 0D DEC</div>
+<div class="row">10 JMP · 12 DELAY · 14 JZ</div>
+<div class="row">29 POKE · 2D JOY · 2F STOREI</div>
+<div class="row">33 CMP · 36 JEQ</div>
 </div></div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll=zoom · drag=pan · dblclick=layar · ⟲=seluruh rangkaian · klik switch</div>
+<div id="help">scroll=zoom · drag=pan · dblclick=layar · ⟲=seluruh rangkaian · klik switch joystick</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 <script>
-window.BUILTIN_PROJECTS={version:24,projects:[
-{id:"pingpong",name:"PING-PONG",description:"Sprite bolak-balik",program:[
-[0x01,0,0,60],[0x01,1,0,61],[0x01,15,0,62],[0x01,14,0,19],[0x01,4,0,20],
-[0x16,14,0,0],[0x17,7,0,0],[0x1C,0,0,0],
-[0x04,61,60,60],[0x08,62,60,60],[0x16,60,0,0],[0x12,1,0,0],[0x10,5,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"starfield",name:"STARFIELD",description:"Titik acak",program:[
-[0x01,1,0,60],[0x01,31,0,63],[0x32,1,0,0],[0x31,0,0,62],[0x08,63,62,62],[0x01,46,0,61],[0x29,46,62,0],[0x12,1,0,0],[0x10,4,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"fireworks",name:"FIREWORKS",description:"Ledakan + SCLR",program:[
-[0x13,0,0,0],[0x01,31,0,63],[0x32,42,0,0],[0x01,0,0,64],
-[0x31,0,0,62],[0x08,63,62,62],[0x29,42,62,0],[0x0C,0,64,64],[0x05,10,64,65],[0x15,4,65,0],
-[0x12,8,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x10,4,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"joy-sprite",name:"JOY SPRITE",description:"Kendalikan sprite dgn joystick",program:[
-[0x13,0,0,0],[0x16,14,0,0],[0x17,7,0,0],[0x1C,0,0,0],[0x12,1,0,0],[0x10,3,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"typewriter",name:"TYPEWRITER",description:"CHR demo",program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],
-[0x21,67,0,0],[0x21,80,0,0],[0x21,85,0,0],[0x21,32,0,0],
-[0x21,54,0,0],[0x21,52,0,0],[0x22,0,0,0],
-[0x21,82,0,0],[0x21,69,0,0],[0x21,65,0,0],[0x21,68,0,0],[0x21,89,0,0],
-[0x12,10,0,0],[0x10,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"maze",name:"MAZE SCROLLER",description:"UP/DOWN scroll maze",storage:[
-[0,32],[1,32],[2,32],[3,32],[4,32],[5,32],[6,32],[7,32],
-[8,35],[9,35],[10,35],[11,35],[12,35],[13,35],[14,35],[15,32],
-[16,32],[17,32],[18,32],[19,32],[20,32],[21,32],[22,32],[23,32],
-[24,35],[25,35],[26,35],[27,35],[28,35],[29,35],[30,35],[31,35]
+// MAZE 2D — grid 8×4 di layar. Player '@' start (1,1). Exit '*' di (6,3).
+// Char codes: 35='#', 32=' ', 42='*', 64='@'
+window.BUILTIN_PROJECTS={version:25,projects:[
+{id:"maze2d",name:"MAZE 2D",description:"Gerakkan @ dengan UP/DOWN/LEFT/RIGHT ke *",storage:[
+  // maze 32 sel (char codes untuk display)
+  [0,35],[1,35],[2,35],[3,35],[4,35],[5,35],[6,35],[7,35],
+  [8,35],[9,32],[10,32],[11,32],[12,32],[13,32],[14,32],[15,35],
+  [16,35],[17,32],[18,35],[19,35],[20,35],[21,35],[22,32],[23,35],
+  [24,35],[25,32],[26,32],[27,32],[28,32],[29,32],[30,42],[31,35]
+],wallFill:true,
+ramInit:[
+  [0,35],[1,35],[2,35],[3,35],[4,35],[5,35],[6,35],[7,35],
+  [8,35],[9,32],[10,32],[11,32],[12,32],[13,32],[14,32],[15,35],
+  [16,35],[17,32],[18,35],[19,35],[20,35],[21,35],[22,32],[23,35],
+  [24,35],[25,32],[26,32],[27,32],[28,32],[29,32],[30,42],[31,35]
 ],program:[
-[0x01,35,0,40],[0x01,32,0,41],[0x01,64,0,42],
-[0x01,8,0,60],[0x01,24,0,61],[0x01,32,0,62],[0x01,31,0,63],
-[0x01,0,0,32],[0x2F,0,32,33],[0x30,33,32,0],[0x0C,0,32,32],[0x05,62,32,35],[0x15,8,35,0],
-[0x01,64,0,19],[0x2D,0,0,34],[0x01,1,0,35],[0x08,35,34,35],[0x14,36,35,0],
-[0x04,60,36,36],[0x08,63,36,36],[0x01,0,0,32],
-[0x04,60,32,35],[0x2E,35,0,33],[0x30,33,32,0],[0x0C,0,32,32],[0x05,61,32,35],[0x15,21,35,0],
-[0x01,0,0,37],[0x04,37,36,35],[0x2F,35,0,33],[0x04,61,37,35],[0x30,33,35,0],[0x0C,0,37,37],[0x05,60,37,35],[0x15,28,35,0],
-[0x01,64,0,19],[0x01,2,0,35],[0x08,35,34,35],[0x14,56,35,0],
-[0x05,60,36,36],[0x08,63,36,36],[0x01,0,0,32],
-[0x2E,32,0,33],[0x04,60,32,35],[0x30,33,35,0],[0x0C,0,32,32],[0x05,61,32,35],[0x15,42,35,0],
-[0x01,0,0,37],[0x04,37,36,35],[0x2F,35,0,33],[0x30,33,37,0],[0x0C,0,37,37],[0x05,60,37,35],[0x15,49,35,0],
-[0x01,64,0,19],[0x10,14,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"c-demo",name:"C-DEMO · FUNGSI + LOOP",description:"CALL/RET + CMP + JNE: cetak ABCDEFGHIJ",program:[
-[0x13,0,0,0],[0x01,65,0,60],[0x01,0,0,61],[0x01,10,0,62],[0x01,0,0,50],
-[0x33,61,62,0],[0x36,12,0,0],[0x38,14,0,0],[0x0C,0,61,61],[0x0C,0,60,60],
-[0x10,5,0,0],[0x28,0,0,0],[0x28,0,0,0],[0x28,0,0,0],
-[0x30,60,50,0],[0x0C,0,50,50],[0x39,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+// INIT
+[0x01,1,0,40],      // 0  R40=1 (px)
+[0x01,1,0,41],      // 1  R41=1 (py)
+[0x01,9,0,46],      // 2  R46=9 (px+py*8)
+[0x01,64,0,47],     // 3  R47=64 ('@')
+[0x29,47,46,0],     // 4  POKE R47 R46  (tulis '@' ke display)
+// MAIN LOOP
+[0x2D,0,0,45],      // 5  R45 = JOY
+[0x14,55,45,0],     // 6  JZ R45 55 (kalau tidak ada input, skip ke DELAY)
+// hitung old_addr R53 = py*8 + px
+[0x02,0,41,53],     // 7  R53 = py
+[0x01,8,0,60],      // 8  R60 = 8
+[0x06,60,53,53],    // 9  R53 = R53 * R60  (DATA=60,TAG=53,DEST=53)
+[0x04,40,53,53],    // 10 R53 = R53 + R40
+// UP (bit0)
+[0x01,1,0,50],      // 11 R50 = 1
+[0x08,50,45,50],    // 12 R50 = R50 & R45
+[0x14,19,50,0],     // 13 JZ R50 19 (skip UP)
+[0x02,0,41,48],     // 14 R48 = py
+[0x0D,0,48,48],     // 15 R48 = py-1
+[0x02,0,40,49],     // 16 R49 = px
+[0x10,41,0,0],      // 17 JMP 41 (commit)
+[0x00,0,0,0],       // 18 NOP
+// DOWN (bit1)
+[0x01,2,0,50],      // 19 R50 = 2
+[0x08,50,45,50],    // 20 AND
+[0x14,27,50,0],     // 21 JZ 27
+[0x02,0,41,48],     // 22 R48 = py
+[0x0C,0,48,48],     // 23 R48 = py+1
+[0x02,0,40,49],     // 24 R49 = px
+[0x10,41,0,0],      // 25 JMP 41
+[0x00,0,0,0],       // 26 NOP
+// LEFT (bit2)
+[0x01,4,0,50],      // 27 R50 = 4
+[0x08,50,45,50],    // 28 AND
+[0x14,35,50,0],     // 29 JZ 35
+[0x02,0,41,48],     // 30 R48 = py
+[0x02,0,40,49],     // 31 R49 = px
+[0x0D,0,49,49],     // 32 R49 = px-1
+[0x10,41,0,0],      // 33 JMP 41
+[0x00,0,0,0],       // 34 NOP
+// RIGHT (bit3)
+[0x01,8,0,50],      // 35 R50 = 8
+[0x08,50,45,50],    // 36 AND
+[0x14,55,50,0],     // 37 JZ 55 (tidak ada → skip ke DELAY)
+[0x02,0,41,48],     // 38 R48 = py
+[0x02,0,40,49],     // 39 R49 = px
+[0x0C,0,49,49],     // 40 R49 = px+1
+// COMMIT — R48=cand py, R49=cand px
+[0x02,0,48,46],     // 41 R46 = R48
+[0x01,8,0,50],      // 42 R50 = 8
+[0x06,50,46,46],    // 43 R46 = R46 * R50
+[0x04,49,46,46],    // 44 R46 = R46 + R49  (addr = py*8+px)
+[0x2F,0,46,51],     // 45 R51 = FLASH[addr]  (STOREI)
+[0x01,35,0,52],     // 46 R52 = 35 ('#')
+[0x33,52,51,0],     // 47 CMP R51,R52  → flags = R51 - 35
+[0x36,55,0,0],      // 48 JEQ 55 (kalau dinding, revert → skip ke DELAY)
+// accept: update pos, erase old, draw new
+[0x02,0,49,40],     // 49 px = cand_px
+[0x02,0,48,41],     // 50 py = cand_py
+[0x01,32,0,52],     // 51 R52 = 32 (' ')
+[0x29,52,53,0],     // 52 POKE R52 R53  (bersihkan posisi lama)
+[0x01,64,0,52],     // 53 R52 = 64 ('@')
+[0x29,52,46,0],     // 54 POKE R52 R46  (gambar di posisi baru)
+// DELAY + loop
+[0x12,8,0,0],       // 55 DELAY 8
+[0x10,5,0,0],       // 56 JMP 5
+[0x00,0,0,0],[0x00,0,0,0],[0x00,0,0,0],[0x00,0,0,0],[0x00,0,0,0],[0x00,0,0,0],[0x00,0,0,0]
 ]}
 ]};
 </script>
@@ -224,7 +233,7 @@ if(s.label){var t=E("text",{x:w/2,y:h+11,"text-anchor":"middle","font-size":8,"f
 if(!s.osc){var hit=E("rect",{x:0,y:0,width:w,height:h,fill:"transparent",cursor:"pointer",class:"swhit"});grp.appendChild(hit);
 hit.addEventListener("pointerdown",function(ev){ev.stopPropagation();ev.preventDefault();s.v=s.v?0:1;
 if(s.label==="DESTRUCT"&&s.v){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);setTimeout(function(){s.v=0;},200);}
-if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT"||s.label==="POINT")){setTimeout(function(){s.v=0;},400);}});}
+if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT")){setTimeout(function(){s.v=0;},300);}});}
 lU.appendChild(grp);}
 function renderLed(l){var sz=l.sz||SIZE_LED,rO=sz*0.4,rI=sz*0.22;var on=l.i.v;
 var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
@@ -306,7 +315,6 @@ function mk(lb,px,py){var s={v:0,o:N(0,0),px:px,py:py,label:lb,osc:false};s.o.x=
 section("INPUT · JOYSTICK",gridW+8,function(){
 core.BTN_UP=mk("UP",bx+bw+g,by);
 core.BTN_LEFT=mk("LEFT",bx,by+bh+g);
-core.BTN_POINT=mk("POINT",bx+bw+g,by+bh+g);
 core.BTN_RIGHT=mk("RIGHT",bx+2*(bw+g),by+bh+g);
 core.BTN_DOWN=mk("DOWN",bx+bw+g,by+2*(bh+g));});
 forceNewRow();}
@@ -419,7 +427,7 @@ var pokeDec;
 section("INDIRECT ADDR DEC",19200,function(){pokeDec=makeDecoder([srcB[0],srcB[1],srcB[2],srcB[3],srcB[4],srcB[5],srcB[6],srcB[7],K0]);});
 core.pokeDec=pokeDec;
 var joyByte=[];
-section("JOY · READ",500,function(){joyByte.push(core.BTN_UP.o,core.BTN_DOWN.o,core.BTN_LEFT.o,core.BTN_RIGHT.o,core.BTN_POINT.o,K0,K0,K0);});
+section("JOY · READ",500,function(){joyByte.push(core.BTN_UP.o,core.BTN_DOWN.o,core.BTN_LEFT.o,core.BTN_RIGHT.o,K0,K0,K0,K0);});
 core.joyByte=joyByte;
 var storRead=[];
 section("STORER · READ MUX",12000,function(){for(b=0;b<8;b++){beginGroup(1000);var acc=null;for(i=0;i<STORE_SIZE;i++){var t=AND(dataDec[i],core.STORE[i][b].o);acc=(acc===null)?t:OR(acc,t);}storRead[b]=acc;endGroup();}});
@@ -555,12 +563,10 @@ section("SPRITE · EDGE",900,function(){core.upPrev=LAT(0);setLat(core.upPrev,co
 core.dnPrev=LAT(0);setLat(core.dnPrev,core.BTN_DOWN.o,core.CLKo);
 core.lfPrev=LAT(0);setLat(core.lfPrev,core.BTN_LEFT.o,core.CLKo);
 core.rtPrev=LAT(0);setLat(core.rtPrev,core.BTN_RIGHT.o,core.CLKo);
-core.ptPrev=LAT(0);setLat(core.ptPrev,core.BTN_POINT.o,core.CLKo);
 core.upEdge=AND(core.BTN_UP.o,NOT(core.upPrev.o));
 core.dnEdge=AND(core.BTN_DOWN.o,NOT(core.dnPrev.o));
 core.lfEdge=AND(core.BTN_LEFT.o,NOT(core.lfPrev.o));
-core.rtEdge=AND(core.BTN_RIGHT.o,NOT(core.rtPrev.o));
-core.ptEdge=AND(core.BTN_POINT.o,NOT(core.ptPrev.o));});
+core.rtEdge=AND(core.BTN_RIGHT.o,NOT(core.rtPrev.o));});
 forceNewRow();
 section("SPRITE · X UPD",1400,function(){var rE=core.effRunEdge;
 var sE=AND(rE,opDec[OP_SPX]);var iE=OR(AND(rE,opDec[OP_SPXP]),core.rtEdge);var dE=OR(AND(rE,opDec[OP_SPXM]),core.lfEdge);
@@ -576,10 +582,9 @@ var en=OR(OR(sE,iE),dE);
 for(i=0;i<4;i++){var v0=OR(AND(sE,core.finalData[i]),AND(NOT(sE),now[i]));var v1=OR(AND(iE,iV[i]),AND(NOT(iE),v0));var v2=OR(AND(dE,dV[i]),AND(NOT(dE),v1));setLat(sy[i],v2,en);}});
 section("SPRITE · VIS UPD",600,function(){var rE=core.effRunEdge;
 var show=AND(rE,opDec[OP_SPSHOW]);var hide=AND(rE,opDec[OP_SPHIDE]);
-var en=OR(OR(show,hide),core.ptEdge);
+var en=OR(show,hide);
 var v0=OR(AND(show,K1),AND(NOT(show),core.sprVis.o));
-var v1=OR(AND(hide,K0),AND(NOT(hide),v0));
-var v2=OR(AND(core.ptEdge,NOT(core.sprVis.o)),AND(NOT(core.ptEdge),v1));
+var v2=OR(AND(hide,K0),AND(NOT(hide),v0));
 setLat(core.sprVis,v2,en);});
 forceNewRow();
 core.sx=sx;core.sy=sy;
@@ -622,7 +627,11 @@ function writeStoreByte(addr,val){if(addr<0||addr>=STORE_SIZE)return;for(var b=0
 function clearMemory(){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);}
 function loadProgram(proj){clearMemory();
 var prog=proj.program||proj;
+// ramInit: pre-load RAM bytes (peran EPROM programmer)
+if(proj.ramInit){for(var k=0;k<proj.ramInit.length;k++){writeRamByte(core.RAM,proj.ramInit[k][0],proj.ramInit[k][1]);}}
 if(proj.storage){for(var k=0;k<proj.storage.length;k++){writeStoreByte(proj.storage[k][0],proj.storage[k][1]);}}
+// wallFill: isi STORE[32..127] dengan 35 (dinding) untuk blok out-of-bounds
+if(proj.wallFill){for(var k=32;k<STORE_SIZE;k++)writeStoreByte(k,35);}
 var pad=(prog||[]).slice(0,QUEUE_SLOTS);while(pad.length<QUEUE_SLOTS)pad.push(NOOP.slice());
 var addr=QUEUE_START;
 for(var i=0;i<QUEUE_SLOTS;i++){var ins=pad[i];
@@ -631,12 +640,7 @@ writeRamByte(core.RAM,addr+2,ins[2]&0xFF);writeRamByte(core.RAM,addr+3,ins[3]&0x
 for(var b=0;b<ADDR_BITS;b++)latchReset(core.slots[i].addr[b],(addr>>b)&1);
 latchReset(core.slots[i].valid,1);addr+=4;}}
 function autoStart(){for(var i=0;i<sws.length;i++){if(sws[i].label==="RUN_Q"){sws[i].v=1;}}}
-function initProj(){var box=document.getElementById("projSel");var dd=document.getElementById("projDropdown");
-if(!window.BUILTIN_PROJECTS||!window.BUILTIN_PROJECTS.projects||!window.BUILTIN_PROJECTS.projects.length){box.style.display="none";loadProgram({program:[NOOP.slice()]});autoStart();return;}
-var list=window.BUILTIN_PROJECTS.projects;while(dd.firstChild)dd.removeChild(dd.firstChild);
-for(var i=0;i<list.length;i++){var o=document.createElement("option");o.value=list[i].id;o.textContent=list[i].name;o.title=list[i].description||"";dd.appendChild(o);}
-dd.onchange=function(){for(var j=0;j<list.length;j++){if(list[j].id===dd.value){loadProgram(list[j]);autoStart();simulate();return;}}};
-box.style.display="flex";loadProgram(list[0]);autoStart();}
+function initProj(){loadProgram(window.BUILTIN_PROJECTS.projects[0]);autoStart();}
 function routeWires(){var STEP=2,buckets={},list=[],i,w;
 for(i=0;i<wires.length;i++){w=wires[i];delete w.mx;if(w.s.x===undefined)continue;
 if(w.l){w.ex=w.l.px-(w.l.sz||22)*0.4-2;w.ey=w.l.py;}
@@ -688,24 +692,19 @@ for(k=sc2.lt0;k<sc2.lt1;k++){var lt=latches[k];lt.px+=dx;lt.py+=dy;lt.o.x+=dx;lt
 sc2.x=nx;sc2.y=ny;}
 return {x:0,y:0,w:best.f.W,h:best.f.H};}
 function fitAll(){if(!frame43)return;var r=svg.getBoundingClientRect();
-var k=Math.min(r.width/frame43.w,r.height/frame43.h)*0.95;
-if(k<0.0015)k=0.0015;
-view.k=k;
-view.x=(r.width-frame43.w*k)/2-frame43.x*k;
-view.y=(r.height-frame43.h*k)/2-frame43.y*k;applyView();}
+var k=Math.min(r.width/frame43.w,r.height/frame43.h)*0.95;if(k<0.0015)k=0.0015;
+view.k=k;view.x=(r.width-frame43.w*k)/2-frame43.x*k;view.y=(r.height-frame43.h*k)/2-frame43.y*k;applyView();}
 function fitScreen(){var r=svg.getBoundingClientRect();
 var x1=Infinity,y1=Infinity,x2=-Infinity,y2=-Infinity,found=false;
 for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];
 if(s.title==="SCREEN · GRID"||s.title==="INPUT · JOYSTICK"){
-found=true;
-if(s.x<x1)x1=s.x;if(s.y<y1)y1=s.y;
+found=true;if(s.x<x1)x1=s.x;if(s.y<y1)y1=s.y;
 if(s.x+s.w>x2)x2=s.x+s.w;if(s.y+s.h>y2)y2=s.y+s.h;}}
 var w,h,cx,cy;
 if(found){w=x2-x1;h=y2-y1;cx=(x1+x2)/2;cy=(y1+y2)/2;}
 else if(frame43){w=frame43.w;h=frame43.h;cx=frame43.x+frame43.w/2;cy=frame43.y+frame43.h/2;}
 else return;
-var k=Math.min(r.width/(w+80),r.height/(h+80))*0.95;
-if(k<0.03)k=0.03;
+var k=Math.min(r.width/(w+80),r.height/(h+80))*0.95;if(k<0.03)k=0.03;
 view.k=k;view.x=r.width/2-cx*k;view.y=r.height/2-cy*k;applyView();}
 function updateGateCount(){var total=gates.length+sws.length+leds.length;
 document.getElementById("gcount").textContent="· "+total.toLocaleString()+" gates · "+latches.length.toLocaleString()+" FFs";}
@@ -752,7 +751,7 @@ var cheatEl=document.getElementById("cheat"),cheatMin=document.getElementById("c
 document.getElementById("cheatBar").addEventListener("click",function(){cheatEl.classList.toggle("min");
 cheatMin.textContent=cheatEl.classList.contains("min")?"+":"−";});
 loadProject();
-setInterval(function(){try{tickOsc();simulate();}catch(e){showErr((e&&e.message)||String(e));}},30);
+setInterval(function(){try{tickOsc();simulate();}catch(e){showErr((e&&e.message)||String(e));}},20);
 var lastR=0;
 requestAnimationFrame(function loop(t){requestAnimationFrame(loop);if(t-lastR<33)return;lastR=t;
 try{renderFrame();}catch(e){showErr((e&&e.message)||String(e));}});
