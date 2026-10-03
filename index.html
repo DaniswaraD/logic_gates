@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v6.5 · MAZE</title><style>
+<title>CPU 64 v6.6 · MAZE</title><style>
 *{box-sizing:border-box}html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
 svg{display:block;width:100vw;height:100vh;background:#fff;touch-action:none;cursor:grab}svg.drag{cursor:grabbing}
 text{font-family:inherit;user-select:none;pointer-events:none}
@@ -19,31 +19,31 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 #zoomCtrl button:active{background:#333;color:#fff}
 #err{position:fixed;top:220px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;white-space:pre-wrap}
 </style></head><body>
-<div id="title">CPU 64 v6.5 · MAZE<small id="gcount"></small></div>
+<div id="title">CPU 64 v6.6 · MAZE<small id="gcount"></small></div>
 <div id="hud">PX=<b id="hudPX">?</b> PY=<b id="hudPY">?</b> PTR=<b id="hudPTR">?</b> JOY=<b id="hudJOY">?</b></div>
 <div id="err"></div>
 <div id="cheat" class="min"><div class="bar" id="cheatBar"><span>CHEAT · MAZE</span><span id="cheatMin">+</span></div>
 <div class="body">
 <div class="hdr">KONTROL</div>
-<div class="note">Klik <b>UP/DOWN/LEFT/RIGHT</b> di joystick untuk gerakkan karakter <b>hijau</b>. Sentuh <b>merah</b> = reset.</div>
+<div class="note">Tahan tombol <b>UP/DOWN/LEFT/RIGHT</b> untuk gerakkan karakter <b>hijau</b>. Sentuh <b>merah</b> = reset posisi.</div>
 <div class="hdr">PALETTE</div>
-<div class="row"><span class="sw" style="background:#000"></span>dinding · hitam</div>
-<div class="row"><span class="sw" style="background:#fff"></span>lantai · putih</div>
-<div class="row"><span class="sw" style="background:#0f0"></span>karakter · hijau</div>
-<div class="row"><span class="sw" style="background:#f00"></span>exit · merah</div>
-<div class="hdr">HUD (pojok kiri atas)</div>
-<div class="note"><b>PX/PY</b> = posisi karakter (target: gerak saat klik arrow)<br><b>PTR</b> = program counter<br><b>JOY</b> = bit joystick (1=UP, 2=DOWN, 4=LEFT, 8=RIGHT)</div>
+<div class="row"><span class="sw" style="background:#000"></span>dinding</div>
+<div class="row"><span class="sw" style="background:#fff"></span>lantai</div>
+<div class="row"><span class="sw" style="background:#0f0"></span>karakter</div>
+<div class="row"><span class="sw" style="background:#f00"></span>exit</div>
+<div class="hdr">HUD</div>
+<div class="note"><b>PX/PY</b> posisi · <b>PTR</b> program counter · <b>JOY</b> bitmask (1=UP 2=DOWN 4=LEFT 8=RIGHT)</div>
 <div class="hdr">LAYOUT</div>
 <div class="row">RAM[64] px · RAM[65] py · RAM[70] joy</div>
-<div class="row">RAM[128..] program code</div>
+<div class="row">RAM[128..] program code (4 byte/instruksi)</div>
 <div class="row">STORE[0..255] maze 16×16</div>
 </div></div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll=zoom · drag=pan · dblclick=layar · ⟲=seluruh rangkaian · klik switch joystick</div>
+<div id="help">scroll=zoom · drag=pan · dblclick=layar · ⟲=seluruh rangkaian · tahan tombol joystick</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 <script>
-window.BUILTIN_PROJECTS={version:28,projects:[
-{id:"maze",name:"MAZE 2D",description:"Arrow → exit",mazeData:[
+window.BUILTIN_PROJECTS={version:29,projects:[
+{id:"maze",name:"MAZE 2D",description:"Arrow -> exit",mazeData:[
 "################",
 "#..............#",
 "#.############.#",
@@ -61,78 +61,71 @@ window.BUILTIN_PROJECTS={version:28,projects:[
 "#.############.#",
 "##############*#"
 ],program:[
-// 0-1: initial position
-[0x01,1,0,64],      // 0  SET R64=1
-[0x01,1,0,65],      // 1  SET R65=1
-// 2-3: read joystick
-[0x2D,0,0,70],      // 2  JOY → R70
-[0x14,54,70,0],     // 3  JZ R70 → 54
-// 4-6: test UP (bit 0)
-[0x01,1,0,71],      // 4  SET R71=1
-[0x08,71,70,71],    // 5  AND R71, R70
-[0x14,11,71,0],     // 6  JZ R71 → 11
-[0x02,0,64,72],     // 7  R72 = R64 (cand px)
-[0x02,0,65,73],     // 8  R73 = R65 (cand py)
-[0x0D,0,73,73],     // 9  R73-- (cand py-1)
-[0x10,45,0,0],      // 10 JMP 45
-// 11-13: test DOWN (bit 1)
-[0x01,2,0,71],      // 11 SET R71=2
-[0x08,71,70,71],    // 12 AND
-[0x14,18,71,0],     // 13 JZ → 18
-[0x02,0,64,72],     // 14 R72 = R64
-[0x02,0,65,73],     // 15 R73 = R65
-[0x0C,0,73,73],     // 16 R73++
-[0x10,45,0,0],      // 17 JMP 45
-// 18-20: test LEFT (bit 2)
-[0x01,4,0,71],      // 18 SET R71=4
-[0x08,71,70,71],    // 19 AND
-[0x14,25,71,0],     // 20 JZ → 25
-[0x02,0,64,72],     // 21 R72 = R64
-[0x02,0,65,73],     // 22 R73 = R65
-[0x0D,0,72,72],     // 23 R72--
-[0x10,45,0,0],      // 24 JMP 45
-// 25-27: test RIGHT (bit 3)
-[0x01,8,0,71],      // 25 SET R71=8
-[0x08,71,70,71],    // 26 AND
-[0x14,54,71,0],     // 27 JZ → 54 (no direction matched)
-[0x02,0,64,72],     // 28 R72 = R64
-[0x02,0,65,73],     // 29 R73 = R65
-[0x0C,0,72,72],     // 30 R72++
-[0x10,45,0,0],      // 31 JMP 45
-[0x00,0,0,0],       // 32
-[0x00,0,0,0],       // 33
-[0x00,0,0,0],       // 34
-[0x00,0,0,0],       // 35
-[0x00,0,0,0],       // 36
-[0x00,0,0,0],       // 37
-[0x00,0,0,0],       // 38
-[0x00,0,0,0],       // 39
-[0x00,0,0,0],       // 40
-[0x00,0,0,0],       // 41
-[0x00,0,0,0],       // 42
-[0x00,0,0,0],       // 43
-[0x00,0,0,0],       // 44
-// 45: COMMIT — cek wall di STORE[py*16+px]
-[0x02,0,73,74],     // 45 R74 = R73 (new py)
-[0x26,0,74,74],     // 46 SHL R74 (=py*2)
-[0x26,0,74,74],     // 47 SHL (=py*4)
-[0x26,0,74,74],     // 48 SHL (=py*8)
-[0x26,0,74,74],     // 49 SHL (=py*16)
-[0x04,72,74,74],    // 50 ADD R74 + R72 (=py*16+px)
-[0x2F,0,74,75],     // 51 STOREI — R75 = STORE[R74]
-[0x01,35,0,76],     // 52 SET R76=35 ('#')
-[0x33,76,75,0],     // 53 CMP (R75 - 35)  [TAG=75=RAM byte, DATA=76=35]
-[0x36,54,0,0],      // 54 JEQ → 54 (wall — skip commit)  ← hmm this needs a real target!
-[0x02,0,72,64],     // 55 R64 = R72 (commit px)
-[0x02,0,73,65],     // 56 R65 = R73 (commit py)
-[0x01,42,0,76],     // 57 R76 = 42 ('*' exit)
-[0x33,76,75,0],     // 58 CMP (R75 - 42)
-[0x37,62,0,0],      // 59 JNE → 62 (not exit, skip reset)
-[0x01,1,0,64],      // 60 R64 = 1 (reset px)
-[0x01,1,0,65],      // 61 R65 = 1 (reset py)
-[0x10,2,0,0],       // 62 JMP 2 (loop)
-[0x00,0,0,0],       // 63
-[0x00,0,0,0]        // 64
+[0x01,1,0,64],
+[0x01,1,0,65],
+[0x2D,0,0,70],
+[0x14,2,70,0],
+[0x01,1,0,71],
+[0x08,71,70,71],
+[0x14,11,71,0],
+[0x02,0,64,72],
+[0x02,0,65,73],
+[0x0D,0,73,73],
+[0x10,45,0,0],
+[0x01,2,0,71],
+[0x08,71,70,71],
+[0x14,18,71,0],
+[0x02,0,64,72],
+[0x02,0,65,73],
+[0x0C,0,73,73],
+[0x10,45,0,0],
+[0x01,4,0,71],
+[0x08,71,70,71],
+[0x14,25,71,0],
+[0x02,0,64,72],
+[0x02,0,65,73],
+[0x0D,0,72,72],
+[0x10,45,0,0],
+[0x01,8,0,71],
+[0x08,71,70,71],
+[0x14,2,71,0],
+[0x02,0,64,72],
+[0x02,0,65,73],
+[0x0C,0,72,72],
+[0x10,45,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0],
+[0x02,0,73,74],
+[0x26,0,74,74],
+[0x26,0,74,74],
+[0x26,0,74,74],
+[0x26,0,74,74],
+[0x04,72,74,74],
+[0x2F,0,74,75],
+[0x01,35,0,76],
+[0x33,76,75,0],
+[0x36,2,0,0],
+[0x02,0,72,64],
+[0x02,0,73,65],
+[0x01,42,0,76],
+[0x33,76,75,0],
+[0x37,62,0,0],
+[0x01,1,0,64],
+[0x01,1,0,65],
+[0x10,2,0,0],
+[0x00,0,0,0],
+[0x00,0,0,0]
 ]}
 ]};
 </script>
@@ -211,7 +204,6 @@ function sw(lb){var p=place(50,58);var s={v:0,o:N(0,0),px:p.x,py:p.y,label:lb||"
 function osc(pr,lb){var p=place(50,58);var s={v:0,o:N(0,0),px:p.x,py:p.y,label:lb||"OSC",osc:true,period:pr|0||6,t:0};s.o.x=p.x+44;s.o.y=p.y+20;sws.push(s);return s;}
 function led(inp,col,lb,sz){sz=sz||SIZE_LED;var p=place(sz,sz);var l={i:inp,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz};if(inp&&inp.x!==undefined&&!inp.virtual){var w={s:inp,l:l};l._w=w;wires.push(w);}leds.push(l);return l;}
 function ledPending(col,lb,sz){sz=sz||SIZE_LED;var p=place(sz,sz);var ph={v:0,x:p.x-2,y:p.y,virtual:true};var l={i:ph,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz,_ph:true,ph:ph};var w={s:ph,l:l};l._w=w;wires.push(w);leds.push(l);return l;}
-function rewireLed(l,newIn){if(l._w){l._w.s=newIn;l.i=newIn;return true;}return false;}
 function gateBody(t){switch(t){case "AND":return "M0,0 L14,0 A17,17 0 0 1 14,30 L0,30 Z";case "OR":return "M0,0 Q12,0 30,15 Q12,30 0,30 Q10,15 0,0 Z";case "NOT":return "M0,0 L30,15 L0,30 Z";case "XOR":return "M4,0 Q17,0 34,15 Q17,30 4,30 Q15,15 4,0 Z";}return "M0,0 L34,0 L34,30 L0,30 Z";}
 function clearLayer(g){while(g.firstChild)g.removeChild(g.firstChild);}
 function renderSection(s){lS.appendChild(E("rect",{x:s.x,y:s.y,width:s.w,height:s.h,fill:"#fafafa",stroke:"#d4d4d4","stroke-width":0.5,"stroke-dasharray":"4 3"}));var t=E("text",{x:s.x+10,y:s.y+13,"font-size":10,"font-weight":700,fill:"#666"});t.textContent=s.title;lS.appendChild(t);}
@@ -230,15 +222,22 @@ var t1=E("text",{x:5,y:19,"font-size":8,fill:"#222","font-weight":700});t1.textC
 var t2=E("text",{x:5,y:37,"font-size":7,fill:"#222","font-weight":700});t2.textContent="C";grp.appendChild(t2);
 var t3=E("text",{x:38,y:22,"font-size":7,fill:"#222","font-weight":700});t3.textContent="Q";grp.appendChild(t3);
 var dot=E("circle",{cx:23,cy:20,r:2,fill:l.prev?"#0a7":"#ccc"});grp.appendChild(dot);lG.appendChild(grp);}
+function isJoyLabel(lb){return lb==="UP"||lb==="DOWN"||lb==="LEFT"||lb==="RIGHT";}
 function renderSwitch(s){var w=38,h=46;var grp=E("g",{transform:"translate("+s.px+","+s.py+")"});
 if(s.osc){grp.appendChild(E("rect",{x:0,y:0,width:w,height:h,fill:s.v?"#8ab4ff":"#dbe9ff",stroke:"#222","stroke-width":1}));grp.appendChild(E("path",{d:"M5,23 H10 L14,11 L22,35 L26,23 H33",fill:"none",stroke:"#1a56db","stroke-width":1}));}
 else{grp.appendChild(E("rect",{x:0,y:0,width:w,height:h,fill:"#c8c8c8",stroke:"#222","stroke-width":1}));var ky=s.v?4:h-20;grp.appendChild(E("rect",{x:4,y:ky,width:w-8,height:15,fill:"#fff",stroke:"#222","stroke-width":1}));}
 grp.appendChild(E("line",{x1:w,y1:23,x2:w+12,y2:23,stroke:"#222","stroke-width":1}));
 if(s.label){var t=E("text",{x:w/2,y:h+11,"text-anchor":"middle","font-size":8,"font-weight":700,fill:"#222"});t.textContent=s.label;grp.appendChild(t);}
-if(!s.osc){var hit=E("rect",{x:0,y:0,width:w,height:h,fill:"transparent",cursor:"pointer",class:"swhit"});grp.appendChild(hit);
-hit.addEventListener("pointerdown",function(ev){ev.stopPropagation();ev.preventDefault();s.v=s.v?0:1;
-if(s.label==="DESTRUCT"&&s.v){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);setTimeout(function(){s.v=0;},200);}
-if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT")){setTimeout(function(){s.v=0;},500);}});}
+if(!s.osc){
+var hit=E("rect",{x:0,y:0,width:w,height:h,fill:"transparent",cursor:"pointer",class:"swhit"});grp.appendChild(hit);
+var isBtn=isJoyLabel(s.label);
+hit.addEventListener("pointerdown",function(ev){ev.stopPropagation();ev.preventDefault();
+if(isBtn){s.v=1;try{hit.setPointerCapture(ev.pointerId);}catch(err){}
+}else{s.v=s.v?0:1;
+if(s.label==="DESTRUCT"&&s.v){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);setTimeout(function(){s.v=0;},200);}}});
+hit.addEventListener("pointerup",function(ev){if(isBtn)s.v=0;});
+hit.addEventListener("pointercancel",function(ev){if(isBtn)s.v=0;});
+hit.addEventListener("pointerleave",function(ev){if(isBtn)s.v=0;});}
 lU.appendChild(grp);}
 function renderLed(l){var sz=l.sz||SIZE_LED;
 var isPixel=(l.forceColor!==undefined);
@@ -646,7 +645,7 @@ var cheatEl=document.getElementById("cheat"),cheatMin=document.getElementById("c
 document.getElementById("cheatBar").addEventListener("click",function(){cheatEl.classList.toggle("min");
 cheatMin.textContent=cheatEl.classList.contains("min")?"+":"−";});
 loadProject();
-setInterval(function(){try{tickOsc();simulate();updateMazeScreen();}catch(e){showErr((e&&e.message)||String(e));}},15);
+setInterval(function(){try{tickOsc();simulate();updateMazeScreen();}catch(e){showErr((e&&e.message)||String(e));}},12);
 var lastR=0;
 requestAnimationFrame(function loop(t){requestAnimationFrame(loop);if(t-lastR<33)return;lastR=t;
 try{renderFrame();}catch(e){showErr((e&&e.message)||String(e));}});
