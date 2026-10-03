@@ -1,255 +1,214 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v6.0</title>
-<style>
-*{box-sizing:border-box}
-html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
-svg{display:block;width:100vw;height:100vh;background:#fff;touch-action:none;cursor:grab}
-svg.drag{cursor:grabbing}
-text{font-family:ui-monospace,Menlo,Consolas,monospace;user-select:none;pointer-events:none}
-#title{position:fixed;top:10px;left:12px;z-index:10;font-size:13px;font-weight:700;color:#222;background:#fff;padding:4px 8px;border:2px solid #333}
-#title small{font-weight:400;color:#666;margin-left:8px}
+<title>CPU 64 v7.1</title><style>
+*{box-sizing:border-box}html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
+svg{display:block;width:100vw;height:100vh;background:#fff;touch-action:none;cursor:grab}svg.drag{cursor:grabbing}
+text{font-family:inherit;user-select:none;pointer-events:none}
+#title{position:fixed;top:10px;left:12px;z-index:10;font-size:13px;font-weight:700;color:#222;background:#fff;padding:4px 8px;border:2px solid #333}#title small{font-weight:400;color:#666;margin-left:8px}
+#hud{position:fixed;top:52px;left:12px;z-index:11;background:#111;color:#0f0;font-family:ui-monospace,monospace;font-size:11px;padding:6px 10px;border:2px solid #333;line-height:1.5}
+#hud b{color:#ff0}
 #help{position:fixed;bottom:10px;left:12px;font-size:11px;color:#888;z-index:10}
 #projSel{position:fixed;top:10px;right:12px;z-index:21;background:#fff;border:2px solid #333;padding:5px 8px;font-size:11px;display:none;align-items:center;gap:6px}
-#projSel label{font-weight:700;letter-spacing:1px;color:#333}
-#projSel select{font-family:inherit;font-size:11px;padding:3px 6px;border:1px solid #888;background:#fff;max-width:280px}
-#cheat{position:fixed;top:52px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:440px;font-size:11px;line-height:1.4}
-#cheat .bar{background:#333;color:#fff;padding:6px 10px;font-weight:700;font-size:11px;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-#cheat .bar .btn{font-size:16px;font-weight:700;padding:0 6px}
-#cheat .body{padding:10px;max-height:80vh;overflow:auto}
-#cheat.min .body{display:none}
-#cheat .hdr{font-weight:700;font-size:11px;color:#222;margin:6px 0 3px;letter-spacing:1px;border-bottom:1px solid #ddd;padding-bottom:2px}
-#cheat .row{font-family:ui-monospace,monospace;margin:1px 0}
-#cheat .c{color:#0a7;font-weight:700;display:inline-block;width:52px}
+#projSel label{font-weight:700;color:#333}#projSel select{font-family:inherit;font-size:11px;padding:3px 6px;border:1px solid #888;background:#fff;max-width:260px}
+#cheat{position:fixed;top:52px;right:12px;background:#fff;border:2px solid #333;z-index:20;width:280px;font-size:11px;line-height:1.4}
+#cheat .bar{background:#333;color:#fff;padding:6px 10px;font-weight:700;display:flex;justify-content:space-between;cursor:pointer}
+#cheat .body{padding:10px;max-height:75vh;overflow:auto}#cheat.min .body{display:none}
+#cheat .hdr{font-weight:700;color:#222;margin:6px 0 3px;border-bottom:1px solid #ddd}
 #cheat .note{background:#f6f8fa;padding:6px 8px;margin:4px 0;border-left:3px solid #0a7;font-size:10px}
 #zoomCtrl{position:fixed;bottom:14px;right:14px;z-index:30;display:flex;flex-direction:column;gap:6px}
-#zoomCtrl button{width:52px;height:52px;font-size:22px;font-weight:700;font-family:inherit;border:2px solid #333;background:#fff;cursor:pointer;padding:0;line-height:1}
+#zoomCtrl button{width:52px;height:52px;font-size:22px;font-weight:700;font-family:inherit;border:2px solid #333;background:#fff;cursor:pointer;padding:0}
 #zoomCtrl button:active{background:#333;color:#fff}
-#err{position:fixed;top:110px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;font-family:ui-monospace,monospace;white-space:pre-wrap}
-</style>
-</head>
-<body>
-<div id="title">CPU 64 v6.0<small id="gcount"></small></div>
+#err{position:fixed;top:200px;left:12px;z-index:100;background:#fee;border:2px solid #c00;color:#900;padding:8px 12px;font-size:12px;max-width:80vw;display:none;white-space:pre-wrap}
+</style></head><body>
+<div id="title">CPU 64 v7.1<small id="gcount"></small></div>
+<div id="hud">PTR=<b id="hudPTR">?</b> SP=<b id="hudSP">?</b> JOY=<b id="hudJOY">?</b></div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
-<div id="cheat" class="min">
-<div class="bar" id="cheatBar"><span>CHEAT SHEET · v6.0</span><span class="btn" id="cheatMin">+</span></div>
+<div id="cheat" class="min"><div class="bar" id="cheatBar"><span>CHEAT · v7.1</span><span id="cheatMin">+</span></div>
 <div class="body">
-<div class="hdr">ARSITEKTUR</div>
-<div class="note">Logika kombinasional: 100% gerbang AND/OR/NOT/XOR. MUX = OR-dari-AND. Decoder = pohon AND. ALU = full-adder dari XOR/AND/OR.</div>
-<div class="note">Flip-flop (storage): primitif atomik snapshot-commit. v6.0 menambah call-stack 8-deep (8×6 latch) dan 3 flag CMP (Z/LT/GT).</div>
-<div class="hdr">OPCODE LAMA (v5.2)</div>
-<div class="row"><span class="c">00</span>NOP</div>
-<div class="row"><span class="c">01</span>SET</div><div class="row"><span class="c">02</span>MOV</div>
-<div class="row"><span class="c">04</span>ADD</div><div class="row"><span class="c">05</span>SUB</div>
-<div class="row"><span class="c">06</span>MUL</div><div class="row"><span class="c">07</span>DIV</div>
-<div class="row"><span class="c">08</span>AND</div><div class="row"><span class="c">09</span>OR</div>
-<div class="row"><span class="c">0A</span>XOR</div><div class="row"><span class="c">0B</span>NOT</div>
-<div class="row"><span class="c">0C</span>INC</div><div class="row"><span class="c">0D</span>DEC</div>
-<div class="row"><span class="c">10</span>JMP</div><div class="row"><span class="c">11</span>CLR</div>
-<div class="row"><span class="c">12</span>DELAY</div><div class="row"><span class="c">13</span>SCRCLR</div>
-<div class="row"><span class="c">14</span>JZ</div><div class="row"><span class="c">15</span>JNZ</div>
-<div class="row"><span class="c">16-1B</span>SPX/SPY/±</div>
-<div class="row"><span class="c">1C</span>SPSHOW</div><div class="row"><span class="c">1D</span>SPHIDE</div>
-<div class="row"><span class="c">1E</span>SCROLL</div><div class="row"><span class="c">1F</span>HOME</div>
-<div class="row"><span class="c">20</span>CUR</div><div class="row"><span class="c">21</span>CHR</div>
-<div class="row"><span class="c">22</span>NL</div><div class="row"><span class="c">23</span>CLRLN</div>
-<div class="row"><span class="c">24</span>SCLR</div><div class="row"><span class="c">25</span>FILL</div>
-<div class="row"><span class="c">26</span>SHL</div><div class="row"><span class="c">27</span>SHR</div>
-<div class="row"><span class="c">28</span>HALT</div><div class="row"><span class="c">29</span>POKE</div>
-<div class="row"><span class="c">2A</span>FONT</div><div class="row"><span class="c">2B</span>STORER</div>
-<div class="row"><span class="c">2C</span>STOREW</div><div class="row"><span class="c">2D</span>JOY</div>
-<div class="row"><span class="c">2E</span>PEEK</div><div class="row"><span class="c">2F</span>STOREI</div>
-<div class="row"><span class="c">30</span>POKER</div><div class="row"><span class="c">31</span>RND</div>
-<div class="row"><span class="c">32</span>SEED</div>
-<div class="hdr">OPCODE BARU (v6.0) · C-LIKE</div>
-<div class="row"><span class="c">33</span>CMP B C → flag Z/LT/GT</div>
-<div class="row"><span class="c">34</span>JLT addr</div>
-<div class="row"><span class="c">35</span>JGT addr</div>
-<div class="row"><span class="c">36</span>JEQ addr</div>
-<div class="row"><span class="c">37</span>JNE addr</div>
-<div class="row"><span class="c">38</span>CALL addr</div>
-<div class="row"><span class="c">39</span>RET</div>
-<div class="note"><b>Pola C:</b> <code>CMP a b</code> + <code>JLT L</code> = <code>if(a&lt;b)goto L</code>. <code>CALL f</code> / <code>RET</code> = fungsi. Call-stack 8-level.</div>
-<div class="hdr">FORMAT: [OP, DATA, TAG, DEST]</div>
-<div class="note">B = RAM[TAG], C = RAM[DATA]. Register umum di RAM[32..127]. Layar di RAM[0..31] (satu byte = satu sel karakter).</div>
-</div>
-</div>
+<div class="hdr">KONTROL</div>
+<div class="note"><b>UP/DOWN/LEFT/RIGHT/POINT</b> sesuai projek.</div>
+<div class="hdr">OPCODE 16-BIT</div>
+<div class="note">Instruksi 5 byte: <code>[OP_HI, OP_LO, DATA, TAG, DEST]</code></div>
+<div class="hdr">DATA STACK (baru)</div>
+<div class="note"><b>PUSH</b> 0x0100 · src=TAG · push RAM[TAG]<br><b>POP</b> 0x0101 · dst=DEST · top→RAM[DEST]<br><b>DUP</b> 0x0102 · duplikat top<br><b>SWAP</b> 0x0103 · tukar top dua</div>
+<div class="hdr">STACK SHOW</div>
+<div class="note">Push 5 huruf A-E, lalu pop → tampil E-D-C-B-A (reverse).</div>
+</div></div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll = zoom · drag = pan · dblclick = fit · klik switch untuk interaksi</div>
+<div id="help">scroll=zoom · drag=pan · dblclick=layar · ⟲=seluruh rangkaian</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <script>
-window.BUILTIN_PROJECTS={version:22,projects:[
-{id:"maze",name:"MAZE SCROLLER",description:"UP/DOWN scroll maze",storage:[
-[0,32],[1,32],[2,32],[3,32],[4,32],[5,32],[6,32],[7,32],
-[8,35],[9,35],[10,35],[11,35],[12,35],[13,35],[14,35],[15,32],
-[16,32],[17,32],[18,32],[19,32],[20,32],[21,32],[22,32],[23,32],
-[24,35],[25,35],[26,35],[27,35],[28,35],[29,35],[30,35],[31,35]
-],program:[
-[0x01,35,0,40],[0x01,32,0,41],[0x01,64,0,42],
-[0x01,8,0,60],[0x01,24,0,61],[0x01,32,0,62],[0x01,31,0,63],
-[0x01,0,0,32],[0x2F,0,32,33],[0x30,33,32,0],[0x0C,0,32,32],[0x05,62,32,35],[0x15,8,35,0],
-[0x01,64,0,19],[0x2D,0,0,34],[0x01,1,0,35],[0x08,35,34,35],[0x14,36,35,0],
-[0x04,60,36,36],[0x08,63,36,36],[0x01,0,0,32],
-[0x04,60,32,35],[0x2E,35,0,33],[0x30,33,32,0],[0x0C,0,32,32],[0x05,61,32,35],[0x15,21,35,0],
-[0x01,0,0,37],[0x04,37,36,35],[0x2F,35,0,33],[0x04,61,37,35],[0x30,33,35,0],[0x0C,0,37,37],[0x05,60,37,35],[0x15,28,35,0],
-[0x01,64,0,19],[0x01,2,0,35],[0x08,35,34,35],[0x14,56,35,0],
-[0x05,60,36,36],[0x08,63,36,36],[0x01,0,0,32],
-[0x2E,32,0,33],[0x04,60,32,35],[0x30,33,35,0],[0x0C,0,32,32],[0x05,61,32,35],[0x15,42,35,0],
-[0x01,0,0,37],[0x04,37,36,35],[0x2F,35,0,33],[0x30,33,37,0],[0x0C,0,37,37],[0x05,60,37,35],[0x15,49,35,0],
-[0x01,64,0,19],[0x10,14,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"starfield",name:"STARFIELD",description:"Titik acak di layar",program:[
-[0x01,1,0,60],[0x01,31,0,63],[0x32,1,0,0],[0x31,0,0,62],[0x08,63,62,62],[0x01,46,0,61],[0x29,46,62,0],[0x12,1,0,0],[0x10,4,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"fireworks",name:"FIREWORKS",description:"Ledakan bintang + SCLR",program:[
-[0x13,0,0,0],[0x01,31,0,63],[0x32,42,0,0],[0x01,0,0,64],
-[0x31,0,0,62],[0x08,63,62,62],[0x29,42,62,0],[0x0C,0,64,64],[0x05,10,64,65],[0x15,4,65,0],
-[0x12,8,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x24,32,0,0],[0x10,4,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"pingpong",name:"PING-PONG",description:"Sprite bolak-balik",program:[
-[0x01,0,0,60],[0x01,1,0,61],[0x01,15,0,62],[0x01,14,0,19],[0x01,4,0,20],
-[0x16,14,0,0],[0x17,7,0,0],[0x1C,0,0,0],
-[0x04,61,60,60],[0x08,62,60,60],[0x16,60,0,0],[0x12,1,0,0],[0x10,5,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"joy-sprite",name:"JOY SPRITE",description:"Kendalikan sprite dengan joystick",program:[
-[0x13,0,0,0],[0x16,14,0,0],[0x17,7,0,0],[0x1C,0,0,0],
-[0x12,1,0,0],[0x10,3,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"typewriter",name:"TYPEWRITER",description:"CHR demo",program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],
-[0x21,67,0,0],[0x21,80,0,0],[0x21,85,0,0],[0x21,32,0,0],
-[0x21,54,0,0],[0x21,52,0,0],[0x22,0,0,0],
-[0x21,82,0,0],[0x21,69,0,0],[0x21,65,0,0],[0x21,68,0,0],[0x21,89,0,0],
-[0x12,10,0,0],[0x10,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"big-cpu",name:"BIG CPU",description:"Big marquee",program:[
-[0x13,0,0,0],[0x2A,2,0,0],[0x20,0,1,0],
-[0x1E,67,0,0],[0x1E,80,0,0],[0x1E,85,0,0],[0x1E,32,0,0],
-[0x1E,54,0,0],[0x1E,52,0,0],[0x1E,33,0,0],[0x1E,32,0,0],
-[0x12,3,0,0],[0x10,3,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"c-demo",name:"C-DEMO · FUNGSI + LOOP",description:"CALL/RET + CMP/JEQ: cetak ABCDEFGHIJ lewat fungsi",program:[
-[0x13,0,0,0],             // 0: SCRCLR
-[0x01,65,0,60],           // 1: R60 = 'A' (65)
-[0x01,0,0,61],            // 2: R61 = counter = 0
-[0x01,10,0,62],           // 3: R62 = limit = 10
-[0x01,0,0,50],            // 4: R50 = cursor pos = 0
-[0x33,62,61,0],           // 5: CMP  R61 vs R62  (B=RAM[61], C=RAM[62])
-[0x36,13,0,0],            // 6: JEQ  13 (done)
-[0x38,15,0,0],            // 7: CALL 15 (print_char)
-[0x0C,0,61,61],           // 8: INC R61
-[0x0C,0,60,60],           // 9: INC R60
-[0x10,5,0,0],             // 10: JMP 5
-[0x28,0,0,0],             // 11: HALT
-[0x28,0,0,0],             // 12: HALT (unused)
-[0x28,0,0,0],             // 13: HALT (done target)
-[0x00,0,0,0],             // 14: NOP
-[0x30,60,50,0],           // 15: POKER: RAM[RAM[50]] = RAM[60]  (tulis karakter ke cursor)
-[0x0C,0,50,50],           // 16: INC R50 (cursor++)
-[0x39,0,0,0],             // 17: RET
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]}
+var FONT={32:[0,0,0,0],33:[4,4,0,4],35:[15,15,15,15],42:[4,14,14,4],43:[4,14,4,0],45:[0,0,14,0],46:[0,0,0,4],47:[1,2,4,8],48:[6,9,9,6],49:[2,6,2,7],50:[6,1,2,7],51:[14,3,14,3],52:[9,9,15,1],53:[15,14,1,14],54:[7,8,14,6],55:[15,1,2,4],56:[6,9,6,9],57:[6,7,1,6],58:[0,4,0,4],60:[2,4,8,4],62:[4,2,1,2],64:[6,11,8,6],65:[6,9,15,9],66:[14,9,14,9],67:[7,8,8,7],68:[14,9,9,14],69:[15,8,14,15],70:[15,8,14,8],71:[7,8,11,7],72:[9,9,15,9],73:[14,4,4,14],74:[1,1,9,6],75:[9,10,12,10],76:[8,8,8,15],77:[9,15,15,9],78:[9,13,11,9],79:[6,9,9,6],80:[14,9,14,8],81:[6,9,5,2],82:[14,9,14,10],83:[7,8,1,14],84:[15,4,4,4],85:[9,9,9,6],86:[9,9,6,4],87:[9,9,15,9],88:[9,6,6,9],89:[9,6,4,4],90:[15,2,4,15],91:[6,4,4,6],93:[6,2,2,6]};
+
+window.BUILTIN_PROJECTS={version:31,projects:[
+
+// 1. STACK SHOW — push A-E lalu pop (reverse)
+{id:"stack",name:"STACK SHOW",description:"Push 5, POP 5 (reverse)",program:[
+// Instr format: [OP_HI, OP_LO, DATA, TAG, DEST]
+[0x00,0x13, 0,   0, 0],     // 0  SCRCLR
+[0x00,0x01, 5,   0, 100],   // 1  SET R100=5 (loop counter push)
+[0x00,0x01, 65,  0, 101],   // 2  SET R101=65 ('A')
+// push loop (3-6):
+[0x01,0x00, 0, 101, 0],     // 3  PUSH R101
+[0x00,0x0C, 0, 101, 101],   // 4  INC R101
+[0x00,0x0D, 0, 100, 100],   // 5  DEC R100
+[0x00,0x15, 0, 100, 3],     // 6  JNZ R100 → slot 3
+// pop loop (7-12):
+[0x00,0x01, 0,   0, 100],   // 7  SET R100=0 (cell index)
+[0x00,0x01, 5,   0, 102],   // 8  SET R102=5 (counter)
+[0x01,0x01, 0,   0, 103],   // 9  POP R103
+[0x00,0x2E, 103, 0, 100],   // 10 CHR R103 → cell R100
+[0x00,0x0C, 0, 100, 100],   // 11 INC R100
+[0x00,0x0D, 0, 102, 102],   // 12 DEC R102
+[0x00,0x15, 0, 102, 9],     // 13 JNZ R102 → slot 9
+[0x00,0x23, 0,   0, 0],     // 14 HALT
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0]]},
+
+// 2. TEXT SELECTOR — LEFT/RIGHT pilih, POINT toggle view
+{id:"text-sel",name:"TEXT SELECTOR",description:"LEFT/RIGHT + POINT toggle",program:[
+[0x00,0x13, 0,   0, 0],     // 0  SCRCLR
+[0x00,0x01, 0,   0, 128],   // 1  SET R128=0 (selected index)
+[0x00,0x01, 65,  0, 132],   // 2  SET R132=65
+// main loop (3):
+[0x00,0x2C, 0,   0, 130],   // 3  R130=JOY
+[0x00,0x01, 4,   0, 131],   // 4  R131=4 (LEFT)
+[0x00,0x08, 131, 130, 131],  // 5  AND
+[0x00,0x14, 0, 131, 8],     // 6  JZ R131 → 8
+[0x00,0x0D, 0, 128, 128],   // 7  DEC R128
+[0x00,0x01, 8,   0, 131],   // 8  R131=8 (RIGHT)
+[0x00,0x08, 131, 130, 131],  // 9  AND
+[0x00,0x14, 0, 131, 12],    // 10 JZ → 12
+[0x00,0x0C, 0, 128, 128],   // 11 INC R128
+// render huruf katalog A..G di cell 0..6
+[0x00,0x2E, 65,  0, 0],     // 12 CHR 'A' cell 0
+[0x00,0x2E, 66,  0, 1],     // 13 CHR 'B' cell 1
+[0x00,0x2E, 67,  0, 2],     // 14 CHR 'C' cell 2
+[0x00,0x2E, 68,  0, 3],     // 15 CHR 'D' cell 3
+[0x00,0x2E, 69,  0, 4],     // 16 CHR 'E' cell 4
+[0x00,0x2E, 70,  0, 5],     // 17 CHR 'F' cell 5
+[0x00,0x2E, 71,  0, 6],     // 18 CHR 'G' cell 6
+// tampilkan yang terpilih di cell 8 (row1 col2)
+[0x00,0x04, 128, 65,  133],  // 19 R133 = 65 + R128
+[0x00,0x2E, 133, 0, 8],     // 20 CHR R133 → cell 8
+[0x00,0x12, 6,   0, 0],     // 21 DELAY 6
+[0x00,0x10, 0,   0, 3],     // 22 JMP → 3
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]},
+
+// 3. PAINT — gerakkan cursor, POINT ganti huruf
+{id:"paint",name:"PAINT",description:"Arrow gerak, POINT ganti char",program:[
+[0x00,0x13, 0,   0, 0],     // 0  SCRCLR
+[0x00,0x01, 0,   0, 220],   // 1  R220=0 (cursor cell)
+[0x00,0x01, 65,  0, 221],   // 2  R221=65 ('A')
+[0x00,0x01, 0,   0, 222],   // 3  R222=0 (mode flag)
+// loop (4)
+[0x00,0x2C, 0,   0, 130],   // 4  R130=JOY
+// UP bit0
+[0x00,0x01, 1,   0, 131],   // 5  R131=1
+[0x00,0x08, 131, 130, 131],  // 6  AND
+[0x00,0x14, 0, 131, 10],    // 7  JZ → 10
+[0x00,0x05, 6, 220, 220],   // 8  R220 -= 6
+[0x00,0x10, 0,   0, 28],    // 9  JMP → 28
+// DOWN bit1
+[0x00,0x01, 2,   0, 131],   // 10 R131=2
+[0x00,0x08, 131, 130, 131],  // 11 AND
+[0x00,0x14, 0, 131, 15],    // 12 JZ → 15
+[0x00,0x04, 6, 220, 220],   // 13 R220 += 6
+[0x00,0x10, 0,   0, 28],    // 14 JMP → 28
+// LEFT bit2
+[0x00,0x01, 4,   0, 131],   // 15
+[0x00,0x08, 131, 130, 131],  // 16
+[0x00,0x14, 0, 131, 20],    // 17
+[0x00,0x0D, 0, 220, 220],   // 18 DEC
+[0x00,0x10, 0,   0, 28],    // 19 JMP → 28
+// RIGHT bit3
+[0x00,0x01, 8,   0, 131],   // 20
+[0x00,0x08, 131, 130, 131],  // 21
+[0x00,0x14, 0, 131, 26],    // 22
+[0x00,0x0C, 0, 220, 220],   // 23 INC
+[0x00,0x10, 0,   0, 28],    // 24 JMP → 28
+[0x00,0x00, 0,   0, 0],     // 25 NOP
+[0x00,0x00, 0,   0, 0],     // 26 NOP
+[0x00,0x00, 0,   0, 0],     // 27 NOP
+// POINT bit4 (28)
+[0x00,0x01, 16,  0, 131],   // 28 R131=16
+[0x00,0x08, 131, 130, 131],  // 29 AND
+[0x00,0x14, 0, 131, 33],    // 30 JZ → 33
+[0x00,0x0C, 0, 221, 221],   // 31 INC R221
+// draw: tulis R221 ke cell R220
+[0x00,0x2E, 221, 0, 220],   // 32 CHR
+[0x00,0x12, 3,   0, 0],     // 33 DELAY 3
+[0x00,0x10, 0,   0, 4],     // 34 JMP → 4
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],
+[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
 ]};
 </script>
 
 <script>
-(function(){
-"use strict";
-var NS="http://www.w3.org/2000/svg";
-var svg=document.getElementById("s");
+(function(){"use strict";
+var NS="http://www.w3.org/2000/svg",svg=document.getElementById("s");
 function E(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
 function showErr(m){var el=document.getElementById("err");el.style.display="block";el.textContent="ERROR: "+m;console.error(m);}
 window.addEventListener("error",function(e){showErr(e.message+" @"+e.lineno);});
-var FONT={};
-FONT[32]=[0,0,0,0];FONT[33]=[4,4,0,4];FONT[35]=[10,5,10,5];
-FONT[42]=[0,4,14,4];FONT[43]=[0,4,14,4];FONT[45]=[0,0,14,0];FONT[46]=[0,0,0,4];FONT[47]=[1,2,4,8];
-FONT[48]=[6,9,9,6];FONT[49]=[2,6,2,7];FONT[50]=[6,1,2,7];FONT[51]=[14,3,14,3];FONT[52]=[9,9,15,1];
-FONT[53]=[15,14,1,14];FONT[54]=[7,8,14,6];FONT[55]=[15,1,2,4];FONT[56]=[6,9,6,9];FONT[57]=[6,7,1,6];
-FONT[58]=[0,4,0,4];FONT[60]=[2,4,8,4];FONT[62]=[4,2,1,2];FONT[64]=[6,11,8,6];
-FONT[65]=[6,9,15,9];FONT[66]=[14,9,14,9];FONT[67]=[7,8,8,7];FONT[68]=[14,9,9,14];FONT[69]=[15,8,14,15];
-FONT[70]=[15,8,14,8];FONT[71]=[7,8,11,7];FONT[72]=[9,9,15,9];FONT[73]=[14,4,4,14];FONT[74]=[1,1,9,6];
-FONT[75]=[9,10,12,10];FONT[76]=[8,8,8,15];FONT[77]=[9,15,15,9];FONT[78]=[9,13,11,9];FONT[79]=[6,9,9,6];
-FONT[80]=[14,9,14,8];FONT[81]=[6,9,5,2];FONT[82]=[14,9,14,10];FONT[83]=[7,8,1,14];FONT[84]=[15,4,4,4];
-FONT[85]=[9,9,9,6];FONT[86]=[9,9,6,4];FONT[87]=[9,9,15,9];FONT[88]=[9,6,6,9];FONT[89]=[9,6,4,4];
-FONT[90]=[15,2,4,15];FONT[91]=[6,4,4,6];FONT[93]=[6,2,2,6];
-var FONT_BOLD={};
-for(var _k in FONT){var _g=FONT[_k],_b=[];for(var _r=0;_r<4;_r++){var _w=_g[_r];_b.push(_w|((_w<<1)&0xF));}FONT_BOLD[_k]=_b;}
-var SUPPORTED=Object.keys(FONT).map(Number);
-var SIZE_LED=22,SCR_W=32,SCR_H=16,CHAR_COLS=8,CHAR_ROWS=4,DISPLAY_CELLS=32;
-var RAM_SIZE=512,STORE_SIZE=128,QUEUE_START=128,QUEUE_SLOTS=64,ADDR_BITS=9,PTR_BITS=6;
-var CALL_DEPTH=8,CSP_BITS=3;
-var OP_NOP=0x00,OP_SET=0x01,OP_MOV=0x02,OP_ADD=0x04,OP_SUB=0x05,OP_MUL=0x06,OP_DIV=0x07,
-OP_AND=0x08,OP_OR=0x09,OP_XOR=0x0A,OP_NOT=0x0B,OP_INC=0x0C,OP_DEC=0x0D,
-OP_JMP=0x10,OP_CLR=0x11,OP_DELAY=0x12,OP_SCRCLR=0x13,OP_JZ=0x14,OP_JNZ=0x15,
-OP_SPX=0x16,OP_SPY=0x17,OP_SPXP=0x18,OP_SPXM=0x19,OP_SPYP=0x1A,OP_SPYM=0x1B,
-OP_SPSHOW=0x1C,OP_SPHIDE=0x1D,OP_SCROLL=0x1E,
-OP_HOME=0x1F,OP_CUR=0x20,OP_CHR=0x21,OP_NL=0x22,OP_CLRLN=0x23,
-OP_SCLR=0x24,OP_FILL=0x25,OP_SHL=0x26,OP_SHR=0x27,OP_HALT=0x28,OP_POKE=0x29,
-OP_FONT=0x2A,OP_STORER=0x2B,OP_STOREW=0x2C,
-OP_JOY=0x2D,OP_PEEK=0x2E,OP_STOREI=0x2F,OP_POKER=0x30,
-OP_RND=0x31,OP_SEED=0x32,
-OP_CMP=0x33,OP_JLT=0x34,OP_JGT=0x35,OP_JEQ=0x36,OP_JNE=0x37,
-OP_CALL=0x38,OP_RET=0x39;
-var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,
-OP_NOT,OP_INC,OP_DEC,OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,
-OP_SPX,OP_SPY,OP_SPXP,OP_SPXM,OP_SPYP,OP_SPYM,OP_SPSHOW,OP_SPHIDE,OP_SCROLL,
-OP_HOME,OP_CUR,OP_CHR,OP_NL,OP_CLRLN,OP_SCLR,OP_FILL,OP_SHL,OP_SHR,OP_HALT,OP_POKE,
-OP_FONT,OP_STORER,OP_STOREW,OP_JOY,OP_PEEK,OP_STOREI,OP_POKER,OP_RND,OP_SEED,
-OP_CMP,OP_JLT,OP_JGT,OP_JEQ,OP_JNE,OP_CALL,OP_RET];
+
+var CELL=5,GRID_W=6,GRID_H=3,SCR_W=GRID_W*CELL,SCR_H=GRID_H*CELL,LED_SZ=18;
+var RAM_SIZE=1024,STORE_SIZE=512,QUEUE_SLOTS=64,ADDR_BITS=10,PTR_BITS=6,STACK_DEPTH=16,SP_BITS=4;
+// FIX #1: OP_PUSH dkk dimasukkan ke rantai var
+var OP_NOP=0x0000,OP_SET=0x0001,OP_MOV=0x0002,OP_ADD=0x0004,OP_SUB=0x0005,OP_MUL=0x0006,OP_DIV=0x0007,
+OP_AND=0x0008,OP_OR=0x0009,OP_XOR=0x000A,OP_NOT=0x000B,OP_INC=0x000C,OP_DEC=0x000D,
+OP_JMP=0x0010,OP_CLR=0x0011,OP_DELAY=0x0012,OP_SCRCLR=0x0013,OP_JZ=0x0014,OP_JNZ=0x0015,
+OP_JLT=0x0016,OP_JGT=0x0017,OP_JEQ=0x0018,OP_JNE=0x0019,OP_CALL=0x001A,OP_RET=0x001B,
+OP_CMP=0x0020,OP_SHL=0x0021,OP_SHR=0x0022,OP_HALT=0x0023,
+OP_POKE=0x0024,OP_PEEK=0x0025,OP_STOREI=0x0026,OP_STORER=0x0027,
+OP_STOREW=0x0028,OP_POKER=0x0029,OP_RND=0x002A,OP_SEED=0x002B,OP_JOY=0x002C,
+OP_DRAW=0x002D,OP_CHR=0x002E,
+OP_PUSH=0x0100,OP_POP=0x0101,OP_DUP=0x0102,OP_SWAP=0x0103;
+var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,OP_NOT,OP_INC,OP_DEC,
+OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,OP_JLT,OP_JGT,OP_JEQ,OP_JNE,OP_CALL,OP_RET,
+OP_CMP,OP_SHL,OP_SHR,OP_HALT,OP_POKE,OP_PEEK,OP_STOREI,OP_STORER,OP_STOREW,OP_POKER,
+OP_RND,OP_SEED,OP_JOY,OP_DRAW,OP_CHR,OP_PUSH,OP_POP,OP_DUP,OP_SWAP];
+
 var gates=[],sws=[],leds=[],latches=[],wires=[],sectionsData=[],frame43=null;
 var vp,lW_on,lW_off,lG,lL,lU,lS;
 var K0={v:0,x:0,y:0,virtual:true},K1={v:1,x:0,y:0,virtual:true};
 var groupStack=[],GAPX=4,GAPY=4,jseed=7,core={};
 function jr(){jseed=(jseed*1103515245+12345)&0x7fffffff;return jseed/0x7fffffff;}
-function reset(){
-while(svg.firstChild)svg.removeChild(svg.firstChild);
+function reset(){while(svg.firstChild)svg.removeChild(svg.firstChild);
 gates=[];sws=[];leds=[];latches=[];wires=[];sectionsData=[];frame43=null;jseed=7;core={};
 groupStack=[{x:20,y:80,rowH:0,maxW:60000,maxXUsed:0,maxYUsed:0,gStart:0,sStart:0,lStart:0,ltStart:0}];
-vp=E("g",{});svg.appendChild(vp);
-lS=E("g",{});
+vp=E("g",{});svg.appendChild(vp);lS=E("g",{});
 lW_off=E("path",{fill:"none",stroke:"#cfcfcf","stroke-width":1,"stroke-linejoin":"round"});
 lW_on=E("path",{fill:"none",stroke:"#111","stroke-width":1.5,"stroke-linejoin":"round"});
 lG=E("g",{});lL=E("g",{});lU=E("g",{});
-vp.appendChild(lS);vp.appendChild(lW_off);vp.appendChild(lW_on);vp.appendChild(lG);vp.appendChild(lL);vp.appendChild(lU);
-}
+vp.appendChild(lS);vp.appendChild(lW_off);vp.appendChild(lW_on);vp.appendChild(lG);vp.appendChild(lL);vp.appendChild(lU);}
 function curFrame(){return groupStack[groupStack.length-1];}
-function framePlaceIn(f,w,h){
-if(f.x>0&&f.x+w>f.maxW){f.x=0;f.y+=f.rowH+GAPY;f.rowH=0;}
-var p={x:f.x,y:f.y};f.x+=w+GAPX;if(h>f.rowH)f.rowH=h;
-if(f.x-GAPX>f.maxXUsed)f.maxXUsed=f.x-GAPX;
-var yU=f.y+h;if(yU>f.maxYUsed)f.maxYUsed=yU;return p;
-}
+function framePlaceIn(f,w,h){if(f.x>0&&f.x+w>f.maxW){f.x=0;f.y+=f.rowH+GAPY;f.rowH=0;}
+var p={x:f.x,y:f.y};f.x+=w+GAPX;if(h>f.rowH)f.rowH=h;if(f.x-GAPX>f.maxXUsed)f.maxXUsed=f.x-GAPX;
+var yU=f.y+h;if(yU>f.maxYUsed)f.maxYUsed=yU;return p;}
 function place(w,h){return framePlaceIn(curFrame(),w,h);}
 function beginGroup(mw){groupStack.push({x:0,y:0,rowH:0,maxW:mw||200,maxXUsed:0,maxYUsed:0,gStart:gates.length,sStart:sws.length,lStart:leds.length,ltStart:latches.length});}
-function endGroup(){
-var f=groupStack.pop();if(!f)return;
-var w=f.maxXUsed||10,h=f.maxYUsed||10;
+function endGroup(){var f=groupStack.pop();if(!f)return;var w=f.maxXUsed||10,h=f.maxYUsed||10;
 var pos=framePlaceIn(curFrame(),w,h);var dx=pos.x,dy=pos.y,i;
 for(i=f.gStart;i<gates.length;i++){var g=gates[i];g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
 for(i=f.sStart;i<sws.length;i++){var s=sws[i];s.px+=dx;s.py+=dy;s.o.x+=dx;s.o.y+=dy;}
 for(i=f.lStart;i<leds.length;i++){var l=leds[i];l.px+=dx;l.py+=dy;if(l.ph){l.ph.x=l.px-2;l.ph.y=l.py;}}
-for(i=f.ltStart;i<latches.length;i++){var lt=latches[i];lt.px+=dx;lt.py+=dy;}
-}
+for(i=f.ltStart;i<latches.length;i++){var lt=latches[i];lt.px+=dx;lt.py+=dy;}}
 function forceNewRow(){var f=groupStack[0];if(!f)return;f.x=0;f.y+=f.rowH+30;f.rowH=0;}
-function section(title,mw,fn){
-var g0=gates.length,s0=sws.length,l0=leds.length,lt0=latches.length;
+function section(title,mw,fn){var g0=gates.length,s0=sws.length,l0=leds.length,lt0=latches.length;
 beginGroup(mw);fn();endGroup();
 var mnx=Infinity,mny=Infinity,mxx=-Infinity,mxy=-Infinity;
 function ext(x1,y1,x2,y2){if(x1<mnx)mnx=x1;if(y1<mny)mny=y1;if(x2>mxx)mxx=x2;if(y2>mxy)mxy=y2;}
@@ -258,107 +217,77 @@ for(var i=lt0;i<latches.length;i++){var l=latches[i];ext(l.px-4,l.py-2,l.px+48,l
 for(var i=s0;i<sws.length;i++){var s=sws[i];ext(s.px-2,s.py-2,s.px+52,s.py+59);}
 for(var i=l0;i<leds.length;i++){var l=leds[i];var r=l.sz?l.sz*0.4:10;ext(l.px-r-3,l.py-r-11,l.px+r+3,l.py+r+3);}
 if(!isFinite(mnx))return;var pad=8;
-sectionsData.push({x:mnx-pad,y:mny-pad-18,w:(mxx-mnx)+2*pad,h:(mxy-mny)+2*pad+18,title:title,g0:g0,g1:gates.length,s0:s0,s1:sws.length,l0:l0,l1:leds.length,lt0:lt0,lt1:latches.length});
-}
+sectionsData.push({x:mnx-pad,y:mny-pad-18,w:(mxx-mnx)+2*pad,h:(mxy-mny)+2*pad+18,title:title,g0:g0,g1:gates.length,s0:s0,s1:sws.length,l0:l0,l1:leds.length,lt0:lt0,lt1:latches.length});}
 function N(v,d){return{v:v|0,d:d|0};}
-function mkGate(t,ins){
-var d=0;for(var i=0;i<ins.length;i++)d=Math.max(d,(ins[i]&&ins[i].d)||0);d=d+1;
+function mkGate(t,ins){var d=0;for(var i=0;i<ins.length;i++)d=Math.max(d,(ins[i]&&ins[i].d)||0);d=d+1;
 var p=place(44,36);var jy=Math.floor(jr()*7);
 var g={t:t,i:ins,o:N(0,d),px:p.x,py:p.y+jy};g.o.x=g.px+34;g.o.y=g.py+15;
 for(var i=0;i<ins.length;i++){var iy=ins.length===1?15:(i===0?10:20);if(ins[i]&&ins[i].x!==undefined&&!ins[i].virtual)wires.push({s:ins[i],g:g,py:iy});}
-gates.push(g);return g;
-}
+gates.push(g);return g;}
 function AND(a,b){return mkGate("AND",[a,b]).o;}
 function OR(a,b){return mkGate("OR",[a,b]).o;}
 function NOT(a){return mkGate("NOT",[a]).o;}
 function XOR(a,b){return mkGate("XOR",[a,b]).o;}
-function LAT(init){
-init=init|0;
-var p=place(46,40);
+function LAT(init){init=init|0;var p=place(46,40);
 var wrapper={t:"LATX",i:[K0,K0],o:N(init,1),px:p.x,py:p.y,prev:init,prevEn:0};
-wrapper.o.x=p.x+46;wrapper.o.y=p.y+20;
-latches.push(wrapper);
-return wrapper;
-}
-function setLat(wrapper,d,en){
-wrapper.i[0]=d;wrapper.i[1]=en;
+wrapper.o.x=p.x+46;wrapper.o.y=p.y+20;latches.push(wrapper);return wrapper;}
+function setLat(wrapper,d,en){wrapper.i[0]=d;wrapper.i[1]=en;
 if(d&&d.x!==undefined&&!d.virtual)wires.push({s:d,g:wrapper,py:15});
-if(en&&en.x!==undefined&&!en.virtual)wires.push({s:en,g:wrapper,py:38});
-}
+if(en&&en.x!==undefined&&!en.virtual)wires.push({s:en,g:wrapper,py:38});}
 function latchReset(l,v){v=v|0;l.prev=v;l.o.v=v;}
 function sw(lb){var p=place(50,58);var s={v:0,o:N(0,0),px:p.x,py:p.y,label:lb||"",osc:false};s.o.x=p.x+44;s.o.y=p.y+20;sws.push(s);return s;}
 function osc(pr,lb){var p=place(50,58);var s={v:0,o:N(0,0),px:p.x,py:p.y,label:lb||"OSC",osc:true,period:pr|0||6,t:0};s.o.x=p.x+44;s.o.y=p.y+20;sws.push(s);return s;}
-function led(inp,col,lb,sz){sz=sz||SIZE_LED;var p=place(sz,sz);var l={i:inp,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz};if(inp&&inp.x!==undefined&&!inp.virtual){var w={s:inp,l:l};l._w=w;wires.push(w);}leds.push(l);return l;}
-function ledPending(col,lb,sz){sz=sz||SIZE_LED;var p=place(sz,sz);var ph={v:0,x:p.x-2,y:p.y,virtual:true};var l={i:ph,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz,_ph:true,ph:ph};var w={s:ph,l:l};l._w=w;wires.push(w);leds.push(l);return l;}
+function led(inp,col,lb,sz){sz=sz||LED_SZ;var p=place(sz,sz);var l={i:inp,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz};if(inp&&inp.x!==undefined&&!inp.virtual){var w={s:inp,l:l};l._w=w;wires.push(w);}leds.push(l);return l;}
+function ledPending(col,lb,sz){sz=sz||LED_SZ;var p=place(sz,sz);var ph={v:0,x:p.x-2,y:p.y,virtual:true};var l={i:ph,v:0,c:col||"#39d353",px:p.x+sz/2,py:p.y+sz/2,label:lb||"",sz:sz,_ph:true,ph:ph};var w={s:ph,l:l};l._w=w;wires.push(w);leds.push(l);return l;}
 function rewireLed(l,newIn){if(l._w){l._w.s=newIn;l.i=newIn;return true;}return false;}
-function gateBody(t){switch(t){
-case "AND":return "M0,0 L14,0 A17,17 0 0 1 14,30 L0,30 Z";
-case "OR":return "M0,0 Q12,0 30,15 Q12,30 0,30 Q10,15 0,0 Z";
-case "NOT":return "M0,0 L30,15 L0,30 Z";
-case "XOR":return "M4,0 Q17,0 34,15 Q17,30 4,30 Q15,15 4,0 Z";}
-return "M0,0 L34,0 L34,30 L0,30 Z";}
+function gateBody(t){switch(t){case "AND":return "M0,0 L14,0 A17,17 0 0 1 14,30 L0,30 Z";case "OR":return "M0,0 Q12,0 30,15 Q12,30 0,30 Q10,15 0,0 Z";case "NOT":return "M0,0 L30,15 L0,30 Z";case "XOR":return "M4,0 Q17,0 34,15 Q17,30 4,30 Q15,15 4,0 Z";}return "M0,0 L34,0 L34,30 L0,30 Z";}
 function clearLayer(g){while(g.firstChild)g.removeChild(g.firstChild);}
 function renderSection(s){lS.appendChild(E("rect",{x:s.x,y:s.y,width:s.w,height:s.h,fill:"#fafafa",stroke:"#d4d4d4","stroke-width":0.5,"stroke-dasharray":"4 3"}));var t=E("text",{x:s.x+10,y:s.y+13,"font-size":10,"font-weight":700,fill:"#666"});t.textContent=s.title;lS.appendChild(t);}
-function renderGate(g){
-var grp=E("g",{transform:"translate("+g.px+","+g.py+")"});
+function renderGate(g){var grp=E("g",{transform:"translate("+g.px+","+g.py+")"});
 grp.appendChild(E("path",{d:gateBody(g.t),fill:"#fff",stroke:"#222","stroke-width":1}));
 if(g.t==="XOR")grp.appendChild(E("path",{d:"M0,0 Q10,15 0,30",fill:"none",stroke:"#222","stroke-width":1}));
 if(g.t==="NOT")grp.appendChild(E("circle",{cx:33,cy:15,r:3,fill:"#fff",stroke:"#222","stroke-width":1}));
 var n=(g.t==="NOT")?1:2;for(var i=0;i<n;i++){var y=n===1?15:(i===0?10:20);grp.appendChild(E("line",{x1:-6,y1:y,x2:0,y2:y,stroke:"#222","stroke-width":1}));}
-grp.appendChild(E("line",{x1:34,y1:15,x2:40,y2:15,stroke:"#222","stroke-width":1}));
-lG.appendChild(grp);
-}
-function renderLatch(l){
-var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
+grp.appendChild(E("line",{x1:34,y1:15,x2:40,y2:15,stroke:"#222","stroke-width":1}));lG.appendChild(grp);}
+function renderLatch(l){var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
 grp.appendChild(E("rect",{x:0,y:0,width:46,height:40,fill:"#fff",stroke:"#222","stroke-width":1}));
 grp.appendChild(E("line",{x1:-6,y1:15,x2:0,y2:15,stroke:"#222","stroke-width":1}));
 grp.appendChild(E("line",{x1:-6,y1:38,x2:0,y2:38,stroke:"#222","stroke-width":1}));
 grp.appendChild(E("line",{x1:46,y1:20,x2:52,y2:20,stroke:"#222","stroke-width":1}));
-var t1=E("text",{x:5,y:19,"font-size":8,fill:"#222","font-weight":700});t1.textContent="D";grp.appendChild(t1);
-var t2=E("text",{x:5,y:37,"font-size":7,fill:"#222","font-weight":700});t2.textContent="C";grp.appendChild(t2);
-var t3=E("text",{x:38,y:22,"font-size":7,fill:"#222","font-weight":700});t3.textContent="Q";grp.appendChild(t3);
-var dot=E("circle",{cx:23,cy:20,r:2,fill:l.prev?"#0a7":"#ccc"});grp.appendChild(dot);
-lG.appendChild(grp);
-}
-function renderSwitch(s){
-var w=38,h=46;var grp=E("g",{transform:"translate("+s.px+","+s.py+")"});
+var dot=E("circle",{cx:23,cy:20,r:2,fill:l.prev?"#0a7":"#ccc"});grp.appendChild(dot);lG.appendChild(grp);}
+function renderSwitch(s){var w=38,h=46;var grp=E("g",{transform:"translate("+s.px+","+s.py+")"});
 if(s.osc){grp.appendChild(E("rect",{x:0,y:0,width:w,height:h,fill:s.v?"#8ab4ff":"#dbe9ff",stroke:"#222","stroke-width":1}));grp.appendChild(E("path",{d:"M5,23 H10 L14,11 L22,35 L26,23 H33",fill:"none",stroke:"#1a56db","stroke-width":1}));}
 else{grp.appendChild(E("rect",{x:0,y:0,width:w,height:h,fill:"#c8c8c8",stroke:"#222","stroke-width":1}));var ky=s.v?4:h-20;grp.appendChild(E("rect",{x:4,y:ky,width:w-8,height:15,fill:"#fff",stroke:"#222","stroke-width":1}));}
 grp.appendChild(E("line",{x1:w,y1:23,x2:w+12,y2:23,stroke:"#222","stroke-width":1}));
 if(s.label){var t=E("text",{x:w/2,y:h+11,"text-anchor":"middle","font-size":8,"font-weight":700,fill:"#222"});t.textContent=s.label;grp.appendChild(t);}
-if(!s.osc){
-var hit=E("rect",{x:0,y:0,width:w,height:h,fill:"transparent",cursor:"pointer",class:"swhit"});
-grp.appendChild(hit);
-hit.addEventListener("pointerdown",function(ev){
-ev.stopPropagation();ev.preventDefault();s.v=s.v?0:1;
+if(!s.osc){var hit=E("rect",{x:0,y:0,width:w,height:h,fill:"transparent",cursor:"pointer",class:"swhit"});grp.appendChild(hit);
+hit.addEventListener("pointerdown",function(ev){ev.stopPropagation();ev.preventDefault();s.v=s.v?0:1;
 if(s.label==="DESTRUCT"&&s.v){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);setTimeout(function(){s.v=0;},200);}
-if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT"||s.label==="POINT")){setTimeout(function(){s.v=0;},400);}
-});
-}
-lU.appendChild(grp);
-}
-function renderLed(l){
-var sz=l.sz||SIZE_LED,rO=sz*0.4,rI=sz*0.22;var on=l.i.v;
+if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT"||s.label==="POINT")){setTimeout(function(){s.v=0;},300);}});}
+lU.appendChild(grp);}
+function renderLed(l){var sz=l.sz||LED_SZ;
+var isPixel=(l.forceColor!==undefined);
+var on=isPixel?(l.forceV||0):l.i.v;
+var fill;
+if(isPixel)fill=on?l.forceColor:"#f0f0f0";
+else fill=on?l.c:"#e8e8e8";
 var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
+if(isPixel){var side=sz+GAPX;
+grp.appendChild(E("rect",{x:-side/2,y:-side/2,width:side,height:side,fill:fill,stroke:"none"}));}
+else{var rO=sz*0.4,rI=sz*0.22;
 grp.appendChild(E("circle",{cx:0,cy:0,r:rO,fill:"#fff",stroke:"#222","stroke-width":1}));
-grp.appendChild(E("circle",{cx:0,cy:0,r:rI,fill:on?l.c:"#e8e8e8"}));
-if(l.label&&sz>=20){var t=E("text",{x:0,y:-rO-3,"text-anchor":"middle","font-size":7,fill:"#555"});t.textContent=l.label;grp.appendChild(t);}
-lL.appendChild(grp);
-}
-function pathFor(sx,sy,dx,dy,mx,simple){
-if(simple)return "M"+sx+","+sy+"L"+dx+","+dy;
+grp.appendChild(E("circle",{cx:0,cy:0,r:rI,fill:fill}));
+if(l.label&&sz>=20){var t=E("text",{x:0,y:-rO-3,"text-anchor":"middle","font-size":7,fill:"#555"});t.textContent=l.label;grp.appendChild(t);}}
+lL.appendChild(grp);}
+function pathFor(sx,sy,dx,dy,mx,simple){if(simple)return "M"+sx+","+sy+"L"+dx+","+dy;
 if(Math.abs(sy-dy)<3)return "M"+sx+","+sy+"H"+dx;
-var m=(mx===undefined)?sx+(dx-sx)/2:mx;
-return "M"+sx+","+sy+"H"+m+"V"+dy+"H"+dx;
-}
+var m=(mx===undefined)?sx+(dx-sx)/2:mx;return "M"+sx+","+sy+"H"+m+"V"+dy+"H"+dx;}
 var _cachedRect=null,_cacheT=0;
 function getRect(){var now=performance.now();if(!_cachedRect||now-_cacheT>200){_cachedRect=svg.getBoundingClientRect();_cacheT=now;}return _cachedRect;}
-function renderFrame(){
-if(!vp)return;
-var r=getRect();
+function renderFrame(){if(!vp)return;var r=getRect();
 var vx1=-view.x/view.k,vy1=-view.y/view.k,vx2=vx1+r.width/view.k,vy2=vy1+r.height/view.k;
 var lod=view.k,pad=40;
-var minimal=lod<0.015,showSections=lod>0.020,showGates=lod>0.060,showSwitches=lod>0.080,showLeds=lod>0.100,showWires=lod>0.004;
+var minimal=lod<0.015,showSections=lod>0.020,showGates=lod>0.035,showSwitches=lod>0.045,showLeds=lod>0.055,showWires=lod>0.004;
 clearLayer(lG);clearLayer(lL);clearLayer(lU);clearLayer(lS);
 if(frame43&&lod>0.010){lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:frame43.w,height:frame43.h,fill:"none",stroke:"#aaa","stroke-width":0.4}));}
 if(showSections){for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];if(s.x+s.w<vx1||s.x>vx2||s.y+s.h<vy1||s.y>vy2)continue;renderSection(s);}}
@@ -373,25 +302,21 @@ lW_on.setAttribute("stroke-width",minimal?0.9:1.5);lW_off.setAttribute("stroke-w
 if(showGates){for(var i=0;i<gates.length;i++){var g=gates[i];if(g.px+50<vx1-pad||g.px>vx2+pad)continue;if(g.py+44<vy1-pad||g.py>vy2+pad)continue;renderGate(g);}}
 if(showGates){for(var i=0;i<latches.length;i++){var l=latches[i];if(l.px+54<vx1-pad||l.px-8>vx2+pad)continue;if(l.py+44<vy1-pad||l.py-4>vy2+pad)continue;renderLatch(l);}}
 if(showSwitches){for(var i=0;i<sws.length;i++){var s=sws[i];if(s.px+70<vx1-pad||s.px>vx2+pad)continue;if(s.py+86<vy1-pad||s.py>vy2+pad)continue;renderSwitch(s);}}
-if(showLeds){for(var i=0;i<leds.length;i++){var l=leds[i];var rad=(l.sz||22)*0.5+4;if(l.px+rad<vx1||l.px-rad>vx2)continue;if(l.py+rad<vy1||l.py-rad>vy2)continue;renderLed(l);}}
-}
+if(showLeds){for(var i=0;i<leds.length;i++){var l=leds[i];var rad=(l.sz||22)*0.5+4;if(l.px+rad<vx1||l.px-rad>vx2)continue;if(l.py+rad<vy1||l.py-rad>vy2)continue;renderLed(l);}}}
 function evalComb(g){var a=g.i[0]?g.i[0].v:0,b=g.i[1]?g.i[1].v:0;
 switch(g.t){case "AND":return a&b;case "OR":return a|b;case "NOT":return a?0:1;case "XOR":return a^b;}return 0;}
-function simulate(){
-for(var it=0;it<16;it++){var ch=false;
+function simulate(){for(var it=0;it<16;it++){var ch=false;
 for(var i=0;i<sws.length;i++){var s=sws[i];if(s.o.v!==s.v){s.o.v=s.v;ch=true;}}
 for(var i=0;i<gates.length;i++){var g=gates[i];var nv=evalComb(g);if(g.o.v!==nv){g.o.v=nv;ch=true;}}
 for(var i=0;i<latches.length;i++){var l=latches[i];if(l.o.v!==l.prev){l.o.v=l.prev;ch=true;}}
 if(!ch)break;}
-var snap=[];
-for(var i=0;i<latches.length;i++){var l=latches[i];var d=l.i[0]?l.i[0].v:0;var en=l.i[1]?l.i[1].v:0;snap.push({l:l,d:d,en:en});}
+var snap=[];for(var i=0;i<latches.length;i++){var l=latches[i];var d=l.i[0]?l.i[0].v:0;var en=l.i[1]?l.i[1].v:0;snap.push({l:l,d:d,en:en});}
 for(var i=0;i<snap.length;i++){var s=snap[i];if(s.en&&!s.l.prevEn)s.l.prev=s.d;s.l.prevEn=s.en;s.l.o.v=s.l.prev;}
 for(var it=0;it<16;it++){var ch2=false;
 for(var i=0;i<sws.length;i++){var s2=sws[i];if(s2.o.v!==s2.v){s2.o.v=s2.v;ch2=true;}}
 for(var i=0;i<gates.length;i++){var g2=gates[i];var nv2=evalComb(g2);if(g2.o.v!==nv2){g2.o.v=nv2;ch2=true;}}
 for(var i=0;i<latches.length;i++){var l2=latches[i];if(l2.o.v!==l2.prev){l2.o.v=l2.prev;ch2=true;}}
-if(!ch2)break;}
-}
+if(!ch2)break;}}
 function tickOsc(){for(var i=0;i<sws.length;i++){var s=sws[i];if(s.osc){s.t++;if(s.t>=s.period){s.t=0;s.v=s.v?0:1;}}}}
 function addN(a,b,cin,n){var c=cin||K0,s=[];for(var i=0;i<n;i++){var ab=XOR(a[i],b[i]);var sum=XOR(ab,c);var g1=AND(a[i],b[i]);var g2=AND(ab,c);c=OR(g1,g2);s.push(sum);}return {sum:s,carry:c};}
 function add8(a,b){return addN(a,b,K0,8).sum;}
@@ -408,250 +333,237 @@ for(var i=3;i>=0;i--){var Rn=[a[i],R[0],R[1],R[2]];var d=addN(Rn,nb,K1,4);Q[i]=d
 return [Q[0],Q[1],Q[2],Q[3],K0,K0,K0,K0];}
 function eqN(bits,val,n){var acc=null;for(var i=0;i<n;i++){var b=(val>>i)&1;var s=b?bits[i]:NOT(bits[i]);acc=(acc===null)?s:AND(acc,s);}return acc;}
 function makeDecoder(bits){var n=bits.length;if(n===0)return[K1];if(n===1)return[NOT(bits[0]),bits[0]];var half=n>>1;var low=makeDecoder(bits.slice(0,half));var high=makeDecoder(bits.slice(half));var out=[];var lm=(1<<half)-1;for(var i=0;i<(1<<n);i++)out.push(AND(high[i>>half],low[i&lm]));return out;}
-function decodeOps(ob){var d={};for(var i=0;i<ALL_OPS.length;i++)d[ALL_OPS[i]]=eqN(ob,ALL_OPS[i],8);return d;}
+function decodeOps(obHi,obLo){var hi={},lo={};for(var i=0;i<256;i++){hi[i]=eqN(obHi,i,8);lo[i]=eqN(obLo,i,8);}
+var d={};for(var i=0;i<ALL_OPS.length;i++){var code=ALL_OPS[i];d[code]=AND(hi[(code>>8)&0xFF],lo[code&0xFF]);}return d;}
 
-function buildFrontend(){
-var OP=[],D=[],T=[],A=[],i;
-section("INPUT · OPCODE (8)",920,function(){for(i=7;i>=0;i--)OP[i]=sw("O"+i);beginGroup(260);for(i=7;i>=0;i--)led(OP[i].o,"#4a9eff","O"+i);endGroup();});
-section("INPUT · DATA (8)",920,function(){for(i=7;i>=0;i--)D[i]=sw("D"+i);beginGroup(260);for(i=7;i>=0;i--)led(D[i].o,"#39d353","D"+i);endGroup();});
-section("INPUT · TAG (8)",920,function(){for(i=7;i>=0;i--)T[i]=sw("T"+i);beginGroup(260);for(i=7;i>=0;i--)led(T[i].o,"#ffb020","T"+i);endGroup();});
-section("INPUT · ADDR (9)",1000,function(){for(i=8;i>=0;i--)A[i]=sw("A"+i);beginGroup(280);for(i=8;i>=0;i--)led(A[i].o,"#a060ff","A"+i);endGroup();});
-section("INPUT · ACTION",1000,function(){
-core.WRo=sw("WR").o;core.RDo=sw("RD").o;core.RUNo=sw("RUN").o;core.CLRo=sw("CLR").o;core.DESTo=sw("DESTRUCT").o;
-beginGroup(340);led(core.WRo,"#39d353","W");led(core.RDo,"#4a9eff","R");led(core.RUNo,"#ff4d4d","N");led(core.CLRo,"#ff4d4d","C");led(core.DESTo,"#000","D");endGroup();
-});
+function buildFrontend(){var OP_HI=[],OP_LO=[],D=[],T=[],A=[],i;
+section("INPUT · OP_HI",920,function(){for(i=7;i>=0;i--)OP_HI[i]=sw("H"+i);});
+section("INPUT · OP_LO",920,function(){for(i=7;i>=0;i--)OP_LO[i]=sw("L"+i);});
+section("INPUT · DATA",920,function(){for(i=7;i>=0;i--)D[i]=sw("D"+i);});
+section("INPUT · TAG",920,function(){for(i=7;i>=0;i--)T[i]=sw("T"+i);});
+section("INPUT · DEST",920,function(){for(i=7;i>=0;i--)A[i]=sw("A"+i);});
+section("INPUT · ACTION",600,function(){core.RUNo=sw("RUN_Q").o;core.CLRo=sw("CLR").o;
+led(core.RUNo,"#ff4d4d","N");led(core.CLRo,"#ff4d4d","C");});
 section("INPUT · CLK",240,function(){core.CLKo=osc(1,"CLK").o;});
 forceNewRow();
-core.OP=OP;core.D=D;core.T=T;core.A=A;core.RAM=[];
-section("STORAGE · RAM 512×8",48000,function(){for(i=0;i<RAM_SIZE;i++){beginGroup(140);core.RAM.push([]);for(var b=0;b<8;b++){beginGroup(18);core.RAM[i].push(LAT(0));endGroup();}endGroup();}});
-forceNewRow();
-core.STORE=[];
-section("STORAGE · FLASH 128×8",12800,function(){for(i=0;i<STORE_SIZE;i++){beginGroup(140);core.STORE.push([]);for(var b=0;b<8;b++){beginGroup(18);core.STORE[i].push(LAT(0));endGroup();}endGroup();}});
-forceNewRow();
-}
-function buildJoystick(){
-var bw=50,bh=58,g=8,gridW=3*bw+2*g,gridH=3*bh+2*g;
+core.OP_HI=OP_HI;core.OP_LO=OP_LO;core.D=D;core.T=T;core.A=A;core.RAM=[];
+section("STORAGE · RAM 1024×8",96000,function(){for(i=0;i<RAM_SIZE;i++){beginGroup(140);core.RAM.push([]);for(var b=0;b<8;b++){beginGroup(18);core.RAM[i].push(LAT(0));endGroup();}endGroup();}});
+forceNewRow();core.STORE=[];
+section("STORAGE · FLASH 512×8",51200,function(){for(i=0;i<STORE_SIZE;i++){beginGroup(140);core.STORE.push([]);for(var b=0;b<8;b++){beginGroup(18);core.STORE[i].push(LAT(0));endGroup();}endGroup();}});
+forceNewRow();}
+
+function buildJoystick(){var bw=50,bh=58,g=6,gridW=3*bw+2*g,gridH=3*bh+2*g;
 var anchor=place(gridW,gridH);var bx=anchor.x,by=anchor.y;
 function mk(lb,px,py){var s={v:0,o:N(0,0),px:px,py:py,label:lb,osc:false};s.o.x=px+44;s.o.y=py+20;sws.push(s);return s;}
-section("INPUT · JOYSTICK",gridW+8,function(){
+section("INPUT · JOYSTICK (+)",gridW+8,function(){
 core.BTN_UP=mk("UP",bx+bw+g,by);
 core.BTN_LEFT=mk("LEFT",bx,by+bh+g);
 core.BTN_POINT=mk("POINT",bx+bw+g,by+bh+g);
 core.BTN_RIGHT=mk("RIGHT",bx+2*(bw+g),by+bh+g);
-core.BTN_DOWN=mk("DOWN",bx+bw+g,by+2*(bh+g));
-});
-forceNewRow();
-}
-function buildQueue(){
-var QADDR=[],slots=[],ptr=[],ptrSel=[],qAddr=[],i,b,s;
-section("QUEUE · ADDR (9)",1000,function(){for(i=8;i>=0;i--)QADDR[i]=sw("QA"+i);beginGroup(280);for(i=8;i>=0;i--)led(QADDR[i].o,"#a060ff","QA"+i);endGroup();});
-section("QUEUE · ACTION",900,function(){
-core.CLRQo=sw("CLR_Q").o;core.QUEUEo=sw("QUEUE").o;core.RUNQo=sw("RUN_Q").o;
-beginGroup(340);led(core.CLRQo,"#ff4d4d","CQ");led(core.QUEUEo,"#39d353","Q");led(core.RUNQo,"#ffb020","RQ");endGroup();
-});
-section("QUEUE · QCLK",240,function(){core.QCLKo=osc(1,"QCLK").o;});
-forceNewRow();
-section("QUEUE · EDGE",900,function(){
-core.queuePrev=LAT(0);setLat(core.queuePrev,core.QUEUEo,core.QCLKo);
-core.clrqPrev=LAT(0);setLat(core.clrqPrev,core.CLRQo,core.QCLKo);
-core.queueEdge=AND(core.QUEUEo,NOT(core.queuePrev.o));
-core.clrqEdge=AND(core.CLRQo,NOT(core.clrqPrev.o));
-});
-forceNewRow();
-section("QUEUE · STORAGE",1800,function(){for(s=0;s<QUEUE_SLOTS;s++){beginGroup(90);var sl={addr:[],valid:null};for(b=0;b<ADDR_BITS;b++)sl.addr.push(LAT(0));sl.valid=LAT(0);slots.push(sl);endGroup();}});
-section("QUEUE · PUSH",2400,function(){
-var cum=K1;
-for(s=0;s<QUEUE_SLOTS;s++){beginGroup(130);
-var v=slots[s].valid.o;var nv=NOT(v);var push=AND(AND(core.queueEdge,cum),nv);var en=OR(push,core.clrqEdge);
-setLat(slots[s].valid,AND(push,K1),en);
-for(b=0;b<ADDR_BITS;b++)setLat(slots[s].addr[b],QADDR[b].o,push);
-cum=AND(cum,v);endGroup();}
-});
-forceNewRow();
-section("QUEUE · POINTER",800,function(){for(i=0;i<PTR_BITS;i++)ptr[i]=LAT(0);core.ptr=ptr;beginGroup(180);for(i=PTR_BITS-1;i>=0;i--)led(ptr[i].o,"#ffb020","p"+i);endGroup();});
-section("QUEUE · PT DEC",2400,function(){
-var np=[];for(i=0;i<PTR_BITS;i++)np.push(NOT(ptr[i].o));
-for(s=0;s<QUEUE_SLOTS;s++){beginGroup(140);var acc=K1;for(i=0;i<PTR_BITS;i++){var bv=(s>>i)&1?ptr[i].o:np[i];acc=AND(acc,bv);}ptrSel.push(acc);endGroup();}
-});
-forceNewRow();
-section("QUEUE · ADDR MUX",2400,function(){for(b=0;b<ADDR_BITS;b++){beginGroup(500);var acc=null;for(s=0;s<QUEUE_SLOTS;s++){var t=AND(ptrSel[s],slots[s].addr[b].o);acc=(acc===null)?t:OR(acc,t);}qAddr.push(acc);endGroup();}});
-core.qAddr=qAddr;core.slots=slots;
-forceNewRow();
-}
-function buildExecutor(){
-var i,RAM=core.RAM,qDec;
-section("FETCH · Q DEC",9600,function(){qDec=makeDecoder(core.qAddr);});
-forceNewRow();
-var qOp=[],qData=[],qTag=[],qDest=[];
-section("FETCH · OP",12000,function(){for(var bb=0;bb<8;bb++){beginGroup(2000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var t=AND(qDec[j],RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qOp.push(acc);endGroup();}});
-section("FETCH · DATA",12000,function(){for(var bb=0;bb<8;bb++){beginGroup(2000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=1)?qDec[j-1]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qData.push(acc);endGroup();}});
-forceNewRow();
-section("FETCH · TAG",12000,function(){for(var bb=0;bb<8;bb++){beginGroup(2000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=2)?qDec[j-2]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qTag.push(acc);endGroup();}});
-section("FETCH · ADDR",12000,function(){for(var bb=0;bb<8;bb++){beginGroup(2000);var acc=null;for(var j=0;j<RAM_SIZE;j++){var s=(j>=3)?qDec[j-3]:K0;var t=AND(s,RAM[j][bb].o);acc=(acc===null)?t:OR(acc,t);}qDest.push(acc);endGroup();}qDest.push(K0);});
-forceNewRow();
-var ms=core.RUNQo;var nms=NOT(ms);
-var fOp=[],fData=[],fTag=[],fDest=[];
-section("MUX · OP",1600,function(){for(i=0;i<8;i++){beginGroup(200);fOp.push(OR(AND(ms,qOp[i]),AND(nms,core.OP[i].o)));endGroup();}});
-section("MUX · DATA",1600,function(){for(i=0;i<8;i++){beginGroup(200);fData.push(OR(AND(ms,qData[i]),AND(nms,core.D[i].o)));endGroup();}});
-section("MUX · TAG",1600,function(){for(i=0;i<8;i++){beginGroup(200);fTag.push(OR(AND(ms,qTag[i]),AND(nms,core.T[i].o)));endGroup();}});
-section("MUX · ADDR",1800,function(){for(i=0;i<ADDR_BITS;i++){beginGroup(200);fDest.push(OR(AND(ms,qDest[i]),AND(nms,core.A[i].o)));endGroup();}});
-core.finalOp=fOp;core.finalData=fData;core.finalTag=fTag;core.finalDest=fDest;
-forceNewRow();
-}
+core.BTN_DOWN=mk("DOWN",bx+bw+g,by+2*(bh+g));});
+forceNewRow();}
 
-function buildBackend(){
-var i,b,c,r;
-var opDec,destDec,tagDec,dataDec;
-var RAM=core.RAM;
-var srcB=[],srcC=[],finalR=[];
-var charSels=[],screenLeds=[],ramViewRows=[],storeViewRows=[];
-section("CTRL · EDGE",900,function(){
-core.runPrev=LAT(0);setLat(core.runPrev,core.RUNo,core.CLKo);
+// FIX #2: buildQueue sekarang buat bytes[5] per slot
+function buildQueue(){var slots=[],ptr=[],ptrSel2=[],i,b,s;
+section("QUEUE · STORAGE 64×5×8",32000,function(){
+for(s=0;s<QUEUE_SLOTS;s++){beginGroup(400);
+var sl={bytes:[]};
+for(var bi=0;bi<5;bi++){beginGroup(80);
+var byteBits=[];for(b=0;b<8;b++)byteBits.push(LAT(0));
+sl.bytes.push(byteBits);endGroup();}
+slots.push(sl);endGroup();}});
+forceNewRow();
+section("QUEUE · POINTER",800,function(){for(i=0;i<PTR_BITS;i++)ptr[i]=LAT(0);core.ptr=ptr;
+beginGroup(180);for(i=PTR_BITS-1;i>=0;i--)led(ptr[i].o,"#ffb020","");endGroup();});
+section("QUEUE · PT DEC",2400,function(){var np=[];for(i=0;i<PTR_BITS;i++)np.push(NOT(ptr[i].o));
+for(s=0;s<QUEUE_SLOTS;s++){beginGroup(140);var acc=K1;for(i=0;i<PTR_BITS;i++){var bv=(s>>i)&1?ptr[i].o:np[i];acc=AND(acc,bv);}ptrSel2.push(acc);endGroup();}});
+core.slots=slots;core.ptrSel2=ptrSel2;forceNewRow();}
+
+function buildExecutor(){var i,b,s;
+var slotSel=core.slots,ptrSel2=core.ptrSel2;
+function muxByte(bi){
+var bits=[];
+for(b=0;b<8;b++){var acc=null;
+for(s=0;s<QUEUE_SLOTS;s++){
+var t=AND(ptrSel2[s],slotSel[s].bytes[bi][b].o);
+acc=(acc===null)?t:OR(acc,t);}
+bits.push(acc);}
+return bits;}
+var qOpHi,qOpLo,qData,qTag,qDest;
+section("FETCH · OP_HI",16000,function(){qOpHi=muxByte(0);});
+section("FETCH · OP_LO",16000,function(){qOpLo=muxByte(1);});
+section("FETCH · DATA",16000,function(){qData=muxByte(2);});
+section("FETCH · TAG",16000,function(){qTag=muxByte(3);});
+section("FETCH · DEST",16000,function(){qDest=muxByte(4);});
+forceNewRow();
+var ms=core.RUNQo||K0;var nms=NOT(ms);
+var fOpHi=[],fOpLo=[],fData=[],fTag=[],fDest=[];
+section("MUX · OP_HI",1200,function(){for(i=0;i<8;i++){beginGroup(150);fOpHi.push(OR(AND(ms,qOpHi[i]),AND(nms,core.OP_HI[i].o)));endGroup();}});
+section("MUX · OP_LO",1200,function(){for(i=0;i<8;i++){beginGroup(150);fOpLo.push(OR(AND(ms,qOpLo[i]),AND(nms,core.OP_LO[i].o)));endGroup();}});
+section("MUX · DATA",1200,function(){for(i=0;i<8;i++){beginGroup(150);fData.push(OR(AND(ms,qData[i]),AND(nms,core.D[i].o)));endGroup();}});
+section("MUX · TAG",1200,function(){for(i=0;i<8;i++){beginGroup(150);fTag.push(OR(AND(ms,qTag[i]),AND(nms,core.T[i].o)));endGroup();}});
+section("MUX · DEST",1200,function(){for(i=0;i<8;i++){beginGroup(150);fDest.push(OR(AND(ms,qDest[i]),AND(nms,core.A[i].o)));endGroup();}});
+core.finalOpHi=fOpHi;core.finalOpLo=fOpLo;core.finalData=fData;core.finalTag=fTag;core.finalDest=fDest;
+forceNewRow();}
+
+function buildBackend(){var i,b;
+var opDec,destDec,tagDec,dataDec;var RAM=core.RAM;
+var srcB=[],srcC=[],finalR=[];var screenLeds=[];
+section("CTRL · EDGE",900,function(){core.runPrev=LAT(0);setLat(core.runPrev,core.RUNo,core.CLKo);
 core.clrPrev=LAT(0);setLat(core.clrPrev,core.CLRo,core.CLKo);
 core.runEdge=AND(core.RUNo,NOT(core.runPrev.o));
 core.clrEdge=AND(core.CLRo,NOT(core.clrPrev.o));
-var nq=NOT(core.RUNQo);
-core.effRunEdge=OR(AND(nq,core.runEdge),AND(core.RUNQo,core.CLKo));
-});
-section("CTRL · OP DEC",72000,function(){opDec=decodeOps(core.finalOp);});
+core.effRunEdge=core.runEdge;});
+section("CTRL · OP DEC 16",9000,function(){opDec=decodeOps(core.finalOpHi,core.finalOpLo);});
 section("CTRL · DEST DEC",19200,function(){destDec=makeDecoder(core.finalDest);});
 forceNewRow();
-section("CTRL · TAG DEC",19200,function(){tagDec=makeDecoder(core.finalTag.concat([K0]));});
-section("CTRL · DATA DEC",19200,function(){dataDec=makeDecoder(core.finalData.concat([K0]));});
-var cCol=[],cRow=[];
-section("CURSOR · COL (3)",700,function(){for(i=0;i<3;i++)cCol.push(LAT(0));});
-section("CURSOR · ROW (2)",500,function(){for(i=0;i<2;i++)cRow.push(LAT(0));});
-core.cCol=cCol;core.cRow=cRow;
-var fontMode=[LAT(0),LAT(0)];
-core.fontMode=fontMode;
-section("FONT · MODE",600,function(){
-var fontA=AND(core.effRunEdge,opDec[OP_FONT]);
-for(i=0;i<2;i++){var v=core.finalData[i];var nv=OR(AND(fontA,v),AND(NOT(fontA),fontMode[i].o));setLat(fontMode[i],nv,fontA);}
-});
-var rndReg=[];
-for(i=0;i<8;i++)rndReg.push(LAT(i===0?1:0));
-core.rndReg=rndReg;
-section("RND · LFSR",1600,function(){
-var rndAct=AND(core.effRunEdge,opDec[OP_RND]);
+section("CTRL · TAG DEC",19200,function(){tagDec=makeDecoder(core.finalTag);});
+section("CTRL · DATA DEC",19200,function(){dataDec=makeDecoder(core.finalData);});
+var rndReg=[];for(i=0;i<8;i++)rndReg.push(LAT(i===0?1:0));core.rndReg=rndReg;
+section("RND · LFSR",1600,function(){var rndAct=AND(core.effRunEdge,opDec[OP_RND]);
 var seedAct=AND(core.effRunEdge,opDec[OP_SEED]);
 var newbit=XOR(XOR(rndReg[0].o,rndReg[2].o),XOR(rndReg[3].o,rndReg[4].o));
-for(i=0;i<8;i++){var next=(i===0)?newbit:rndReg[i-1].o;var seedBit=core.finalData[i];var withSeed=OR(AND(seedAct,seedBit),AND(NOT(seedAct),next));setLat(rndReg[i],withSeed,OR(rndAct,seedAct));}
-});
+for(i=0;i<8;i++){var next=(i===0)?newbit:rndReg[i-1].o;var seedBit=core.finalData[i];var withSeed=OR(AND(seedAct,seedBit),AND(NOT(seedAct),next));setLat(rndReg[i],withSeed,OR(rndAct,seedAct));}});
 forceNewRow();
-section("CTRL · DELAY",1600,function(){
-core.delayReg=[];
-for(i=0;i<4;i++)core.delayReg.push(LAT(0));
-core.delayOpPrev=LAT(0);
+section("CTRL · DELAY",1600,function(){core.delayReg=[];
+for(i=0;i<4;i++)core.delayReg.push(LAT(0));core.delayOpPrev=LAT(0);
 var db=[core.delayReg[0].o,core.delayReg[1].o,core.delayReg[2].o,core.delayReg[3].o];
-var dAct=OR(OR(db[0],db[1]),OR(db[2],db[3]));
-var nDelay=NOT(dAct);
+var dAct=OR(OR(db[0],db[1]),OR(db[2],db[3]));var nDelay=NOT(dAct);
 var delayRise=AND(opDec[OP_DELAY],NOT(core.delayOpPrev.o));
-var dLoad=AND(delayRise,core.effRunEdge);
-var nLoad=NOT(dLoad);
+var dLoad=AND(delayRise,core.effRunEdge);var nLoad=NOT(dLoad);
 var decBits=addN(db,[K1,K1,K1,K1],K0,4).sum;
 for(i=0;i<4;i++){var keep=AND(dAct,decBits[i]);var dd=OR(AND(dLoad,core.finalData[i]),AND(nLoad,keep));setLat(core.delayReg[i],dd,core.effRunEdge);}
 setLat(core.delayOpPrev,opDec[OP_DELAY],core.effRunEdge);
-core.nDelay=nDelay;core.delayRise=delayRise;
-});
+core.nDelay=nDelay;core.delayRise=delayRise;});
 forceNewRow();
-section("MUX · READ B (TAG)",48000,function(){for(b=0;b<8;b++){beginGroup(4000);var acc=null;for(i=0;i<RAM_SIZE;i++){var t=AND(tagDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}srcB[b]=acc;endGroup();}});
-section("MUX · READ C (DATA)",48000,function(){for(b=0;b<8;b++){beginGroup(4000);var acc=null;for(i=0;i<RAM_SIZE;i++){var t=AND(dataDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}srcC[b]=acc;endGroup();}});
+section("MUX · READ B (TAG)",96000,function(){for(b=0;b<8;b++){beginGroup(8000);var acc=null;for(i=0;i<RAM_SIZE;i++){var t=AND(tagDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}srcB[b]=acc;endGroup();}});
+section("MUX · READ C (DATA)",96000,function(){for(b=0;b<8;b++){beginGroup(8000);var acc=null;for(i=0;i<RAM_SIZE;i++){var t=AND(dataDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}srcC[b]=acc;endGroup();}});
 forceNewRow();
 section("CTRL · TAG ZERO",400,function(){var a=K0;for(b=0;b<8;b++)a=OR(a,srcB[b]);core.srcBZero=NOT(a);});
-
-// v6.0 CMP: flags Z, LT, GT computed from B - C via full-adder
 var flagZ=LAT(0),flagLT=LAT(0),flagGT=LAT(0);
 core.flagZ=flagZ;core.flagLT=flagLT;core.flagGT=flagGT;
-section("CTRL · CMP FLAGS",1600,function(){
-var full=sub8full(srcB,srcC);
-var z=null;
-for(b=0;b<8;b++){var nz=NOT(full.sum[b]);z=(z===null)?nz:AND(z,nz);}
-var borrow=NOT(full.carry);
-var gt=AND(full.carry,NOT(z));
+section("CTRL · CMP FLAGS",1600,function(){var full=sub8full(srcB,srcC);
+var z=null;for(b=0;b<8;b++){var nz=NOT(full.sum[b]);z=(z===null)?nz:AND(z,nz);}
+var borrow=NOT(full.carry);var gt=AND(full.carry,NOT(z));
 var cp=AND(core.effRunEdge,opDec[OP_CMP]);
-setLat(flagZ,z,cp);
-setLat(flagLT,borrow,cp);
-setLat(flagGT,gt,cp);
-});
+setLat(flagZ,z,cp);setLat(flagLT,borrow,cp);setLat(flagGT,gt,cp);});
 
-// v6.0 CALL stack: 8-deep × 6-bit PC, index by CSP (3-bit)
-core.callStack=[];
-section("CALL · STACK 8×6",1200,function(){
-for(var s=0;s<CALL_DEPTH;s++){beginGroup(400);var e=[];for(b=0;b<PTR_BITS;b++)e.push(LAT(0));core.callStack.push(e);endGroup();}
-});
-core.csp=[];
-section("CALL · CSP (3)",300,function(){for(b=0;b<CSP_BITS;b++)core.csp.push(LAT(0));});
-section("CALL · CTRL",7000,function(){
-var cPulse=AND(core.effRunEdge,opDec[OP_CALL]);
-var rPulse=AND(core.effRunEdge,opDec[OP_RET]);
-var ptrNow=[];for(i=0;i<PTR_BITS;i++)ptrNow.push(core.ptr[i].o);
-var incOne=[K1];for(i=1;i<PTR_BITS;i++)incOne.push(K0);
-var incVal=addN(ptrNow,incOne,K0,PTR_BITS).sum;
-core.incVal=incVal;
-var cspBits=[];for(i=0;i<CSP_BITS;i++)cspBits.push(core.csp[i].o);
-var cspDec=makeDecoder(cspBits);
-var cspM1=subN(cspBits,[K1,K0,K0],CSP_BITS);
-var cspM1Dec=makeDecoder(cspM1);
-for(var s=0;s<CALL_DEPTH;s++){var we=AND(cPulse,cspDec[s]);for(b=0;b<PTR_BITS;b++)setLat(core.callStack[s][b],incVal[b],we);}
-var retData=[];
-for(b=0;b<PTR_BITS;b++){var acc=null;for(var s=0;s<CALL_DEPTH;s++){var t=AND(cspM1Dec[s],core.callStack[s][b].o);acc=(acc===null)?t:OR(acc,t);}retData.push(acc);}
-core.retData=retData;
-var cspP1=addN(cspBits,[K1,K0,K0],K0,CSP_BITS).sum;
-for(i=0;i<CSP_BITS;i++){var vp=AND(cPulse,cspP1[i]);var vm=AND(rPulse,cspM1[i]);setLat(core.csp[i],OR(vp,vm),OR(cPulse,rPulse));}
+// ============================================================
+// DATA STACK (16×8 + SP 4-bit)
+// ============================================================
+core.dataStack=[];
+section("STACK · DATA 16×8",2560,function(){
+for(var s=0;s<STACK_DEPTH;s++){beginGroup(300);
+var entry=[];for(b=0;b<8;b++)entry.push(LAT(0));
+core.dataStack.push(entry);endGroup();}});
+core.sp=[];
+section("STACK · SP (4)",300,function(){for(b=0;b<SP_BITS;b++)core.sp.push(LAT(0));});
+forceNewRow();
+section("STACK · CTRL",6000,function(){
+var pushAct=AND(core.effRunEdge,opDec[OP_PUSH]);
+var popAct=AND(core.effRunEdge,opDec[OP_POP]);
+var dupAct=AND(core.effRunEdge,opDec[OP_DUP]);
+var swapAct=AND(core.effRunEdge,opDec[OP_SWAP]);
+var spBits=[];for(i=0;i<SP_BITS;i++)spBits.push(core.sp[i].o);
+var spDec=makeDecoder(spBits);                    // index untuk PUSH/DUP write
+var spM1=subN(spBits,[K1,K0,K0,K0],SP_BITS);      // sp-1
+var spM1Dec=makeDecoder(spM1);                    // index untuk POP/DUP read
+var spM2=subN(spM1,[K1,K0,K0,K0],SP_BITS);        // sp-2
+var spM2Dec=makeDecoder(spM2);                    // index untuk SWAP baca
+// PUSH: data = RAM[finalDest], write ke stack[sp]
+// DUP:  data = stack[sp-1], write ke stack[sp]
+// SWAP: stack[sp-1] <-> stack[sp-2]
+var writeData=[];
+var dupRead=[];
+var swapReadA=[];
+var swapReadB=[];
+for(b=0;b<8;b++){
+// dupRead[b] = stack[sp-1][b] via MUX
+var dacc=null;
+for(var s=0;s<STACK_DEPTH;s++){
+var t=AND(spM1Dec[s],core.dataStack[s][b].o);
+dacc=(dacc===null)?t:OR(dacc,t);}
+dupRead.push(dacc);
+// swapReadA[b] = stack[sp-1][b]
+var aacc=null;
+for(var s=0;s<STACK_DEPTH;s++){
+var t=AND(spM1Dec[s],core.dataStack[s][b].o);
+aacc=(aacc===null)?t:OR(aacc,t);}
+swapReadA.push(aacc);
+// swapReadB[b] = stack[sp-2][b]
+var bacc=null;
+for(var s=0;s<STACK_DEPTH;s++){
+var t=AND(spM2Dec[s],core.dataStack[s][b].o);
+bacc=(bacc===null)?t:OR(bacc,t);}
+swapReadB.push(bacc);
+// Tentukan data yang ditulis ke stack[sp]
+// PUSH: finalDest[b]
+// DUP:  dupRead[b]
+// SWAP: swapReadB[b] (yang tadinya sp-2 pindah ke sp-1... tunggu)
+// SWAP semantik: [a, b] -> [b, a]. Kalau top=stack[sp-1], di bawahnya=stack[sp-2].
+// Setelah SWAP: stack[sp-1] = b (yang lama sp-2), stack[sp-2] = a (yang lama sp-1)
+// Jadi write yang perlu: stack[sp-1] = oldSp2; stack[sp-2] = oldSp1.
+var wrP=AND(pushAct,core.finalDest[b]);
+var wrD=AND(dupAct,dupRead[b]);
+var wrToTop=OR(wrP,wrD);  // write ke stack[sp]
+var wrSwapToSp1=AND(swapAct,swapReadB[b]); // write ke stack[sp-1] (dari sp-2)
+var wrSwapToSp2=AND(swapAct,swapReadA[b]); // write ke stack[sp-2] (dari sp-1)
+// Untuk setiap stack entry s, tulis kalau spDec[s] && wrToTop, atau spM1Dec[s] && wrSwapToSp1, atau spM2Dec[s] && wrSwapToSp2
+for(var s=0;s<STACK_DEPTH;s++){
+var weTop=AND(spDec[s],wrToTop);
+var weSwap1=AND(spM1Dec[s],wrSwapToSp1);
+var weSwap2=AND(spM2Dec[s],wrSwapToSp2);
+var weTot=OR(OR(weTop,weSwap1),weSwap2);
+// Data untuk entry ini:
+//   kalau weTop: wrToTop (nilai di wrToTop)
+//   kalau weSwap1: wrSwapToSp1
+//   kalau weSwap2: wrSwapToSp2
+var dTot=OR(OR(AND(weTop,wrToTop),AND(weSwap1,wrSwapToSp1)),AND(weSwap2,wrSwapToSp2));
+setLat(core.dataStack[s][b], dTot, weTot);
+}
+}
+core.dupRead=dupRead;
+// Update SP: PUSH/DUP -> +1; POP -> -1; SWAP -> tetap
+var spP1=addN(spBits,[K1,K0,K0,K0],K0,SP_BITS).sum;
+var spEn=OR(OR(pushAct,dupAct),popAct);
+for(i=0;i<SP_BITS;i++){
+var vUp=AND(OR(pushAct,dupAct),spP1[i]);
+var vDn=AND(popAct,spM1[i]);
+var v =OR(vUp,vDn);
+setLat(core.sp[i], v, spEn);}
 });
 
 var pokeDec;
-section("INDIRECT ADDR DEC",19200,function(){pokeDec=makeDecoder([srcB[0],srcB[1],srcB[2],srcB[3],srcB[4],srcB[5],srcB[6],srcB[7],K0]);});
+section("INDIRECT ADDR DEC",19200,function(){pokeDec=makeDecoder(srcB);});
 core.pokeDec=pokeDec;
 var joyByte=[];
-section("JOY · READ",500,function(){joyByte.push(core.BTN_UP.o,core.BTN_DOWN.o,core.BTN_LEFT.o,core.BTN_RIGHT.o,core.BTN_POINT.o,K0,K0,K0);});
+section("JOY · READ",600,function(){joyByte.push(core.BTN_UP.o,core.BTN_DOWN.o,core.BTN_LEFT.o,core.BTN_RIGHT.o,core.BTN_POINT.o,K0,K0,K0);});
 core.joyByte=joyByte;
-var storRead=[];
-section("STORER · READ MUX",12000,function(){for(b=0;b<8;b++){beginGroup(1000);var acc=null;for(i=0;i<STORE_SIZE;i++){var t=AND(dataDec[i],core.STORE[i][b].o);acc=(acc===null)?t:OR(acc,t);}storRead[b]=acc;endGroup();}});
-core.storRead=storRead;
-var storeiRead=[];
-section("STOREI · READ MUX",12000,function(){for(b=0;b<8;b++){beginGroup(1000);var acc=null;for(i=0;i<STORE_SIZE;i++){var t=AND(pokeDec[i],core.STORE[i][b].o);acc=(acc===null)?t:OR(acc,t);}storeiRead[b]=acc;endGroup();}});
-core.storeiRead=storeiRead;
 var peekRead=[];
-section("PEEK · READ MUX",48000,function(){for(b=0;b<8;b++){beginGroup(4000);var acc=null;for(i=0;i<RAM_SIZE;i++){var t=AND(pokeDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}peekRead[b]=acc;endGroup();}});
+section("PEEK · READ MUX",96000,function(){for(b=0;b<8;b++){beginGroup(8000);var acc=null;for(i=0;i<RAM_SIZE;i++){var t=AND(pokeDec[i],RAM[i][b].o);acc=(acc===null)?t:OR(acc,t);}peekRead[b]=acc;endGroup();}});
 core.peekRead=peekRead;
-section("STOREW · WRITE",12000,function(){var storAct=AND(AND(core.effRunEdge,core.nDelay),opDec[OP_STOREW]);for(i=0;i<STORE_SIZE;i++){beginGroup(80);var we=AND(storAct,dataDec[i]);for(b=0;b<8;b++)setLat(core.STORE[i][b],srcB[b],we);endGroup();}});
-section("POKER · WRITE",48000,function(){var pokerAct=AND(AND(core.effRunEdge,core.nDelay),opDec[OP_POKER]);for(i=0;i<RAM_SIZE;i++){beginGroup(100);var we=AND(pokerAct,pokeDec[i]);for(b=0;b<8;b++)setLat(RAM[i][b],srcC[b],we);endGroup();}});
+section("POKER · WRITE",96000,function(){var pokerAct=AND(core.effRunEdge,opDec[OP_POKER]);for(i=0;i<RAM_SIZE;i++){beginGroup(100);var we=AND(pokerAct,pokeDec[i]);for(b=0;b<8;b++)setLat(RAM[i][b],srcC[b],we);endGroup();}});
+// POP: tulis dupRead ke RAM[finalDest]
+section("POP · WRITE TO RAM",96000,function(){var popAct=AND(core.effRunEdge,opDec[OP_POP]);
+for(i=0;i<RAM_SIZE;i++){beginGroup(80);var we=AND(popAct,destDec[i]);
+for(b=0;b<8;b++)setLat(RAM[i][b],core.dupRead[b],we);endGroup();}});
 core.halt=LAT(0);
 section("HALT · LATCH",600,function(){var haltSet=AND(AND(opDec[OP_HALT],core.effRunEdge),NOT(core.halt.o));var next=OR(haltSet,core.halt.o);setLat(core.halt,next,OR(haltSet,core.clrEdge));});
-
-// v6.0 PT UPDATE: includes CALL/RET/JLT/JGT/JEQ/JNE
-section("QUEUE · PT UPDATE",4000,function(){
-var runEdge=core.effRunEdge;
+section("QUEUE · PT UPDATE",5000,function(){var runEdge=core.effRunEdge;
 var jb=opDec[OP_JMP];
-var cb=opDec[OP_CALL];
-var rb=opDec[OP_RET];
-var jzb=AND(opDec[OP_JZ],core.srcBZero);
-var jnzb=AND(opDec[OP_JNZ],NOT(core.srcBZero));
-var jltb=AND(opDec[OP_JLT],core.flagLT.o);
-var jgtb=AND(opDec[OP_JGT],core.flagGT.o);
-var jeqb=AND(opDec[OP_JEQ],core.flagZ.o);
-var jneb=AND(opDec[OP_JNE],NOT(core.flagZ.o));
-var anyDataJump=OR(OR(OR(jb,cb),OR(jzb,jnzb)),OR(OR(jltb,jgtb),OR(jeqb,jneb)));
-var anyJump=OR(anyDataJump,rb);
-var haltEn=core.halt.o;
-var runGate=AND(core.nDelay,NOT(haltEn));
-var notRise=NOT(core.delayRise);
+var jzb=AND(opDec[OP_JZ],core.srcBZero);var jnzb=AND(opDec[OP_JNZ],NOT(core.srcBZero));
+var jltb=AND(opDec[OP_JLT],core.flagLT.o);var jgtb=AND(opDec[OP_JGT],core.flagGT.o);
+var jeqb=AND(opDec[OP_JEQ],core.flagZ.o);var jneb=AND(opDec[OP_JNE],NOT(core.flagZ.o));
+var anyJump=OR(OR(OR(jb,jzb),OR(jnzb,jltb)),OR(OR(jgtb,jeqb),jneb));
+var haltEn=core.halt.o;var runGate=AND(core.nDelay,NOT(haltEn));var notRise=NOT(core.delayRise);
 var jmpEn=AND(AND(anyJump,runEdge),AND(runGate,notRise));
-var incEn=AND(AND(runEdge,core.RUNQo),AND(runGate,notRise));
+var incEn=AND(AND(runEdge,core.effRunEdge),AND(runGate,notRise));
 var en=OR(jmpEn,incEn);
 var ptrNow=[];for(i=0;i<PTR_BITS;i++)ptrNow.push(core.ptr[i].o);
 var incOne=[K1];for(i=1;i<PTR_BITS;i++)incOne.push(K0);
 var incVal=addN(ptrNow,incOne,K0,PTR_BITS).sum;
-for(i=0;i<PTR_BITS;i++){
-var jvData=AND(anyDataJump,core.finalData[i]);
-var jvRet=AND(rb,core.retData[i]);
-var jv=OR(jvData,jvRet);
-var v=OR(AND(jmpEn,jv),AND(NOT(jmpEn),incVal[i]));
-setLat(core.ptr[i],v,en);
-}
-});
-
+for(i=0;i<PTR_BITS;i++){var jv=core.finalDest[i];
+var v=OR(AND(jmpEn,jv),AND(NOT(jmpEn),incVal[i]));setLat(core.ptr[i],v,en);}});
 var opR={},opList=[];
 function addOp(code,bits){opR[code]=bits;opList.push(code);}
 section("ALU · SET·MOV",900,function(){var r0=[];for(b=0;b<8;b++)r0.push(core.finalData[b]);addOp(OP_SET,r0);addOp(OP_MOV,srcB.slice());});
@@ -662,460 +574,209 @@ section("ALU · LOGIC",1400,function(){var aR=[],oR=[],xR=[],nR=[];for(b=0;b<8;b
 section("ALU · INC·DEC",1600,function(){addOp(OP_INC,add8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]));addOp(OP_DEC,sub8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]));});
 section("ALU · CLR",200,function(){addOp(OP_CLR,[K0,K0,K0,K0,K0,K0,K0,K0]);});
 section("ALU · SHL·SHR",1600,function(){var shl=[K0],shr=[K0];for(b=0;b<7;b++)shl.push(srcB[b]);for(b=1;b<8;b++)shr.push(srcB[b]);addOp(OP_SHL,shl);addOp(OP_SHR,shr);});
-section("ALU · INDIRECT",1000,function(){
-addOp(OP_JOY,joyByte.slice());
-addOp(OP_PEEK,peekRead.slice());
-addOp(OP_STOREI,storeiRead.slice());
-addOp(OP_STORER,storRead.slice());
-});
+section("ALU · JOY",500,function(){addOp(OP_JOY,joyByte.slice());});
+section("ALU · PEEK",900,function(){addOp(OP_PEEK,peekRead.slice());});
 section("ALU · RND",600,function(){var rr=[];for(b=0;b<8;b++)rr.push(core.rndReg[b].o);addOp(OP_RND,rr);});
 forceNewRow();
-section("OUTPUT MUX",5000,function(){
-for(b=0;b<8;b++){beginGroup(700);var acc=null;for(var ii=0;ii<opList.length;ii++){var opv=opList[ii];var t=AND(opDec[opv],opR[opv][b]);acc=(acc===null)?t:OR(acc,t);}if(acc===null)acc=K0;finalR.push(acc);endGroup();}
-});
-var big=fontMode[1].o;var bold=fontMode[0].o;var nbig=NOT(big);var nbold=NOT(bold);
-var colInc,rowInc,colOf,rowOf;
-section("CURSOR · ARITH",1800,function(){
-colInc=addN([cCol[0].o,cCol[1].o,cCol[2].o],[K1,K0,K0],K0,3).sum;
-rowInc=addN([cRow[0].o,cRow[1].o],[K1,K0],K0,2).sum;
-var colOf_s=AND(cCol[0].o,AND(cCol[1].o,cCol[2].o));
-var colOf_b=AND(cCol[0].o,cCol[1].o);
-colOf=OR(AND(nbig,colOf_s),AND(big,colOf_b));
-var rowOf_s=AND(cRow[0].o,cRow[1].o);
-var rowOf_b=cRow[0].o;
-rowOf=OR(AND(nbig,rowOf_s),AND(big,rowOf_b));
-});
-section("CURSOR · UPDATE",2400,function(){
-var chrA=AND(core.effRunEdge,opDec[OP_CHR]);
-var homeA=AND(core.effRunEdge,opDec[OP_HOME]);
-var curA=AND(core.effRunEdge,opDec[OP_CUR]);
-var nlA=AND(core.effRunEdge,opDec[OP_NL]);
-var anyOp=OR(OR(chrA,homeA),OR(curA,nlA));
-var zero=K0;
-var chWrap=AND(chrA,colOf);
-for(i=0;i<3;i++){
-var c0=AND(curA,core.finalData[i]);
-var c1=AND(OR(homeA,nlA),zero);
-var c2=AND(chWrap,zero);
-var c3=AND(AND(chrA,NOT(colOf)),colInc[i]);
-var keep=AND(NOT(anyOp),cCol[i].o);
-var v=OR(OR(c0,OR(c1,c2)),OR(c3,keep));
-setLat(cCol[i],v,anyOp);
-}
-for(i=0;i<2;i++){
-var r0=AND(curA,core.finalTag[i]);
-var r1=AND(homeA,zero);
-var nlW=AND(nlA,rowOf);
-var nlN=AND(nlA,NOT(rowOf));
-var chW=AND(chWrap,rowOf);
-var chN=AND(chWrap,NOT(rowOf));
-var v2=OR(OR(r0,r1),zero);
-v2=OR(v2,AND(nlN,rowInc[i]));
-v2=OR(v2,AND(chN,rowInc[i]));
-v2=OR(v2,AND(OR(nlW,chW),zero));
-v2=OR(v2,AND(NOT(anyOp),cRow[i].o));
-setLat(cRow[i],v2,anyOp);
-}
-});
-section("OUTPUT · WRITE EN",72000,function(){
-var runOk=AND(core.effRunEdge,core.nDelay);
-var wrEnable=OR(core.WRo,core.RUNQo);
-var wrPulse=AND(runOk,wrEnable);
-var nClr=NOT(core.clrEdge);
-var scrClrPulse=AND(runOk,opDec[OP_SCRCLR]);
-var scrollPulse=AND(runOk,opDec[OP_SCROLL]);
-var storerAct=AND(runOk,opDec[OP_STORER]);
+section("OUTPUT MUX",5000,function(){for(b=0;b<8;b++){beginGroup(700);var acc=null;for(var ii=0;ii<opList.length;ii++){var opv=opList[ii];var t=AND(opDec[opv],opR[opv][b]);acc=(acc===null)?t:OR(acc,t);}if(acc===null)acc=K0;finalR.push(acc);endGroup();}});
+section("OUTPUT · WRITE EN",96000,function(){var wrEnable=core.effRunEdge;var nClr=NOT(core.clrEdge);
 var noWrite=K0;
 noWrite=OR(noWrite,opDec[OP_NOP]);noWrite=OR(noWrite,opDec[OP_JMP]);
 noWrite=OR(noWrite,opDec[OP_JZ]);noWrite=OR(noWrite,opDec[OP_JNZ]);
-noWrite=OR(noWrite,opDec[OP_DELAY]);noWrite=OR(noWrite,opDec[OP_SCRCLR]);
-noWrite=OR(noWrite,opDec[OP_SCROLL]);noWrite=OR(noWrite,opDec[OP_SPX]);
-noWrite=OR(noWrite,opDec[OP_SPY]);noWrite=OR(noWrite,opDec[OP_SPXP]);
-noWrite=OR(noWrite,opDec[OP_SPXM]);noWrite=OR(noWrite,opDec[OP_SPYP]);
-noWrite=OR(noWrite,opDec[OP_SPYM]);noWrite=OR(noWrite,opDec[OP_SPSHOW]);
-noWrite=OR(noWrite,opDec[OP_SPHIDE]);noWrite=OR(noWrite,opDec[OP_HOME]);
-noWrite=OR(noWrite,opDec[OP_CUR]);noWrite=OR(noWrite,opDec[OP_CHR]);
-noWrite=OR(noWrite,opDec[OP_NL]);noWrite=OR(noWrite,opDec[OP_CLRLN]);
-noWrite=OR(noWrite,opDec[OP_SCLR]);noWrite=OR(noWrite,opDec[OP_FILL]);
-noWrite=OR(noWrite,opDec[OP_HALT]);noWrite=OR(noWrite,opDec[OP_FONT]);
-noWrite=OR(noWrite,opDec[OP_STOREW]);noWrite=OR(noWrite,opDec[OP_POKER]);
-noWrite=OR(noWrite,opDec[OP_SEED]);
-noWrite=OR(noWrite,opDec[OP_CMP]);
 noWrite=OR(noWrite,opDec[OP_JLT]);noWrite=OR(noWrite,opDec[OP_JGT]);
 noWrite=OR(noWrite,opDec[OP_JEQ]);noWrite=OR(noWrite,opDec[OP_JNE]);
-noWrite=OR(noWrite,opDec[OP_CALL]);noWrite=OR(noWrite,opDec[OP_RET]);
+noWrite=OR(noWrite,opDec[OP_DELAY]);noWrite=OR(noWrite,opDec[OP_SCRCLR]);
+noWrite=OR(noWrite,opDec[OP_HALT]);noWrite=OR(noWrite,opDec[OP_CMP]);
+noWrite=OR(noWrite,opDec[OP_POKER]);noWrite=OR(noWrite,opDec[OP_POP]);
+noWrite=OR(noWrite,opDec[OP_PUSH]);noWrite=OR(noWrite,opDec[OP_DUP]);
+noWrite=OR(noWrite,opDec[OP_SWAP]);
 var doWrite=NOT(noWrite);
-var cellBit0=cCol[0].o;
-var cellBit1=cCol[1].o;
-var cellBit2=OR(AND(nbig,cCol[2].o),AND(big,cRow[0].o));
-var cellBit3=OR(AND(nbig,cRow[0].o),AND(big,K0));
-var cellBit4=OR(AND(nbig,cRow[1].o),AND(big,K0));
-var cellBits=[cellBit0,cellBit1,cellBit2,cellBit3,cellBit4];
-var pokeAct=AND(runOk,opDec[OP_POKE]);
-var SPACE=[K0,K0,K0,K0,K0,K1,K0,K0];
-var rowMatchList=[];
-for(i=0;i<32;i++){
-var rsRow=(i>>3)&3;var rbRow=(i>>2)&1;
-var rs0=(rsRow&1)?cRow[0].o:NOT(cRow[0].o);
-var rs1=(rsRow&2)?cRow[1].o:NOT(cRow[1].o);
-var rowSmall=AND(rs0,rs1);
-var rowBig=(rbRow===1)?cRow[0].o:NOT(cRow[0].o);
-rowMatchList.push(OR(AND(nbig,rowSmall),AND(big,rowBig)));
-}
 for(i=0;i<RAM_SIZE;i++){
 beginGroup(100);
-var wEn=AND(AND(wrPulse,destDec[i]),doWrite);
-var pokeEn=AND(pokeAct,pokeDec[i]);
-var storerEn=AND(storerAct,destDec[i]);
-var inDisp=(i<DISPLAY_CELLS)?K1:K0;
-var scrollEn=AND(scrollPulse,inDisp);
-var chrEn=K0,clrEn=K0,sclrEn=K0,fillEn=K0;
-if(i<DISPLAY_CELLS){
-var chrHit=eqN(cellBits,i,5);
-chrEn=AND(AND(core.effRunEdge,opDec[OP_CHR]),chrHit);
-var clrRow=(i>>3)&3;
-var crm0=(clrRow&1)?cRow[0].o:NOT(cRow[0].o);
-var crm1=(clrRow&2)?cRow[1].o:NOT(cRow[1].o);
-clrEn=AND(AND(core.effRunEdge,opDec[OP_CLRLN]),AND(crm0,crm1));
-sclrEn=AND(core.effRunEdge,opDec[OP_SCLR]);
-fillEn=AND(core.effRunEdge,opDec[OP_FILL]);
-}
-if(i<DISPLAY_CELLS)wEn=OR(wEn,scrClrPulse);
-var textEn=OR(OR(chrEn,clrEn),OR(sclrEn,fillEn));
-var en=OR(OR(OR(wEn,core.clrEdge),scrollEn),pokeEn);
-en=OR(en,textEn);en=OR(en,storerEn);
-for(b=0;b<8;b++){
-var norm=AND(finalR[b],nClr);
-var isLastSmall=((i&7)===7)?K1:K0;
-var isLastBig=((i&3)===3)?K1:K0;
-var isLast=OR(AND(nbig,isLastSmall),AND(big,isLastBig));
-var nextBit=((i+1)<DISPLAY_CELLS)?RAM[i+1][b].o:K0;
-var inRowScroll=OR(AND(isLast,core.finalData[b]),AND(NOT(isLast),nextBit));
-var scrollData=OR(AND(rowMatchList[i],inRowScroll),AND(NOT(rowMatchList[i]),RAM[i][b].o));
-var dB=OR(AND(scrollEn,scrollData),AND(NOT(scrollEn),norm));
-var pokeBit=core.finalData[b];
-var chrBit=core.finalData[b];
-var clrBit=SPACE[b];
-var fillBit=core.finalData[b];
-var sclrBit=(i<24)?RAM[i+8][b].o:core.finalData[b];
-var anyText=OR(OR(chrEn,clrEn),OR(sclrEn,fillEn));
-var textBit=OR(OR(AND(chrEn,chrBit),AND(clrEn,clrBit)),OR(AND(sclrEn,sclrBit),AND(fillEn,fillBit)));
-var withText=OR(AND(anyText,textBit),AND(NOT(anyText),dB));
-var withPoke=OR(AND(pokeEn,pokeBit),AND(NOT(pokeEn),withText));
-var storerBit=storRead[b];
-var withStorer=OR(AND(storerEn,storerBit),AND(NOT(storerEn),withPoke));
-setLat(RAM[i][b],withStorer,en);
-}
+var wEn=AND(AND(wrEnable,destDec[i]),doWrite);
+var en=OR(wEn,core.clrEdge);
+for(b=0;b<8;b++)setLat(RAM[i][b],finalR[b],en);
 endGroup();
-}
-});
+}});
+// CHR: tulis finalData ke RAM[DEST]
+section("CHR · WRITE",96000,function(){var chrAct=AND(core.effRunEdge,opDec[OP_CHR]);
+for(i=0;i<RAM_SIZE;i++){beginGroup(80);var we=AND(chrAct,destDec[i]);
+for(b=0;b<8;b++)setLat(RAM[i][b],core.finalData[b],we);endGroup();}});
 forceNewRow();
-var sx=[],sy=[];
-section("SPRITE · X",700,function(){for(i=0;i<5;i++)sx.push(LAT(0));});
-section("SPRITE · Y",600,function(){for(i=0;i<4;i++)sy.push(LAT(0));});
-section("SPRITE · VIS",300,function(){core.sprVis=LAT(0);});
-section("SPRITE · EDGE",900,function(){
-core.upPrev=LAT(0);setLat(core.upPrev,core.BTN_UP.o,core.CLKo);
-core.dnPrev=LAT(0);setLat(core.dnPrev,core.BTN_DOWN.o,core.CLKo);
-core.lfPrev=LAT(0);setLat(core.lfPrev,core.BTN_LEFT.o,core.CLKo);
-core.rtPrev=LAT(0);setLat(core.rtPrev,core.BTN_RIGHT.o,core.CLKo);
-core.ptPrev=LAT(0);setLat(core.ptPrev,core.BTN_POINT.o,core.CLKo);
-core.upEdge=AND(core.BTN_UP.o,NOT(core.upPrev.o));
-core.dnEdge=AND(core.BTN_DOWN.o,NOT(core.dnPrev.o));
-core.lfEdge=AND(core.BTN_LEFT.o,NOT(core.lfPrev.o));
-core.rtEdge=AND(core.BTN_RIGHT.o,NOT(core.rtPrev.o));
-core.ptEdge=AND(core.BTN_POINT.o,NOT(core.ptPrev.o));
-});
-forceNewRow();
-section("SPRITE · X UPD",1400,function(){
-var rE=core.effRunEdge;
-var sE=AND(rE,opDec[OP_SPX]);
-var iE=OR(AND(rE,opDec[OP_SPXP]),core.rtEdge);
-var dE=OR(AND(rE,opDec[OP_SPXM]),core.lfEdge);
-var now=[sx[0].o,sx[1].o,sx[2].o,sx[3].o,sx[4].o];
-var iV=addN(now,[K1,K0,K0,K0,K0],K0,5).sum;
-var dV=subN(now,[K1,K0,K0,K0,K0],5);
-var en=OR(OR(sE,iE),dE);
-for(i=0;i<5;i++){var v0=OR(AND(sE,core.finalData[i]),AND(NOT(sE),now[i]));var v1=OR(AND(iE,iV[i]),AND(NOT(iE),v0));var v2=OR(AND(dE,dV[i]),AND(NOT(dE),v1));setLat(sx[i],v2,en);}
-});
-section("SPRITE · Y UPD",1200,function(){
-var rE=core.effRunEdge;
-var sE=AND(rE,opDec[OP_SPY]);
-var iE=OR(AND(rE,opDec[OP_SPYP]),core.dnEdge);
-var dE=OR(AND(rE,opDec[OP_SPYM]),core.upEdge);
-var now=[sy[0].o,sy[1].o,sy[2].o,sy[3].o];
-var iV=addN(now,[K1,K0,K0,K0],K0,4).sum;
-var dV=subN(now,[K1,K0,K0,K0],4);
-var en=OR(OR(sE,iE),dE);
-for(i=0;i<4;i++){var v0=OR(AND(sE,core.finalData[i]),AND(NOT(sE),now[i]));var v1=OR(AND(iE,iV[i]),AND(NOT(iE),v0));var v2=OR(AND(dE,dV[i]),AND(NOT(dE),v1));setLat(sy[i],v2,en);}
-});
-section("SPRITE · VIS UPD",600,function(){
-var rE=core.effRunEdge;
-var show=AND(rE,opDec[OP_SPSHOW]);
-var hide=AND(rE,opDec[OP_SPHIDE]);
-var en=OR(OR(show,hide),core.ptEdge);
-var v0=OR(AND(show,K1),AND(NOT(show),core.sprVis.o));
-var v1=OR(AND(hide,K0),AND(NOT(hide),v0));
-var v2=OR(AND(core.ptEdge,NOT(core.sprVis.o)),AND(NOT(core.ptEdge),v1));
-setLat(core.sprVis,v2,en);
-});
-forceNewRow();
-core.sx=sx;core.sy=sy;
-section("SPRITE · XOFF",1200,function(){var now=[sx[0].o,sx[1].o,sx[2].o,sx[3].o,sx[4].o];core.sxK=[now,addN(now,[K1,K0,K0,K0,K0],K0,5).sum,addN(now,[K0,K1,K0,K0,K0],K0,5).sum,addN(now,[K1,K1,K0,K0,K0],K0,5).sum];});
-section("SPRITE · YOFF",900,function(){var now=[sy[0].o,sy[1].o,sy[2].o,sy[3].o];core.syK=[now,addN(now,[K1,K0,K0,K0],K0,4).sum,addN(now,[K0,K1,K0,K0],K0,4).sum,addN(now,[K1,K1,K0,K0],K0,4).sum];});
-forceNewRow();
-section("SCREEN · CHAR DET",12000,function(){
-for(var ci=0;ci<DISPLAY_CELLS;ci++){
-beginGroup(2000);
-var cellSels=[];
-for(var si=0;si<SUPPORTED.length;si++){
-var cval=SUPPORTED[si];
-beginGroup(80);
-var bits=[];
-for(b=0;b<8;b++){var bv=(cval>>b)&1;bits.push(bv?RAM[ci][b].o:NOT(RAM[ci][b].o));}
-var a1=AND(bits[0],bits[1]);var a2=AND(bits[2],bits[3]);var a3=AND(bits[4],bits[5]);var a4=AND(bits[6],bits[7]);
-cellSels.push(AND(AND(a1,a2),AND(a3,a4)));
-endGroup();
-}
-charSels.push(cellSels);
-endGroup();
-}
-});
-forceNewRow();
-section("SCREEN · GRID",SCR_W*(SIZE_LED+GAPX)+GAPX,function(){for(r=0;r<SCR_H;r++){beginGroup(SCR_W*(SIZE_LED+GAPX)+GAPX);screenLeds.push([]);for(c=0;c<SCR_W;c++)screenLeds[r].push(ledPending("#111","",SIZE_LED));endGroup();}});
-section("SCREEN · FONT",20000,function(){
-for(r=0;r<SCR_H;r++){beginGroup(8000);
-for(c=0;c<SCR_W;c++){beginGroup(5000);
-var ci_small=(r>>2)*CHAR_COLS+(c>>2);
-var ci_big=(r>>3)*4+(c>>3);
-var spx=c&3,spy=r&3,bpx=(c>>1)&3,bpy=(r>>1)&3;
-var acc=null;
-for(var si=0;si<SUPPORTED.length;si++){
-var ch=SUPPORTED[si];
-var v_sn=(FONT[ch][spy]>>(3-spx))&1;
-var v_sb=(FONT_BOLD[ch][spy]>>(3-spx))&1;
-var v_bn=(FONT[ch][bpy]>>(3-bpx))&1;
-var v_bb=(FONT_BOLD[ch][bpy]>>(3-bpx))&1;
-var anyS=v_sn|v_sb,anyB=v_bn|v_bb;
-if(!anyS&&!anyB)continue;
-var mS=charSels[ci_small][si];
-var mB=charSels[ci_big][si];
-var tS=K0,tB=K0;
-if(anyS){var bitS=v_sn?(v_sb?K1:nbold):(v_sb?bold:K0);tS=AND(AND(mS,nbig),bitS);}
-if(anyB){var bitB=v_bn?(v_bb?K1:nbold):(v_bb?bold:K0);tB=AND(AND(mB,big),bitB);}
-var term=OR(tS,tB);
-acc=(acc===null)?term:OR(acc,term);
-}
-if(acc===null)acc=K0;
-rewireLed(screenLeds[r][c],acc);
-endGroup();}
-endGroup();}
-});
-forceNewRow();
-section("SCREEN · SCOL",2000,function(){
-var k0=core.sxK[0],k1=core.sxK[1],k2=core.sxK[2],k3=core.sxK[3];
-core.colMatch=[];
-for(c=0;c<SCR_W;c++){beginGroup(150);var e0=eqN(k0,c,5),e1=eqN(k1,c,5),e2=eqN(k2,c,5),e3=eqN(k3,c,5);core.colMatch.push(OR(OR(e0,e1),OR(e2,e3)));endGroup();}
-});
-section("SCREEN · SROW",1200,function(){
-var k0=core.syK[0],k1=core.syK[1],k2=core.syK[2],k3=core.syK[3];
-core.rowMatch=[];
-for(r=0;r<SCR_H;r++){beginGroup(150);var e0=eqN(k0,r,4),e1=eqN(k1,r,4),e2=eqN(k2,r,4),e3=eqN(k3,r,4);core.rowMatch.push(OR(OR(e0,e1),OR(e2,e3)));endGroup();}
-});
-forceNewRow();
-section("SCREEN · SPRITE OVER",4000,function(){
-for(r=0;r<SCR_H;r++){beginGroup(SCR_W*40);
-for(c=0;c<SCR_W;c++){beginGroup(40);
-var hit=AND(core.sprVis.o,AND(core.colMatch[c],core.rowMatch[r]));
-var ex=screenLeds[r][c].i;
-rewireLed(screenLeds[r][c],OR(ex,hit));
-endGroup();}
-endGroup();}
-});
-forceNewRow();
-section("OUTPUT · RAM VIEW",RAM_SIZE*(SIZE_LED+GAPX)+GAPX,function(){for(var br=0;br<8;br++){beginGroup(RAM_SIZE*(SIZE_LED+GAPX)+GAPX);var row=[];for(var a=0;a<RAM_SIZE;a++)row.push(ledPending("#ffb020","",SIZE_LED));ramViewRows.push(row);endGroup();}});
-for(var a=0;a<RAM_SIZE;a++)for(var bb=0;bb<8;bb++)rewireLed(ramViewRows[7-bb][a],RAM[a][bb].o);
-forceNewRow();
-section("OUTPUT · STORAGE VIEW",STORE_SIZE*(SIZE_LED+GAPX)+GAPX,function(){for(var br=0;br<8;br++){beginGroup(STORE_SIZE*(SIZE_LED+GAPX)+GAPX);var row=[];for(var a=0;a<STORE_SIZE;a++)row.push(ledPending("#4a9eff","",SIZE_LED));storeViewRows.push(row);endGroup();}});
-for(var a=0;a<STORE_SIZE;a++)for(var bb=0;bb<8;bb++)rewireLed(storeViewRows[7-bb][a],core.STORE[a][bb].o);
-forceNewRow();
-}
+section("SCREEN · GRID 6×3 CELLS 5×5",GRID_W*(LED_SZ+GAPX)*CELL+GAPX,function(){
+for(var row=0;row<GRID_H;row++){beginGroup(GRID_W*(LED_SZ+GAPX)*CELL+GAPX);screenLeds.push([]);
+for(var col=0;col<GRID_W;col++){
+var cellLeds=[];
+for(var py=0;py<CELL;py++){var rowLeds=[];
+for(var px=0;px<CELL;px++)rowLeds.push(ledPending("#111","",LED_SZ));cellLeds.push(rowLeds);}
+screenLeds[row].push(cellLeds);}
+endGroup();}});
+core.screenLeds=screenLeds;}
 
-var NOOP=[0,0,0,0];
+var NOOP5=[0,0,0,0,0];
 function writeRamByte(arr,addr,val){if(addr<0||addr>=RAM_SIZE)return;for(var b=0;b<8;b++)latchReset(arr[addr][b],(val>>b)&1);}
-function writeStoreByte(addr,val){if(addr<0||addr>=STORE_SIZE)return;for(var b=0;b<8;b++)latchReset(core.STORE[addr][b],(val>>b)&1);}
 function clearMemory(){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);}
+// FIX #2b: loadProgram OK sekarang karena bytes sudah ada
 function loadProgram(proj){
 clearMemory();
-var prog=proj.program||proj;
-if(proj.storage){for(var k=0;k<proj.storage.length;k++){writeStoreByte(proj.storage[k][0],proj.storage[k][1]);}}
-var pad=(prog||[]).slice(0,QUEUE_SLOTS);
-while(pad.length<QUEUE_SLOTS)pad.push(NOOP.slice());
-var addr=QUEUE_START;
+var prog=proj.program||[];
 for(var i=0;i<QUEUE_SLOTS;i++){
-var ins=pad[i];
-writeRamByte(core.RAM,addr,ins[0]&0xFF);
-writeRamByte(core.RAM,addr+1,ins[1]&0xFF);
-writeRamByte(core.RAM,addr+2,ins[2]&0xFF);
-writeRamByte(core.RAM,addr+3,ins[3]&0xFF);
-for(var b=0;b<ADDR_BITS;b++)latchReset(core.slots[i].addr[b],(addr>>b)&1);
-latchReset(core.slots[i].valid,1);
-addr+=4;
+var ins=(i<prog.length)?prog[i]:NOOP5;
+for(var bi=0;bi<5;bi++){
+var byteVal=(ins[bi]|0)&0xFF;
+if(core.slots[i]&&core.slots[i].bytes&&core.slots[i].bytes[bi]){
+for(var b=0;b<8;b++)latchReset(core.slots[i].bytes[bi][b],(byteVal>>b)&1);}}
 }
+// Clear RAM display area (all white)
+for(var a=0;a<128;a++)writeRamByte(core.RAM,a,32);
 }
 function autoStart(){for(var i=0;i<sws.length;i++){if(sws[i].label==="RUN_Q"){sws[i].v=1;}}}
 function initProj(){
 var box=document.getElementById("projSel");var dd=document.getElementById("projDropdown");
-if(!window.BUILTIN_PROJECTS||!window.BUILTIN_PROJECTS.projects||!window.BUILTIN_PROJECTS.projects.length){box.style.display="none";loadProgram({program:[NOOP.slice()]});autoStart();return;}
-var list=window.BUILTIN_PROJECTS.projects;
-while(dd.firstChild)dd.removeChild(dd.firstChild);
-for(var i=0;i<list.length;i++){var o=document.createElement("option");o.value=list[i].id;o.textContent=list[i].name;o.title=list[i].description||"";dd.appendChild(o);}
-dd.onchange=function(){for(var j=0;j<list.length;j++){if(list[j].id===dd.value){loadProgram(list[j]);autoStart();simulate();return;}}};
+if(!window.BUILTIN_PROJECTS||!window.BUILTIN_PROJECTS.projects.length){box.style.display="none";return;}
+var list=window.BUILTIN_PROJECTS.projects;while(dd.firstChild)dd.removeChild(dd.firstChild);
+for(var i=0;i<list.length;i++){var o=document.createElement("option");o.value=list[i].id;o.textContent=list[i].name;dd.appendChild(o);}
+dd.onchange=function(){for(var j=0;j<list.length;j++){if(list[j].id===dd.value){
+// Reset PTR & SP ke 0 sebelum reload
+for(var b=0;b<PTR_BITS;b++)if(core.ptr[b])latchReset(core.ptr[b],0);
+for(var b=0;b<SP_BITS;b++)if(core.sp[b])latchReset(core.sp[b],0);
+for(var b=0;b<8;b++)if(core.halt)latchReset(core.halt,0);
+loadProgram(list[j]);autoStart();simulate();updateHUD();updateScreen();return;}}};
 box.style.display="flex";
-loadProgram(list[0]);
-autoStart();
-}
-function routeWires(){
-var STEP=2,buckets={},list=[],i,w;
-for(i=0;i<wires.length;i++){w=wires[i];delete w.mx;if(w.s.x===undefined)continue;if(w.l){w.ex=w.l.px-(w.l.sz||22)*0.4-2;w.ey=w.l.py;}else if(w.g&&w.g.px!==undefined){w.ex=w.g.px-6;w.ey=w.g.py+w.py;}else{continue;}if(Math.abs(w.s.y-w.ey)<3)continue;list.push(w);}
+loadProgram(list[0]);autoStart();}
+function routeWires(){var STEP=2,buckets={},list=[],i,w;
+for(i=0;i<wires.length;i++){w=wires[i];delete w.mx;if(w.s.x===undefined)continue;
+if(w.l){w.ex=w.l.px-(w.l.sz||22)*0.4-2;w.ey=w.l.py;}
+else if(w.g&&w.g.px!==undefined){w.ex=w.g.px-6;w.ey=w.g.py+w.py;}else{continue;}
+if(Math.abs(w.s.y-w.ey)<3)continue;list.push(w);}
 list.sort(function(a,b){return Math.abs(b.ey-b.s.y)-Math.abs(a.ey-a.s.y);});
-for(i=0;i<list.length;i++){w=list[i];var y1=Math.min(w.s.y,w.ey)-1,y2=Math.max(w.s.y,w.ey)+1;var ideal=w.s.x+(w.ex-w.s.x)/2,base=Math.round(ideal/STEP),pick=null;
-for(var d=0;d<400&&pick===null;d++){for(var sg=(d===0?1:-1);sg<=1&&pick===null;sg+=2){var key=base+sg*d,arr=buckets[key],ok=true;if(arr)for(var m=0;m<arr.length;m++){var o=arr[m];if(o.n!==w.s&&o.a<y2&&o.b>y1){ok=false;break;}}if(ok)pick=key;}}
-if(pick===null)pick=base;(buckets[pick]||(buckets[pick]=[])).push({a:y1,b:y2,n:w.s});w.mx=pick*STEP;}
-}
-function relayout43(){
-var GX=22,GY=26,M=60,TOP=110,RATIO=16/9,CG=150,RG=55;
+for(i=0;i<list.length;i++){w=list[i];var y1=Math.min(w.s.y,w.ey)-1,y2=Math.max(w.s.y,w.ey)+1;
+var ideal=w.s.x+(w.ex-w.s.x)/2,base=Math.round(ideal/STEP),pick=null;
+for(var d=0;d<400&&pick===null;d++){for(var sg=(d===0?1:-1);sg<=1&&pick===null;sg+=2){
+var key=base+sg*d,arr=buckets[key],ok=true;
+if(arr)for(var m=0;m<arr.length;m++){var o=arr[m];if(o.n!==w.s&&o.a<y2&&o.b>y1){ok=false;break;}}
+if(ok)pick=key;}}
+if(pick===null)pick=base;(buckets[pick]||(buckets[pick]=[])).push({a:y1,b:y2,n:w.s});w.mx=pick*STEP;}}
+function relayout43(){var GX=22,GY=26,M=60,TOP=110,RATIO=16/9,CG=150,RG=55;
 var secs=sectionsData,n=secs.length,i,k,maxW=0,totW=0,idx={};
 if(!n)return null;
 for(i=0;i<n;i++){idx[secs[i].title]=i;if(secs[i].w>maxW)maxW=secs[i].w;totW+=secs[i].w+GX;}
 var fixed=[],isFix={},y=0,inW=0;
-var INP=["INPUT · OPCODE (8)","INPUT · DATA (8)","INPUT · TAG (8)","INPUT · ADDR (9)","INPUT · ACTION","INPUT · CLK","QUEUE · ADDR (9)","QUEUE · ACTION","QUEUE · QCLK"];
+var INP=["INPUT · OP_HI","INPUT · OP_LO","INPUT · DATA","INPUT · TAG","INPUT · DEST","INPUT · ACTION","INPUT · CLK"];
 for(k=0;k<INP.length;k++){var a=idx[INP[k]];if(a===undefined)continue;fixed.push({i:a,x:0,y:y});y+=secs[a].h+RG;if(secs[a].w>inW)inW=secs[a].w;}
 var x0=inW+CG;
-var sc=idx["SCREEN · GRID"],rv=idx["OUTPUT · RAM VIEW"],sv=idx["OUTPUT · STORAGE VIEW"],joy=idx["INPUT · JOYSTICK"];
-if(sc!==undefined){
-fixed.push({i:sc,x:x0,y:0});
-if(joy!==undefined) fixed.push({i:joy,x:x0,y:secs[sc].h+GY});
-var x1=x0+secs[sc].w+CG;
-var yAcc=0;
-if(rv!==undefined){fixed.push({i:rv,x:x1,y:yAcc});yAcc+=secs[rv].h+GY;}
-if(sv!==undefined){fixed.push({i:sv,x:x1,y:yAcc});}
-}
+var sc=idx["SCREEN · GRID 6×3 CELLS 5×5"],joy=idx["INPUT · JOYSTICK (+)"];
+if(sc!==undefined){fixed.push({i:sc,x:x0,y:0});
+if(joy!==undefined)fixed.push({i:joy,x:x0,y:secs[sc].h+GY});}
 for(k=0;k<fixed.length;k++)isFix[fixed[k].i]=1;
-function pack(Wp){
-var placed=[],pos=[],usedW=0,usedH=0,j,c,rr;
-for(j=0;j<fixed.length;j++){var f=fixed[j],q=secs[f.i];placed.push({x:f.x,y:f.y,w:q.w,h:q.h});pos[f.i]={x:f.x,y:f.y};if(f.x+q.w>usedW)usedW=f.x+q.w;if(f.y+q.h>usedH)usedH=f.y+q.h;}
-for(j=0;j<n;j++){
-if(isFix[j])continue;
-var s=secs[j],cand=[0],bx=0,by=Infinity;
+function pack(Wp){var placed=[],pos=[],usedW=0,usedH=0,j,c,rr;
+for(j=0;j<fixed.length;j++){var f=fixed[j],q=secs[f.i];placed.push({x:f.x,y:f.y,w:q.w,h:q.h});pos[f.i]={x:f.x,y:f.y};
+if(f.x+q.w>usedW)usedW=f.x+q.w;if(f.y+q.h>usedH)usedH=f.y+q.h;}
+for(j=0;j<n;j++){if(isFix[j])continue;var s=secs[j],cand=[0],bx=0,by=Infinity;
 for(k=0;k<placed.length;k++){cand.push(placed[k].x);cand.push(placed[k].x+placed[k].w+GX);}
-for(c=0;c<cand.length;c++){
-var x=cand[c];
-if(x>0&&x+s.w>Wp)continue;
+for(c=0;c<cand.length;c++){var x=cand[c];if(x>0&&x+s.w>Wp)continue;
 var yy=0;
 for(k=0;k<placed.length;k++){rr=placed[k];if(rr.x<x+s.w+GX&&rr.x+rr.w+GX>x){var yb=rr.y+rr.h+GY;if(yb>yy)yy=yb;}}
-if(yy<by||(yy===by&&x<bx)){by=yy;bx=x;}
-}
+if(yy<by||(yy===by&&x<bx)){by=yy;bx=x;}}
 placed.push({x:bx,y:by,w:s.w,h:s.h});pos[j]={x:bx,y:by};
-if(bx+s.w>usedW)usedW=bx+s.w;if(by+s.h>usedH)usedH=by+s.h;
-}
-return {pos:pos,w:usedW,h:usedH};
-}
-function fit(p){var wN=p.w+2*M,hN=p.h+TOP+M,W,H;if(wN/hN<RATIO){H=hN;W=hN*RATIO;}else{W=wN;H=wN/RATIO;}return {W:W,H:H};}
+if(bx+s.w>usedW)usedW=bx+s.w;if(by+s.h>usedH)usedH=by+s.h;}
+return {pos:pos,w:usedW,h:usedH};}
+function fit(p){var wN=p.w+2*M,hN=p.h+TOP+M,W,H;
+if(wN/hN<RATIO){H=hN;W=hN*RATIO;}else{W=wN;H=wN/RATIO;}return {W:W,H:H};}
 var best=null,bestArea=Infinity;
-for(var t=0;t<=30;t++){var Wp=maxW*Math.pow(totW/maxW,t/30);var p=pack(Wp),f2=fit(p),ar=f2.W*f2.H;if(ar<bestArea){bestArea=ar;best={p:p,f:f2};}}
-for(i=0;i<n;i++){
-var sc2=secs[i],nx=M+best.p.pos[i].x,ny=TOP+best.p.pos[i].y;
+for(var t=0;t<=30;t++){var Wp=maxW*Math.pow(totW/maxW,t/30);var p=pack(Wp),f2=fit(p),ar=f2.W*f2.H;
+if(ar<bestArea){bestArea=ar;best={p:p,f:f2};}}
+for(i=0;i<n;i++){var sc2=secs[i],nx=M+best.p.pos[i].x,ny=TOP+best.p.pos[i].y;
 var dx=nx-sc2.x,dy=ny-sc2.y;
 for(k=sc2.g0;k<sc2.g1;k++){var g=gates[k];g.px+=dx;g.py+=dy;g.o.x+=dx;g.o.y+=dy;}
 for(k=sc2.s0;k<sc2.s1;k++){var q2=sws[k];q2.px+=dx;q2.py+=dy;q2.o.x+=dx;q2.o.y+=dy;}
 for(k=sc2.l0;k<sc2.l1;k++){var l=leds[k];l.px+=dx;l.py+=dy;if(l.ph){l.ph.x=l.px-2;l.ph.y=l.py;}}
 for(k=sc2.lt0;k<sc2.lt1;k++){var lt=latches[k];lt.px+=dx;lt.py+=dy;lt.o.x+=dx;lt.o.y+=dy;}
-sc2.x=nx;sc2.y=ny;
-}
-return {x:0,y:0,w:best.f.W,h:best.f.H};
-}
-function fitView(){
-if(!frame43)return;
-var r=svg.getBoundingClientRect();
-var k=Math.min(r.width/frame43.w, r.height/frame43.h)*0.95;
-view.k=k;
-view.x=(r.width - frame43.w*k)/2 - frame43.x*k;
-view.y=(r.height - frame43.h*k)/2 - frame43.y*k;
-applyView();
-}
-function updateGateCount(){
-var total=gates.length+sws.length+leds.length;
-document.getElementById("gcount").textContent="· "+total.toLocaleString()+" gates · "+latches.length.toLocaleString()+" FFs";
-}
-function loadProject(){
-try{
-reset();
-buildFrontend();
-buildJoystick();
-buildQueue();
-buildExecutor();
-buildBackend();
-frame43=relayout43();
-routeWires();
-initProj();
-simulate();
-fitView();
-updateGateCount();
-renderFrame();
-}catch(e){showErr((e&&e.message)||String(e));console.error(e);if(e&&e.stack)console.error(e.stack);}
-}
-var view={x:0,y:0,k:1};
-var MIN_K=0.0002,MAX_K=30;
+sc2.x=nx;sc2.y=ny;}
+return {x:0,y:0,w:best.f.W,h:best.f.H};}
+function fitAll(){if(!frame43)return;var r=svg.getBoundingClientRect();
+var k=Math.min(r.width/frame43.w,r.height/frame43.h)*0.95;if(k<0.0015)k=0.0015;
+view.k=k;view.x=(r.width-frame43.w*k)/2-frame43.x*k;view.y=(r.height-frame43.h*k)/2-frame43.y*k;applyView();}
+function fitScreen(){var r=svg.getBoundingClientRect();
+var x1=Infinity,y1=Infinity,x2=-Infinity,y2=-Infinity,found=false;
+for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];
+if(s.title==="SCREEN · GRID 6×3 CELLS 5×5"||s.title==="INPUT · JOYSTICK (+)"){
+found=true;if(s.x<x1)x1=s.x;if(s.y<y1)y1=s.y;
+if(s.x+s.w>x2)x2=s.x+s.w;if(s.y+s.h>y2)y2=s.y+s.h;}}
+var w,h,cx,cy;
+if(found){w=x2-x1;h=y2-y1;cx=(x1+x2)/2;cy=(y1+y2)/2;}
+else if(frame43){w=frame43.w;h=frame43.h;cx=frame43.x+frame43.w/2;cy=frame43.y+frame43.h/2;}
+else return;
+var k=Math.min(r.width/(w+80),r.height/(h+80))*0.95;if(k<0.03)k=0.03;
+view.k=k;view.x=r.width/2-cx*k;view.y=r.height/2-cy*k;applyView();}
+function updateGateCount(){var total=gates.length+sws.length+leds.length;
+document.getElementById("gcount").textContent="· "+total.toLocaleString()+" gates · "+latches.length.toLocaleString()+" FFs";}
+var hudPTR=document.getElementById("hudPTR"),hudSP=document.getElementById("hudSP"),hudJOY=document.getElementById("hudJOY");
+function readLatches8(arr,idx){var v=0;if(!arr[idx])return 0;for(var b=0;b<8;b++){if(arr[idx][b]&&arr[idx][b].o.v)v|=(1<<b);}return v;}
+function readPTR(){var v=0;for(var b=0;b<PTR_BITS;b++){if(core.ptr&&core.ptr[b]&&core.ptr[b].o.v)v|=(1<<b);}return v;}
+function readSP(){var v=0;for(var b=0;b<SP_BITS;b++){if(core.sp&&core.sp[b]&&core.sp[b].o.v)v|=(1<<b);}return v;}
+function updateHUD(){hudPTR.textContent=readPTR();hudSP.textContent=readSP();hudJOY.textContent=readLatches8(core.RAM,130);}
+function updateScreen(){if(!core.screenLeds||!core.RAM)return;
+for(var row=0;row<GRID_H;row++){for(var col=0;col<GRID_W;col++){
+var cellIdx=row*GRID_W+col;
+var charCode=readLatches8(core.RAM,cellIdx);
+var fontRow=FONT[charCode]||[0,0,0,0];
+var cellLeds=core.screenLeds[row][col];
+for(var py=0;py<CELL;py++){for(var px=0;px<CELL;px++){
+var bit=0;
+if(py<4&&px<4){bit=(fontRow[py]>>(3-px))&1;}
+var led=cellLeds[py][px];
+led.forceV=1;
+led.forceColor=bit?"#000":"#fff";
+}}}}}
+function loadProject(){try{
+reset();buildFrontend();buildJoystick();buildQueue();buildExecutor();buildBackend();
+frame43=relayout43();routeWires();initProj();simulate();updateHUD();updateScreen();fitScreen();updateGateCount();renderFrame();
+}catch(e){showErr((e&&e.message)||String(e));console.error(e);if(e&&e.stack)console.error(e.stack);}}
+var view={x:0,y:0,k:1};var MIN_K=0.0002,MAX_K=30;
 function applyView(){if(vp)vp.setAttribute("transform","translate("+view.x+","+view.y+") scale("+view.k+")");}
-function setZoomAt(nk,cx,cy){nk=Math.min(MAX_K,Math.max(MIN_K,nk));var s=nk/view.k;view.x=cx-(cx-view.x)*s;view.y=cy-(cy-view.y)*s;view.k=nk;applyView();}
+function setZoomAt(nk,cx,cy){nk=Math.min(MAX_K,Math.max(MIN_K,nk));var s=nk/view.k;
+view.x=cx-(cx-view.x)*s;view.y=cy-(cy-view.y)*s;view.k=nk;applyView();}
 function zoomC(f){var r=svg.getBoundingClientRect();setZoomAt(view.k*f,r.width/2,r.height/2);}
-svg.addEventListener("wheel",function(e){e.preventDefault();var r=svg.getBoundingClientRect();setZoomAt(view.k*(e.deltaY<0?1.12:1/1.12),e.clientX-r.left,e.clientY-r.top);},{passive:false});
+svg.addEventListener("wheel",function(e){e.preventDefault();var r=svg.getBoundingClientRect();
+setZoomAt(view.k*(e.deltaY<0?1.12:1/1.12),e.clientX-r.left,e.clientY-r.top);},{passive:false});
 var ptrs={},panS=null,pinchS=null,mode=null;
 svg.addEventListener("pointerdown",function(e){
 if(e.target&&e.target.classList&&e.target.classList.contains("swhit"))return;
 if(e.target&&e.target.parentNode&&e.target.parentNode.classList&&e.target.parentNode.classList.contains("swhit"))return;
 if(e.button!==undefined&&e.button!==0&&e.pointerType==="mouse")return;
-ptrs[e.pointerId]={x:e.clientX,y:e.clientY};
-try{svg.setPointerCapture(e.pointerId);}catch(err){}
+ptrs[e.pointerId]={x:e.clientX,y:e.clientY};try{svg.setPointerCapture(e.pointerId);}catch(err){}
 var ids=Object.keys(ptrs);
 if(ids.length===1){mode="pan";panS={x:e.clientX,y:e.clientY,ox:view.x,oy:view.y,moved:false};svg.classList.add("drag");}
-else if(ids.length===2){mode="pinch";var p0=ptrs[ids[0]],p1=ptrs[ids[1]];pinchS={d:Math.hypot(p0.x-p1.x,p0.y-p1.y),cx:(p0.x+p1.x)/2,cy:(p0.y+p1.y)/2,k:view.k,x:view.x,y:view.y};panS=null;}
-});
-svg.addEventListener("pointermove",function(e){
-if(!ptrs[e.pointerId])return;
+else if(ids.length===2){mode="pinch";var p0=ptrs[ids[0]],p1=ptrs[ids[1]];
+pinchS={d:Math.hypot(p0.x-p1.x,p0.y-p1.y),cx:(p0.x+p1.x)/2,cy:(p0.y+p1.y)/2,k:view.k,x:view.x,y:view.y};panS=null;}});
+svg.addEventListener("pointermove",function(e){if(!ptrs[e.pointerId])return;
 ptrs[e.pointerId].x=e.clientX;ptrs[e.pointerId].y=e.clientY;
 if(mode==="pinch"){var ids=Object.keys(ptrs);if(ids.length<2)return;
 var p0=ptrs[ids[0]],p1=ptrs[ids[1]];var d=Math.hypot(p0.x-p1.x,p0.y-p1.y);var cx=(p0.x+p1.x)/2,cy=(p0.y+p1.y)/2;
 var r=svg.getBoundingClientRect();var f=d/pinchS.d;var nk=Math.min(MAX_K,Math.max(MIN_K,pinchS.k*f));var s=nk/pinchS.k;
 var mx=pinchS.cx-r.left,my=pinchS.cy-r.top;var nmx=cx-r.left,nmy=cy-r.top;
-view.x=nmx-(mx-pinchS.x)*s;view.y=nmy-(my-pinchS.y)*s;view.k=nk;applyView();
-}else if(mode==="pan"&&panS){
-var dx=e.clientX-panS.x,dy=e.clientY-panS.y;
+view.x=nmx-(mx-pinchS.x)*s;view.y=nmy-(my-pinchS.y)*s;view.k=nk;applyView();}
+else if(mode==="pan"&&panS){var dx=e.clientX-panS.x,dy=e.clientY-panS.y;
 if(Math.abs(dx)>3||Math.abs(dy)>3)panS.moved=true;
-if(panS.moved){view.x=panS.ox+dx;view.y=panS.oy+dy;applyView();}
-}
-});
-function endPtr(e){
-delete ptrs[e.pointerId];
-var ids=Object.keys(ptrs);
+if(panS.moved){view.x=panS.ox+dx;view.y=panS.oy+dy;applyView();}}});
+function endPtr(e){delete ptrs[e.pointerId];var ids=Object.keys(ptrs);
 if(ids.length===0){mode=null;panS=null;pinchS=null;svg.classList.remove("drag");}
-else if(ids.length===1){mode="pan";var id=ids[0];panS={x:ptrs[id].x,y:ptrs[id].y,ox:view.x,oy:view.y,moved:false};pinchS=null;}
-}
-svg.addEventListener("pointerup",endPtr);
-svg.addEventListener("pointercancel",endPtr);
+else if(ids.length===1){mode="pan";var id=ids[0];panS={x:ptrs[id].x,y:ptrs[id].y,ox:view.x,oy:view.y,moved:false};pinchS=null;}}
+svg.addEventListener("pointerup",endPtr);svg.addEventListener("pointercancel",endPtr);
 svg.addEventListener("pointerleave",function(e){if(ptrs[e.pointerId])endPtr(e);});
-svg.addEventListener("dblclick",function(){fitView();});
+svg.addEventListener("dblclick",function(){fitScreen();});
 document.getElementById("zoomIn").addEventListener("click",function(){zoomC(1.3);});
 document.getElementById("zoomOut").addEventListener("click",function(){zoomC(1/1.3);});
-document.getElementById("zoomReset").addEventListener("click",function(){fitView();});
+document.getElementById("zoomReset").addEventListener("click",function(){fitAll();});
 var cheatEl=document.getElementById("cheat"),cheatMin=document.getElementById("cheatMin");
-document.getElementById("cheatBar").addEventListener("click",function(){cheatEl.classList.toggle("min");cheatMin.textContent=cheatEl.classList.contains("min")?"+":"−";});
+document.getElementById("cheatBar").addEventListener("click",function(){cheatEl.classList.toggle("min");
+cheatMin.textContent=cheatEl.classList.contains("min")?"+":"−";});
 loadProject();
-setInterval(function(){try{tickOsc();simulate();}catch(e){showErr((e&&e.message)||String(e));}},30);
+setInterval(function(){try{tickOsc();simulate();updateHUD();updateScreen();}catch(e){showErr((e&&e.message)||String(e));}},25);
 var lastR=0;
-requestAnimationFrame(function loop(t){requestAnimationFrame(loop);if(t-lastR<33)return;lastR=t;try{renderFrame();}catch(e){showErr((e&&e.message)||String(e));}});
+requestAnimationFrame(function loop(t){requestAnimationFrame(loop);if(t-lastR<33)return;lastR=t;
+try{renderFrame();}catch(e){showErr((e&&e.message)||String(e));}});
 })();
 </script>
-</body>
-</html>
+</body></html>
