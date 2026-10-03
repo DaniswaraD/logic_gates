@@ -4,12 +4,10 @@
 var NS="http://www.w3.org/2000/svg";
 function E(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
 
-/* ---------- config ---------- */
 var SCR_W=80, SCR_H=24, LED_SZ=6;
 var CELL_COLS=10, CELL_ROWS=3, CELLS=30, SCR_BYTES=240;
 var RAM_SIZE=256, QUEUE_SLOTS=64, PTR_BITS=6, STACK_DEPTH=16, SP_BITS=4;
 
-/* ---------- opcodes ---------- */
 var OP={};
 OP.NOP=0x0000;OP.SET=0x0001;OP.MOV=0x0002;OP.ADD=0x0004;OP.SUB=0x0005;OP.MUL=0x0006;OP.DIV=0x0007;
 OP.AND=0x0008;OP.OR=0x0009;OP.XOR=0x000A;OP.NOT=0x000B;OP.INC=0x000C;OP.DEC=0x000D;
@@ -31,52 +29,30 @@ MN[OP.CMP]="CMP";MN[OP.SHL]="SHL";MN[OP.SHR]="SHR";MN[OP.HALT]="HALT";MN[OP.RND]
 MN[OP.JOY]="JOY";MN[OP.CHR]="CHR";MN[OP.BYTE]="BYTE";MN[OP.TIME]="TIME";MN[OP.DRAWC]="DRAWC";
 MN[OP.PUSH]="PUSH";MN[OP.POP]="POP";MN[OP.DUP]="DUP";MN[OP.SWAP]="SWAP";
 
-/* ---------- font rom (41 chars × 8 rows, bit7=leftmost) ---------- */
 var FONT8=[
-0x00,0x70,0x88,0x88,0xF8,0x88,0x88,0x00, // A
-0x00,0xF0,0x88,0x88,0xF0,0x88,0x88,0xF0, // B
-0x00,0x78,0x80,0x80,0x80,0x80,0x80,0x78, // C
-0x00,0xF0,0x88,0x88,0x88,0x88,0x88,0xF0, // D
-0x00,0xF8,0x80,0x80,0xF0,0x80,0x80,0xF8, // E
-0x00,0xF8,0x80,0x80,0xF0,0x80,0x80,0x80, // F
-0x00,0x78,0x80,0x80,0xB8,0x88,0x88,0x78, // G
-0x00,0x88,0x88,0x88,0xF8,0x88,0x88,0x88, // H
-0x00,0xF8,0x20,0x20,0x20,0x20,0x20,0xF8, // I
-0x00,0x08,0x08,0x08,0x08,0x88,0x88,0x70, // J
-0x00,0x88,0x90,0xA0,0xC0,0xA0,0x90,0x88, // K
-0x00,0x80,0x80,0x80,0x80,0x80,0x80,0xF8, // L
-0x00,0x88,0xD8,0xA8,0xA8,0x88,0x88,0x88, // M
-0x00,0x88,0xC8,0xA8,0x98,0x88,0x88,0x88, // N
-0x00,0x70,0x88,0x88,0x88,0x88,0x88,0x70, // O
-0x00,0xF0,0x88,0x88,0xF0,0x80,0x80,0x80, // P
-0x00,0x70,0x88,0x88,0x88,0xA8,0x90,0x68, // Q
-0x00,0xF0,0x88,0x88,0xF0,0xA0,0x90,0x88, // R
-0x00,0x78,0x80,0x80,0x70,0x08,0x08,0xF0, // S
-0x00,0xF8,0x20,0x20,0x20,0x20,0x20,0x20, // T
-0x00,0x88,0x88,0x88,0x88,0x88,0x88,0x70, // U
-0x00,0x88,0x88,0x88,0x88,0x88,0x50,0x20, // V
-0x00,0x88,0x88,0x88,0xA8,0xA8,0xD8,0x88, // W
-0x00,0x88,0x88,0x50,0x20,0x50,0x88,0x88, // X
-0x00,0x88,0x88,0x88,0x70,0x20,0x20,0x20, // Y
-0x00,0xF8,0x08,0x10,0x20,0x40,0x80,0xF8, // Z
-0x00,0x70,0x88,0x98,0xA8,0xC8,0x88,0x70, // 0
-0x00,0x20,0x60,0x20,0x20,0x20,0x20,0x70, // 1
-0x00,0x70,0x88,0x08,0x30,0x40,0x80,0xF8, // 2
-0x00,0xF0,0x08,0x08,0x70,0x08,0x08,0xF0, // 3
-0x00,0x10,0x30,0x50,0x90,0xF8,0x10,0x10, // 4
-0x00,0xF8,0x80,0x80,0xF0,0x08,0x08,0xF0, // 5
-0x00,0x70,0x80,0x80,0xF0,0x88,0x88,0x70, // 6
-0x00,0xF8,0x08,0x10,0x20,0x40,0x40,0x40, // 7
-0x00,0x70,0x88,0x88,0x70,0x88,0x88,0x70, // 8
-0x00,0x70,0x88,0x88,0x78,0x08,0x08,0x70, // 9
-0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x00, // .
-0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x10, // ,
-0x00,0x20,0x20,0x20,0x20,0x20,0x00,0x20, // !
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // space
-0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF  // block/ENTER
+0x00,0x70,0x88,0x88,0xF8,0x88,0x88,0x00,0x00,0xF0,0x88,0x88,0xF0,0x88,0x88,0xF0,
+0x00,0x78,0x80,0x80,0x80,0x80,0x80,0x78,0x00,0xF0,0x88,0x88,0x88,0x88,0x88,0xF0,
+0x00,0xF8,0x80,0x80,0xF0,0x80,0x80,0xF8,0x00,0xF8,0x80,0x80,0xF0,0x80,0x80,0x80,
+0x00,0x78,0x80,0x80,0xB8,0x88,0x88,0x78,0x00,0x88,0x88,0x88,0xF8,0x88,0x88,0x88,
+0x00,0xF8,0x20,0x20,0x20,0x20,0x20,0xF8,0x00,0x08,0x08,0x08,0x08,0x88,0x88,0x70,
+0x00,0x88,0x90,0xA0,0xC0,0xA0,0x90,0x88,0x00,0x80,0x80,0x80,0x80,0x80,0x80,0xF8,
+0x00,0x88,0xD8,0xA8,0xA8,0x88,0x88,0x88,0x00,0x88,0xC8,0xA8,0x98,0x88,0x88,0x88,
+0x00,0x70,0x88,0x88,0x88,0x88,0x88,0x70,0x00,0xF0,0x88,0x88,0xF0,0x80,0x80,0x80,
+0x00,0x70,0x88,0x88,0x88,0xA8,0x90,0x68,0x00,0xF0,0x88,0x88,0xF0,0xA0,0x90,0x88,
+0x00,0x78,0x80,0x80,0x70,0x08,0x08,0xF0,0x00,0xF8,0x20,0x20,0x20,0x20,0x20,0x20,
+0x00,0x88,0x88,0x88,0x88,0x88,0x88,0x70,0x00,0x88,0x88,0x88,0x88,0x88,0x50,0x20,
+0x00,0x88,0x88,0x88,0xA8,0xA8,0xD8,0x88,0x00,0x88,0x88,0x50,0x20,0x50,0x88,0x88,
+0x00,0x88,0x88,0x88,0x70,0x20,0x20,0x20,0x00,0xF8,0x08,0x10,0x20,0x40,0x80,0xF8,
+0x00,0x70,0x88,0x98,0xA8,0xC8,0x88,0x70,0x00,0x20,0x60,0x20,0x20,0x20,0x20,0x70,
+0x00,0x70,0x88,0x08,0x30,0x40,0x80,0xF8,0x00,0xF0,0x08,0x08,0x70,0x08,0x08,0xF0,
+0x00,0x10,0x30,0x50,0x90,0xF8,0x10,0x10,0x00,0xF8,0x80,0x80,0xF0,0x08,0x08,0xF0,
+0x00,0x70,0x80,0x80,0xF0,0x88,0x88,0x70,0x00,0xF8,0x08,0x10,0x20,0x40,0x40,0x40,
+0x00,0x70,0x88,0x88,0x70,0x88,0x88,0x70,0x00,0x70,0x88,0x88,0x78,0x08,0x08,0x70,
+0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x10,
+0x00,0x20,0x20,0x20,0x20,0x20,0x00,0x20,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
 ];
 
-/* ---------- state ---------- */
 var gates=[],sws=[],leds=[],latches=[],wires=[],sectionsData=[],screenLeds=[];
 var groupStack=[],GAPX=4,GAPY=4,jseed=7,core={},_curSect="";
 var K0={v:0,x:0,y:0,virtual:true},K1={v:1,x:0,y:0,virtual:true};
@@ -112,8 +88,9 @@ function ext(x1,y1,x2,y2){if(x1<mnx)mnx=x1;if(y1<mny)mny=y1;if(x2>mxx)mxx=x2;if(
 for(var i=g0;i<gates.length;i++){var g=gates[i];ext(g.px-6,g.py-2,g.px+41,g.py+32);}
 for(var i=lt0;i<latches.length;i++){var l=latches[i];ext(l.px-4,l.py-2,l.px+48,l.py+40);}
 for(var i=s0;i<sws.length;i++){var s=sws[i];ext(s.px-2,s.py-2,s.px+52,s.py+59);}
-for(var i=l0;i<leds.length;i++){var l=leds[i];var r=l.sz?l.sz*0.5:10;ext(l.px-r-2,l.py-r-2,l.px+r+2,l.py+r+2);}
-if(!isFinite(mnx)){mnx=curFrame().x||0;mny=curFrame().y||0;mxx=mnx+10;mxy=mny+10;}
+for(var i=l0;i<leds.length;i++){var l=leds[i];var r=(l.sz||10)*0.55;
+ext(l.px-r-3,l.py-r-3,l.px+r+3,l.py+r+3);}
+if(!isFinite(mnx)){mnx=0;mny=0;mxx=10;mxy=10;}
 var pad=12;sectionsData.push({x:mnx-pad,y:mny-pad-24,w:(mxx-mnx)+2*pad,h:(mxy-mny)+2*pad+24,
 title:title,color:sectionColor(title),g0:g0,g1:gates.length,s0:s0,s1:sws.length,l0:l0,l1:leds.length,lt0:lt0,lt1:latches.length});
 _curSect="";}
@@ -138,24 +115,19 @@ function latchReset(l,v){v=v|0;l.prev=v;l.o.v=v;}
 function sw(lb){var p=place(50,58);var s={v:0,o:N(0,0),px:p.x,py:p.y,label:lb||"",osc:false};s.o.x=p.x+44;s.o.y=p.y+20;sws.push(s);return s;}
 function osc(pr,lb){var p=place(50,58);var s={v:0,o:N(0,0),px:p.x,py:p.y,label:lb||"OSC",osc:true,period:pr|0||6,t:0};s.o.x=p.x+44;s.o.y=p.y+20;sws.push(s);return s;}
 
-/* =====================================================================
-   SCREEN LED: wired directly to a RAM latch output node.
-   led.i === RAM[byteIdx][bit].o  (same object reference)
-   No JS forcing. If the latch doesn't flip, the LED can't change.
-   ===================================================================== */
+/* SCREEN LED: wired directly to RAM latch output; also registered in leds[]
+   so it gets moved correctly by endGroup / relayout */
 function screenLedFor(row,col){
-  var cy=row>>3,cx=col>>3,ipy=row&7,ipx=col&7;
-  var cell=cy*CELL_COLS+cx;
-  var byteIdx=cell*8+ipy;
-  var bit=7-ipx;
-  var srcNode=core.RAM[byteIdx][bit].o;
-  var p=place(LED_SZ+1,LED_SZ+1);
-  var led={i:srcNode,v:0,c:"#111",px:p.x+LED_SZ/2,py:p.y+LED_SZ/2,sz:LED_SZ,screen:true,row:row,col:col};
-  /* one visible wire per BYTE (8 pixels share it) */
-  return led;
-}
+var cy=row>>3,cx=col>>3,ipy=row&7,ipx=col&7;
+var cell=cy*CELL_COLS+cx;
+var byteIdx=cell*8+ipy;
+var bit=7-ipx;
+var srcNode=core.RAM[byteIdx][bit].o;
+var p=place(LED_SZ+1,LED_SZ+1);
+var led={i:srcNode,v:0,c:"#ff2020",px:p.x+LED_SZ/2,py:p.y+LED_SZ/2,sz:LED_SZ+1,screen:true,row:row,col:col,_lv:-1};
+leds.push(led);
+return led;}
 
-/* ---------- adders/decoders ---------- */
 function addN(a,b,cin,n){var c=cin||K0,s=[];
 for(var i=0;i<n;i++){var ab=XOR(a[i],b[i]);var sum=XOR(ab,c);var g1=AND(a[i],b[i]);var g2=AND(ab,c);c=OR(g1,g2);s.push(sum);}
 return {sum:s,carry:c};}
@@ -173,17 +145,15 @@ function eqN(bits,val,n){var acc=null;
 for(var i=0;i<n;i++){var b=(val>>i)&1;var s=b?bits[i]:NOT(bits[i]);acc=(acc===null)?s:AND(acc,s);}
 return acc;}
 function makeDecoder(bits){var n=bits.length;if(n===0)return[K1];if(n===1)return[NOT(bits[0]),bits[0]];
-if(n<=5){var out=[];for(var i=0;i<(1<<n);i++)out.push(eqN(bits,i,n));return out;}
 var half=n>>1;var lo=makeDecoder(bits.slice(0,half));var hi=makeDecoder(bits.slice(half));
-var out2=[],lm=(1<<half)-1;
-for(var j=0;j<(1<<n);j++)out2.push(AND(hi[j>>half],lo[j&lm]));
-return out2;}
+var out=[],lm=(1<<half)-1;
+for(var j=0;j<(1<<n);j++)out.push(AND(hi[j>>half],lo[j&lm]));
+return out;}
 function decodeOps(obHi,obLo){var d={};
 for(var i=0;i<ALL_OPS.length;i++){var code=ALL_OPS[i];
 d[code]=AND(eqN(obHi,(code>>8)&0xFF,8),eqN(obLo,code&0xFF,8));}
 return d;}
 
-/* ---------- build: frontend inputs ---------- */
 function buildFrontend(){var OP_HI=[],OP_LO=[],D=[],T=[],A=[],i;
 section("INPUT · OP_HI",920,function(){for(i=7;i>=0;i--)OP_HI[i]=sw("H"+i);});
 section("INPUT · OP_LO",920,function(){for(i=7;i>=0;i--)OP_LO[i]=sw("L"+i);});
@@ -203,7 +173,6 @@ forceNewRow();
 core.hwTimer=[];
 section("HW · TIMER 8-bit",900,function(){for(i=0;i<8;i++)core.hwTimer.push(LAT(0));});}
 
-/* ---------- joystick ---------- */
 function buildJoystick(){var bw=50,bh=58,g=6,gridW=3*bw+2*g,gridH=3*bh+2*g;
 var anchor=place(gridW,gridH),bx=anchor.x,by=anchor.y;
 function mk(lb,px,py){var s={v:0,o:N(0,0),px:px,py:py,label:lb,osc:false};s.o.x=px+44;s.o.y=py+20;sws.push(s);return s;}
@@ -215,7 +184,6 @@ core.BTN_RIGHT=mk("RIGHT",bx+2*(bw+g),by+bh+g);
 core.BTN_DOWN=mk("DOWN",bx+bw+g,by+2*(bh+g));});
 forceNewRow();}
 
-/* ---------- queue ---------- */
 function buildQueue(){var slots=[],ptr=[],ptrSel=[],i,b,s;
 section("QUEUE · "+QUEUE_SLOTS+"×5×8",QUEUE_SLOTS*400,function(){
 for(s=0;s<QUEUE_SLOTS;s++){beginGroup(400);var sl={bytes:[]};
@@ -231,7 +199,6 @@ for(i=0;i<PTR_BITS;i++){var bv=(s>>i)&1?ptr[i].o:np[i];acc=AND(acc,bv);}
 ptrSel.push(acc);endGroup();}});
 core.slots=slots;core.ptrSel=ptrSel;forceNewRow();}
 
-/* ---------- fetch / mux ---------- */
 function buildExecutor(){var i,b,s;
 var slotSel=core.slots,ptrSel=core.ptrSel;
 function muxByte(bi){var bits=[];
@@ -257,15 +224,17 @@ section("MUX · DEST",1200,function(){fDest=muxFinal(qDest,core.A);});
 core.finalHi=fHi;core.finalLo=fLo;core.finalData=fData;core.finalTag=fTag;core.finalDest=fDest;
 forceNewRow();}
 
-/* ---------- backend ---------- */
 function buildBackend(){var i,b;
 var opDec,destDec,tagDec,dataDec;var RAM=core.RAM;
 var srcB=[],srcC=[],finalR=[];
+/* =============== EDGE FIX ===============
+   Sebelumnya runEdge = RUNo AND NOT(runPrev.o) -> hanya pulse sekali.
+   Sekarang runEdge = RUNo AND CLKo -> pulse tiap CLK naik.
+   Latch en input sudah edge-triggered (naik dari 0 ke 1), jadi
+   instruksi jalan 1x per CLK cycle. */
 section("CTRL · EDGE",900,function(){
-core.runPrev=LAT(0);setLat(core.runPrev,core.RUNo,core.CLKo);
-core.clrPrev=LAT(0);setLat(core.clrPrev,core.CLRo,core.CLKo);
-core.runEdge=AND(core.RUNo,NOT(core.runPrev.o));
-core.clrEdge=AND(core.CLRo,NOT(core.clrPrev.o));});
+core.runEdge = AND(core.RUNo, core.CLKo);
+core.clrEdge = AND(core.CLRo, core.CLKo);});
 section("CTRL · OP DEC",9000,function(){opDec=decodeOps(core.finalHi,core.finalLo);});
 section("CTRL · DEST DEC",9000,function(){destDec=makeDecoder(core.finalDest);});
 forceNewRow();
@@ -317,7 +286,6 @@ for(b=0;b<8;b++){var nz=NOT(full.sum[b]);z=(z===null)?nz:AND(z,nz);}
 var borrow=NOT(full.carry);var gt=AND(full.carry,NOT(z));
 var cp=AND(core.runEdge,opDec[OP.CMP]);
 setLat(flagZ,z,cp);setLat(flagLT,borrow,cp);setLat(flagGT,gt,cp);});
-/* stack */
 core.dataStack=[];
 section("STACK · DATA 16×8",2560,function(){
 for(var s=0;s<STACK_DEPTH;s++){beginGroup(300);var entry=[];
@@ -390,7 +358,6 @@ var incVal=addN(ptrNow,incOne,K0,PTR_BITS).sum;
 for(i=0;i<PTR_BITS;i++){var jv=core.finalDest[i];
 var v=OR(AND(jmpEn,jv),AND(NOT(jmpEn),incVal[i]));
 setLat(core.ptr[i],v,en);}});
-/* ALU */
 var opR={},opList=[];
 function addOp(code,bits){opR[code]=bits;opList.push(code);}
 section("ALU · SET·MOV",900,function(){var r0=[];
@@ -425,7 +392,6 @@ for(var ii=0;ii<opList.length;ii++){var opv=opList[ii];
 var t=AND(opDec[opv],opR[opv][b]);acc=(acc===null)?t:OR(acc,t);}
 if(acc===null)acc=K0;finalR.push(acc);endGroup();}});
 
-/* ---------- font rom in circuit ---------- */
 var fontOut=[];
 section("FONT · ROM 41×8×8",5000,function(){
 var charDec=makeDecoder(srcB);
@@ -434,11 +400,9 @@ for(var bit=0;bit<8;bit++){var acc=K0;
 for(var t=0;t<41;t++){
 if((FONT8[t*8+r]>>(7-bit))&1)acc=OR(acc,charDec[t]);}
 fontOut[r][bit]=acc;}}});
-/* cell decoder for DRAWC */
 var cellDec=null;
 section("DRAWC · CELL DEC",3000,function(){cellDec=makeDecoder(srcC);});
 
-/* ---------- write logic ---------- */
 section("OUTPUT · WRITE",RAM_SIZE*100,function(){
 var wrEnable=core.runEdge;
 var scrClrAct=AND(core.runEdge,opDec[OP.SCRCLR]);
@@ -478,42 +442,34 @@ for(i=0;i<RAM_SIZE;i++){beginGroup(80);var we=AND(byteAct,pokeDec[i]);
 for(b=0;b<8;b++)setLat(RAM[i][b],srcC[b],we);endGroup();}});
 forceNewRow();}
 
-/* ---------- build screen pixels (directly wired to RAM latches) ---------- */
 function buildScreen(){
 section("SCREEN · GRID "+SCR_W+"×"+SCR_H,SCR_W*(LED_SZ+1)+8,function(){
 for(var row=0;row<SCR_H;row++){
 beginGroup(SCR_W*(LED_SZ+1)+8);
 var rowArr=[];
-for(var col=0;col<SCR_W;col++){
-rowArr.push(screenLedFor(row,col));
-}
+for(var col=0;col<SCR_W;col++)rowArr.push(screenLedFor(row,col));
 screenLeds.push(rowArr);
 endGroup();
 }});}
 
-/* ---------- oscillator ---------- */
 function tickOsc(){for(var i=0;i<sws.length;i++){var s=sws[i];
 if(s.osc){s.t++;if(s.t>=s.period){s.t=0;s.v=s.v?0:1;}}}}
 
-/* ---------- simulate ---------- */
 function evalComb(g){var a=g.i[0]?g.i[0].v:0,b=g.i[1]?g.i[1].v:0;
 switch(g.t){case "AND":return a&b;case "OR":return a|b;case "NOT":return a?0:1;case "XOR":return a^b;}return 0;}
 function simulate(){
-/* settle combinational */
 for(var it=0;it<10;it++){var ch=false;
 for(var i=0;i<sws.length;i++){var s=sws[i];if(s.o.v!==s.v){s.o.v=s.v;ch=true;}}
 for(var i=0;i<gates.length;i++){var g=gates[i];var nv=evalComb(g);
 if(g.o.v!==nv){g.o.v=nv;ch=true;}}
 for(var i=0;i<latches.length;i++){var l=latches[i];if(l.o.v!==l.prev){l.o.v=l.prev;ch=true;}}
 if(!ch)break;}
-/* sample latch inputs, apply on rising enable */
 var snap=[];
 for(var i=0;i<latches.length;i++){var l=latches[i];
 var d=l.i[0]?l.i[0].v:0,en=l.i[1]?l.i[1].v:0;snap.push({l:l,d:d,en:en});}
 for(var i=0;i<snap.length;i++){var s=snap[i];
 if(s.en&&!s.l.prevEn)s.l.prev=s.d;
 s.l.prevEn=s.en;s.l.o.v=s.l.prev;}
-/* settle again */
 for(var it=0;it<10;it++){var ch2=false;
 for(var i=0;i<sws.length;i++){var s2=sws[i];if(s2.o.v!==s2.v){s2.o.v=s2.v;ch2=true;}}
 for(var i=0;i<gates.length;i++){var g2=gates[i];var nv2=evalComb(g2);
@@ -521,25 +477,21 @@ if(g2.o.v!==nv2){g2.o.v=nv2;ch2=true;}}
 for(var i=0;i<latches.length;i++){var l2=latches[i];if(l2.o.v!==l2.prev){l2.o.v=l2.prev;ch2=true;}}
 if(!ch2)break;}}
 
-/* ---------- build all ---------- */
 function build(){reset();
 buildFrontend();buildJoystick();buildQueue();buildExecutor();buildBackend();buildScreen();
 return {gates:gates,sws:sws,leds:leds,latches:latches,wires:wires,
 sectionsData:sectionsData,core:core,screenLeds:screenLeds};}
 
-/* ---------- load program into queue latches ---------- */
 function loadProgram(proj){
 for(var q=0;q<latches.length;q++)latchReset(latches[q],0);
 var prog=proj.program||[];
 var NOOP=[0,0,0,0,0];
 for(var i=0;i<QUEUE_SLOTS;i++){var ins=(i<prog.length)?prog[i]:NOOP;
 for(var bi=0;bi<5;bi++){var byteVal=(ins[bi]|0)&255;
-var slot=core.slots[i];
-if(!slot)continue;
+var slot=core.slots[i];if(!slot)continue;
 var bb=slot.bytes[bi];
 for(var b=0;b<8;b++)latchReset(bb[b],(byteVal>>b)&1);}}
-for(var j=0;j<sws.length;j++)if(sws[j].label==="RUN_Q")sws[j].v=1;
-}
+for(var j=0;j<sws.length;j++)if(sws[j].label==="RUN_Q")sws[j].v=1;}
 
 window.CPU={
 build:build,simulate:simulate,tickOsc:tickOsc,loadProgram:loadProgram,
