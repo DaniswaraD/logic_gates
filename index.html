@@ -33,9 +33,6 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <script>
-// ============================================================
-// FONT 8x8 — bitmap per karakter (bit 7 = leftmost pixel)
-// ============================================================
 window.FONT8 = {
 32:[0,0,0,0,0,0,0,0],
 33:[0x18,0x18,0x18,0x18,0x18,0,0x18,0],
@@ -185,13 +182,12 @@ function E(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribu
 function showErr(m){var el=document.getElementById("err");el.style.display="block";el.textContent="ERROR: "+m;console.error(m);}
 window.addEventListener("error",function(e){showErr(e.message+" @"+e.lineno);});
 
-// ============ CONFIG ============
 var SIZE_LED=6;
-var SCR_W=48, SCR_H=24;          // 48×24 pixel LED
-var CHAR_PX=8;                    // font 8×8
-var CHAR_COLS=SCR_W/CHAR_PX;      // 6 char per row
-var CHAR_ROWS=SCR_H/CHAR_PX;      // 3 char per column
-var DISPLAY_CELLS=CHAR_COLS*CHAR_ROWS; // 18 cells
+var SCR_W=48, SCR_H=24;
+var CHAR_PX=8;
+var CHAR_COLS=SCR_W/CHAR_PX;
+var CHAR_ROWS=SCR_H/CHAR_PX;
+var DISPLAY_CELLS=CHAR_COLS*CHAR_ROWS;
 var RAM_SIZE=128;
 var STORE_SIZE=256;
 var QUEUE_START=64, QUEUE_SLOTS=16;
@@ -369,17 +365,20 @@ var r=getRect();
 var vx1=-view.x/view.k,vy1=-view.y/view.k,vx2=vx1+r.width/view.k,vy2=vy1+r.height/view.k;
 var lod=view.k,pad=40;
 var minimal=lod<0.015;
-var showSections=lod>0.020;
-var showGates=lod>0.060;
-var showSwitches=lod>0.080;
-var showLeds=lod>0.100;
-var showWires=lod>0.004;
+// === FIX #2: longgarkan threshold ===
+var showSections=lod>0.003;
+var showGates=lod>0.040;
+var showSwitches=lod>0.070;
+var showLeds=lod>0.070;
+var showWires=lod>0.015;
 clearLayer(lG);clearLayer(lL);clearLayer(lU);clearLayer(lS);
 if(frame43&&lod>0.010){lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:frame43.w,height:frame43.h,fill:"none",stroke:"#aaa","stroke-width":0.4}));}
 if(showSections){for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];if(s.x+s.w<vx1||s.x>vx2||s.y+s.h<vy1||s.y>vy2)continue;renderSection(s);}}
 var onD="",offD="";
 if(showWires){
-for(var i=0;i<wires.length;i++){
+// === FIX #3a: budget untuk wires ===
+var wB=8000;
+for(var i=0;i<wires.length&&wB>0;i++){
 var w=wires[i];var sx=w.s.x,sy=w.s.y;if(sx===undefined||sy===undefined)continue;
 var dx,dy;
 if(w.l){dx=w.l.px-(w.l.sz||22)*0.4-2;dy=w.l.py;}
@@ -390,6 +389,7 @@ var miny=Math.min(sy,dy),maxy=Math.max(sy,dy);
 if(maxx<vx1-pad||minx>vx2+pad||maxy<vy1-pad||miny>vy2+pad)continue;
 var p=pathFor(sx,sy,dx,dy,w.mx,minimal);
 if(w.s.v)onD+=p;else offD+=p;
+wB--;
 }
 }
 lW_on.setAttribute("d",onD);
@@ -397,13 +397,14 @@ lW_off.setAttribute("d",offD);
 lW_on.setAttribute("stroke-width",minimal?0.9:1.5);
 lW_off.setAttribute("stroke-width",minimal?0.35:1);
 lW_off.setAttribute("stroke",minimal?"#dcdcdc":"#cfcfcf");
-if(showGates){for(var i=0;i<gates.length;i++){var g=gates[i];if(g.px+50<vx1-pad||g.px>vx2+pad)continue;if(g.py+44<vy1-pad||g.py>vy2+pad)continue;renderGate(g);}}
-if(showGates){for(var i=0;i<latches.length;i++){var l=latches[i];if(l.px+54<vx1-pad||l.px-8>vx2+pad)continue;if(l.py+44<vy1-pad||l.py-4>vy2+pad)continue;renderLatch(l);}}
+// === FIX #3b: budget untuk gates ===
+if(showGates){var gB=6000;for(var i=0;i<gates.length&&gB>0;i++){var g=gates[i];if(g.px+50<vx1-pad||g.px>vx2+pad)continue;if(g.py+44<vy1-pad||g.py>vy2+pad)continue;renderGate(g);gB--;}}
+if(showGates){var ltB=2000;for(var i=0;i<latches.length&&ltB>0;i++){var l=latches[i];if(l.px+54<vx1-pad||l.px-8>vx2+pad)continue;if(l.py+44<vy1-pad||l.py-4>vy2+pad)continue;renderLatch(l);ltB--;}}
 if(showSwitches){for(var i=0;i<sws.length;i++){var s=sws[i];if(s.px+70<vx1-pad||s.px>vx2+pad)continue;if(s.py+86<vy1-pad||s.py>vy2+pad)continue;renderSwitch(s);}}
-if(showLeds){for(var i=0;i<leds.length;i++){var l=leds[i];var rad=(l.sz||22)*0.5+2;if(l.px+rad<vx1||l.px-rad>vx2)continue;if(l.py+rad<vy1||l.py-rad>vy2)continue;renderLed(l);}}
+// === FIX #3c: budget untuk leds ===
+if(showLeds){var lB=6000;for(var i=0;i<leds.length&&lB>0;i++){var l=leds[i];var rad=(l.sz||22)*0.5+2;if(l.px+rad<vx1||l.px-rad>vx2)continue;if(l.py+rad<vy1||l.py-rad>vy2)continue;renderLed(l);lB--;}}
 }
 
-// ============ SIMULATE (inline eval — fast) ============
 var SETTLE_ITERS=5;
 function simulate(){
   var gL=gates.length, sL=sws.length, lL=latches.length;
@@ -419,13 +420,12 @@ function simulate(){
       if(t==="AND") nv=a&b;
       else if(t==="OR") nv=a|b;
       else if(t==="XOR") nv=a^b;
-      else nv=a?0:1;   // NOT
+      else nv=a?0:1;
       if(g.o.v!==nv){g.o.v=nv;changed=true;}
     }
     for(var i=0;i<lL;i++){var l=latches[i];if(l.o.v!==l.prev){l.o.v=l.prev;changed=true;}}
     if(!changed)break;
   }
-  // Snapshot FF
   var snapLen=lL;
   var snapD=new Int8Array(snapLen);
   var snapEn=new Int8Array(snapLen);
@@ -434,14 +434,12 @@ function simulate(){
     snapD[i]=l.i[0]?l.i[0].v:0;
     snapEn[i]=l.i[1]?l.i[1].v:0;
   }
-  // Commit FF
   for(var i=0;i<snapLen;i++){
     var l=latches[i];
     if(snapEn[i] && !l.prevEn) l.prev=snapD[i];
     l.prevEn=snapEn[i];
     l.o.v=l.prev;
   }
-  // Re-settle
   for(var iter=0;iter<SETTLE_ITERS;iter++){
     var changed2=false;
     for(var i=0;i<sL;i++){var s=sws[i];if(s.o.v!==s.v){s.o.v=s.v;changed2=true;}}
@@ -966,7 +964,7 @@ section("SPRITE · YOFF",900,function(){var now=[sy[0].o,sy[1].o,sy[2].o,sy[3].o
 forceNewRow();
 // ============================================================
 // SCREEN — per-pixel full 52-way decoder (independently built)
-// Setiap pixel punya rangkaian equality-check sendiri.
+// FIX #1: maxW dari 600000 → 8000
 // ============================================================
 section("SCREEN · GRID",SCR_W*(SIZE_LED+GAPX)+GAPX,function(){
 for(r=0;r<SCR_H;r++){beginGroup(SCR_W*(SIZE_LED+GAPX)+GAPX);screenLeds.push([]);
@@ -974,7 +972,7 @@ for(c=0;c<SCR_W;c++){var sl=ledPending("#111","",SIZE_LED);sl.isScreenLed=true;s
 endGroup();}
 });
 
-section("SCREEN · FONT ARRAY",600000,function(){
+section("SCREEN · FONT ARRAY",8000,function(){
 for(r=0;r<SCR_H;r++){
 for(c=0;c<SCR_W;c++){
 var cellIdx=(r/CHAR_PX|0)*CHAR_COLS+(c/CHAR_PX|0);
@@ -986,7 +984,6 @@ for(var si=0;si<SUPPORTED.length;si++){
 var ch=SUPPORTED[si];
 var fbit=(window.FONT8[ch][py]>>bit)&1;
 if(!fbit)continue;
-// Bangun equality: RAM[cellIdx][0..7] == ch
 var b0=(ch>>0)&1, b1=(ch>>1)&1, b2=(ch>>2)&1, b3=(ch>>3)&1;
 var b4=(ch>>4)&1, b5=(ch>>5)&1, b6=(ch>>6)&1, b7=(ch>>7)&1;
 var e0=b0?RAM[cellIdx][0].o:NOT(RAM[cellIdx][0].o);
@@ -1150,6 +1147,7 @@ function fitView(){
 if(!frame43)return;
 var r=svg.getBoundingClientRect();
 var k=Math.min(r.width/frame43.w, r.height/frame43.h)*0.95;
+if(k<0.0005)k=0.0005;
 view.k=k;
 view.x=(r.width - frame43.w*k)/2 - frame43.x*k;
 view.y=(r.height - frame43.h*k)/2 - frame43.y*k;
@@ -1175,7 +1173,6 @@ applyView();
 }
 function updateGateCount(){
 var logicGates=gates.length;
-var total=logicGates+sws.length+leds.length;
 document.getElementById("gcount").textContent="· "+logicGates.toLocaleString()+" LOGIC GATES · "+latches.length.toLocaleString()+" FFs";
 }
 function loadProject(){
@@ -1248,10 +1245,8 @@ var statCLK=document.getElementById("statCLK");
 
 loadProject();
 
-// ============ 1-second invert timer ============
 setInterval(function(){gInvertState = gInvertState ? 0 : 1;}, INVERT_PERIOD_MS);
 
-// ============ CPU clock ============
 setInterval(function(){
   try{
     tickOsc();
