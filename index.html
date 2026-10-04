@@ -29,67 +29,39 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll = zoom · drag = pan · dblclick = layar · ⟲ = fit all</div>
+<div id="help">scroll=zoom · drag=pan · dblclick=LAYAR · ⟲=fit all (5:4)</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <script>
 window.FONT8 = {
-32:[0,0,0,0,0,0,0,0],
-33:[0x18,0x18,0x18,0x18,0x18,0,0x18,0],
-35:[0x24,0x24,0x7E,0x24,0x7E,0x24,0x24,0],
-37:[0x62,0x64,0x08,0x10,0x26,0x46,0,0],
-38:[0x30,0x48,0x50,0x20,0x54,0x48,0x34,0],
-40:[0x08,0x10,0x20,0x20,0x20,0x10,0x08,0],
-41:[0x20,0x10,0x08,0x08,0x08,0x10,0x20,0],
-42:[0,0x24,0x18,0x7E,0x18,0x24,0,0],
-43:[0,0x10,0x10,0x7C,0x10,0x10,0,0],
-44:[0,0,0,0,0,0x18,0x18,0x10],
-45:[0,0,0,0x7E,0,0,0,0],
-46:[0,0,0,0,0,0x18,0x18,0],
+32:[0,0,0,0,0,0,0,0],33:[0x18,0x18,0x18,0x18,0x18,0,0x18,0],35:[0x24,0x24,0x7E,0x24,0x7E,0x24,0x24,0],
+37:[0x62,0x64,0x08,0x10,0x26,0x46,0,0],38:[0x30,0x48,0x50,0x20,0x54,0x48,0x34,0],
+40:[0x08,0x10,0x20,0x20,0x20,0x10,0x08,0],41:[0x20,0x10,0x08,0x08,0x08,0x10,0x20,0],
+42:[0,0x24,0x18,0x7E,0x18,0x24,0,0],43:[0,0x10,0x10,0x7C,0x10,0x10,0,0],
+44:[0,0,0,0,0,0x18,0x18,0x10],45:[0,0,0,0x7E,0,0,0,0],46:[0,0,0,0,0,0x18,0x18,0],
 47:[0x02,0x04,0x08,0x10,0x20,0x40,0x80,0],
-48:[0x3C,0x66,0x6E,0x76,0x66,0x66,0x3C,0],
-49:[0x18,0x38,0x18,0x18,0x18,0x18,0x7E,0],
-50:[0x3C,0x66,0x06,0x0C,0x18,0x30,0x7E,0],
-51:[0x3C,0x66,0x06,0x1C,0x06,0x66,0x3C,0],
-52:[0x0C,0x1C,0x3C,0x6C,0x7E,0x0C,0x0C,0],
-53:[0x7E,0x60,0x7C,0x06,0x06,0x66,0x3C,0],
-54:[0x1C,0x30,0x60,0x7C,0x66,0x66,0x3C,0],
-55:[0x7E,0x06,0x0C,0x18,0x30,0x30,0x30,0],
-56:[0x3C,0x66,0x66,0x3C,0x66,0x66,0x3C,0],
-57:[0x3C,0x66,0x66,0x3E,0x06,0x0C,0x38,0],
-58:[0,0x18,0x18,0,0x18,0x18,0,0],
-59:[0,0x18,0x18,0,0x18,0x18,0x10,0],
-60:[0x08,0x10,0x20,0x40,0x20,0x10,0x08,0],
-61:[0,0,0x7E,0,0x7E,0,0,0],
-62:[0x20,0x10,0x08,0x04,0x08,0x10,0x20,0],
-63:[0x3C,0x66,0x06,0x0C,0x18,0,0x18,0],
+48:[0x3C,0x66,0x6E,0x76,0x66,0x66,0x3C,0],49:[0x18,0x38,0x18,0x18,0x18,0x18,0x7E,0],
+50:[0x3C,0x66,0x06,0x0C,0x18,0x30,0x7E,0],51:[0x3C,0x66,0x06,0x1C,0x06,0x66,0x3C,0],
+52:[0x0C,0x1C,0x3C,0x6C,0x7E,0x0C,0x0C,0],53:[0x7E,0x60,0x7C,0x06,0x06,0x66,0x3C,0],
+54:[0x1C,0x30,0x60,0x7C,0x66,0x66,0x3C,0],55:[0x7E,0x06,0x0C,0x18,0x30,0x30,0x30,0],
+56:[0x3C,0x66,0x66,0x3C,0x66,0x66,0x3C,0],57:[0x3C,0x66,0x66,0x3E,0x06,0x0C,0x38,0],
+58:[0,0x18,0x18,0,0x18,0x18,0,0],59:[0,0x18,0x18,0,0x18,0x18,0x10,0],
+60:[0x08,0x10,0x20,0x40,0x20,0x10,0x08,0],61:[0,0,0x7E,0,0x7E,0,0,0],
+62:[0x20,0x10,0x08,0x04,0x08,0x10,0x20,0],63:[0x3C,0x66,0x06,0x0C,0x18,0,0x18,0],
 64:[0x3C,0x66,0x6E,0x6A,0x6E,0x60,0x3C,0],
-65:[0x18,0x3C,0x66,0x66,0x7E,0x66,0x66,0],
-66:[0x7C,0x66,0x66,0x7C,0x66,0x66,0x7C,0],
-67:[0x3C,0x66,0x60,0x60,0x60,0x66,0x3C,0],
-68:[0x78,0x6C,0x66,0x66,0x66,0x6C,0x78,0],
-69:[0x7E,0x60,0x60,0x78,0x60,0x60,0x7E,0],
-70:[0x7E,0x60,0x60,0x78,0x60,0x60,0x60,0],
-71:[0x3C,0x66,0x60,0x6E,0x66,0x66,0x3E,0],
-72:[0x66,0x66,0x66,0x7E,0x66,0x66,0x66,0],
-73:[0x3C,0x18,0x18,0x18,0x18,0x18,0x3C,0],
-74:[0x1E,0x0C,0x0C,0x0C,0x0C,0x6C,0x38,0],
-75:[0x66,0x6C,0x78,0x70,0x78,0x6C,0x66,0],
-76:[0x60,0x60,0x60,0x60,0x60,0x60,0x7E,0],
-77:[0x63,0x77,0x7F,0x6B,0x63,0x63,0x63,0],
-78:[0x66,0x76,0x7E,0x7E,0x6E,0x66,0x66,0],
-79:[0x3C,0x66,0x66,0x66,0x66,0x66,0x3C,0],
-80:[0x7C,0x66,0x66,0x7C,0x60,0x60,0x60,0],
-81:[0x3C,0x66,0x66,0x66,0x6E,0x3C,0x0E,0],
-82:[0x7C,0x66,0x66,0x7C,0x78,0x6C,0x66,0],
-83:[0x3C,0x66,0x60,0x3C,0x06,0x66,0x3C,0],
-84:[0x7E,0x18,0x18,0x18,0x18,0x18,0x18,0],
-85:[0x66,0x66,0x66,0x66,0x66,0x66,0x3C,0],
-86:[0x66,0x66,0x66,0x66,0x66,0x3C,0x18,0],
-87:[0x63,0x63,0x63,0x6B,0x7F,0x77,0x63,0],
-88:[0x66,0x66,0x3C,0x18,0x3C,0x66,0x66,0],
-89:[0x66,0x66,0x66,0x3C,0x18,0x18,0x18,0],
-90:[0x7E,0x06,0x0C,0x18,0x30,0x60,0x7E,0]
+65:[0x18,0x3C,0x66,0x66,0x7E,0x66,0x66,0],66:[0x7C,0x66,0x66,0x7C,0x66,0x66,0x7C,0],
+67:[0x3C,0x66,0x60,0x60,0x60,0x66,0x3C,0],68:[0x78,0x6C,0x66,0x66,0x66,0x6C,0x78,0],
+69:[0x7E,0x60,0x60,0x78,0x60,0x60,0x7E,0],70:[0x7E,0x60,0x60,0x78,0x60,0x60,0x60,0],
+71:[0x3C,0x66,0x60,0x6E,0x66,0x66,0x3E,0],72:[0x66,0x66,0x66,0x7E,0x66,0x66,0x66,0],
+73:[0x3C,0x18,0x18,0x18,0x18,0x18,0x3C,0],74:[0x1E,0x0C,0x0C,0x0C,0x0C,0x6C,0x38,0],
+75:[0x66,0x6C,0x78,0x70,0x78,0x6C,0x66,0],76:[0x60,0x60,0x60,0x60,0x60,0x60,0x7E,0],
+77:[0x63,0x77,0x7F,0x6B,0x63,0x63,0x63,0],78:[0x66,0x76,0x7E,0x7E,0x6E,0x66,0x66,0],
+79:[0x3C,0x66,0x66,0x66,0x66,0x66,0x3C,0],80:[0x7C,0x66,0x66,0x7C,0x60,0x60,0x60,0],
+81:[0x3C,0x66,0x66,0x66,0x6E,0x3C,0x0E,0],82:[0x7C,0x66,0x66,0x7C,0x78,0x6C,0x66,0],
+83:[0x3C,0x66,0x60,0x3C,0x06,0x66,0x3C,0],84:[0x7E,0x18,0x18,0x18,0x18,0x18,0x18,0],
+85:[0x66,0x66,0x66,0x66,0x66,0x66,0x3C,0],86:[0x66,0x66,0x66,0x66,0x66,0x3C,0x18,0],
+87:[0x63,0x63,0x63,0x6B,0x7F,0x77,0x63,0],88:[0x66,0x66,0x3C,0x18,0x3C,0x66,0x66,0],
+89:[0x66,0x66,0x66,0x3C,0x18,0x18,0x18,0],90:[0x7E,0x06,0x0C,0x18,0x30,0x60,0x7E,0]
 };
 var SUPPORTED=Object.keys(window.FONT8).map(Number);
 
@@ -97,79 +69,25 @@ window.BUILTIN_PROJECTS = {
 version: 23,
 projects: [
 {id:"danis", name:"DANIS", description:"DANIS walk + invert 1s",
-program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],
-[0x1E,68,0,0],[0x12,3,0,0],[0x1E,65,0,0],[0x12,3,0,0],
-[0x1E,78,0,0],[0x12,3,0,0],[0x1E,73,0,0],[0x12,3,0,0],
-[0x1E,83,0,0],[0x12,3,0,0],[0x1E,32,0,0],[0x12,3,0,0],
-[0x10,3,0,0]
-]},
+program:[[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],[0x1E,68,0,0],[0x12,3,0,0],[0x1E,65,0,0],[0x12,3,0,0],[0x1E,78,0,0],[0x12,3,0,0],[0x1E,73,0,0],[0x12,3,0,0],[0x1E,83,0,0],[0x12,3,0,0],[0x1E,32,0,0],[0x12,3,0,0],[0x10,3,0,0]]},
 {id:"hello", name:"HELLO", description:"HELLO marquee",
-program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],
-[0x1E,72,0,0],[0x12,2,0,0],[0x1E,69,0,0],[0x12,2,0,0],
-[0x1E,76,0,0],[0x12,2,0,0],[0x1E,76,0,0],[0x12,2,0,0],
-[0x1E,79,0,0],[0x12,2,0,0],[0x1E,32,0,0],[0x12,2,0,0],
-[0x10,3,0,0]
-]},
+program:[[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],[0x1E,72,0,0],[0x12,2,0,0],[0x1E,69,0,0],[0x12,2,0,0],[0x1E,76,0,0],[0x12,2,0,0],[0x1E,76,0,0],[0x12,2,0,0],[0x1E,79,0,0],[0x12,2,0,0],[0x1E,32,0,0],[0x12,2,0,0],[0x10,3,0,0]]},
 {id:"blink", name:"BLINK", description:"Flash fill",
-program:[
-[0x13,0,0,0],[0x2A,0,0,0],
-[0x25,35,0,0],[0x12,6,0,0],
-[0x13,0,0,0],[0x12,6,0,0],
-[0x10,2,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
+program:[[0x13,0,0,0],[0x2A,0,0,0],[0x25,35,0,0],[0x12,6,0,0],[0x13,0,0,0],[0x12,6,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 {id:"starfield", name:"STARFIELD", description:"Random dots",
-program:[
-[0x01,1,0,60],[0x01,31,0,63],[0x32,1,0,0],
-[0x31,0,0,62],[0x08,63,62,62],[0x01,46,0,61],
-[0x29,46,62,0],[0x12,1,0,0],[0x10,2,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
+program:[[0x01,1,0,60],[0x01,31,0,63],[0x32,1,0,0],[0x31,0,0,62],[0x08,63,62,62],[0x01,46,0,61],[0x29,46,62,0],[0x12,1,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 {id:"bar", name:"BAR", description:"Bar pattern",
-program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],
-[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],
-[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],
-[0x12,20,0,0],[0x13,0,0,0],[0x12,5,0,0],[0x10,2,0,0],[0x10,2,0,0]
-]},
+program:[[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x12,20,0,0],[0x13,0,0,0],[0x12,5,0,0],[0x10,2,0,0],[0x10,2,0,0]]},
 {id:"box", name:"BOX", description:"Box outline",
-program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],
-[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],
-[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],
-[0x20,0,1,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x10,2,0,0]
-]},
+program:[[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x20,0,1,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x10,2,0,0]]},
 {id:"numbers", name:"NUMBERS", description:"Digit demo",
-program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],
-[0x21,48,0,0],[0x21,49,0,0],[0x21,50,0,0],[0x21,51,0,0],
-[0x21,52,0,0],[0x21,53,0,0],[0x21,54,0,0],[0x21,55,0,0],
-[0x12,30,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
+program:[[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],[0x21,48,0,0],[0x21,49,0,0],[0x21,50,0,0],[0x21,51,0,0],[0x21,52,0,0],[0x21,53,0,0],[0x21,54,0,0],[0x21,55,0,0],[0x12,30,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 {id:"abc", name:"ABC", description:"Alphabet",
-program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],
-[0x21,65,0,0],[0x21,66,0,0],[0x21,67,0,0],[0x21,68,0,0],
-[0x21,69,0,0],[0x21,70,0,0],[0x21,71,0,0],[0x21,72,0,0],
-[0x12,30,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
+program:[[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],[0x21,65,0,0],[0x21,66,0,0],[0x21,67,0,0],[0x21,68,0,0],[0x21,69,0,0],[0x21,70,0,0],[0x21,71,0,0],[0x21,72,0,0],[0x12,30,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 {id:"scroll-a", name:"SCROLL A", description:"Repeating A",
-program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],
-[0x1E,65,0,0],[0x12,2,0,0],[0x10,3,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
+program:[[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],[0x1E,65,0,0],[0x12,2,0,0],[0x10,3,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 {id:"scroll-z", name:"SCROLL Z", description:"Repeating Z",
-program:[
-[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],
-[0x1E,90,0,0],[0x12,2,0,0],[0x10,3,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]}
+program:[[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],[0x1E,90,0,0],[0x12,2,0,0],[0x10,3,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]}
 ]};
 </script>
 
@@ -185,16 +103,13 @@ window.addEventListener("error",function(e){showErr(e.message+" @"+e.lineno);});
 var SIZE_LED=6;
 var SCR_W=48, SCR_H=24;
 var CHAR_PX=8;
-var CHAR_COLS=SCR_W/CHAR_PX;
-var CHAR_ROWS=SCR_H/CHAR_PX;
+var CHAR_COLS=SCR_W/CHAR_PX, CHAR_ROWS=SCR_H/CHAR_PX;
 var DISPLAY_CELLS=CHAR_COLS*CHAR_ROWS;
-var RAM_SIZE=128;
-var STORE_SIZE=256;
+var RAM_SIZE=128, STORE_SIZE=256;
 var QUEUE_START=64, QUEUE_SLOTS=16;
 var ADDR_BITS=7, PTR_BITS=4;
 var INVERT_PERIOD_MS=1000;
-// === PERUBAHAN 1: rasio peta 5:4 ===
-var MAP_RATIO=5/4;
+var MAP_RATIO=5/4;   // <-- 5:4 aspect ratio untuk seluruh peta
 
 var OP_NOP=0x00,OP_SET=0x01,OP_MOV=0x02,OP_ADD=0x04,OP_SUB=0x05,OP_MUL=0x06,OP_DIV=0x07,
 OP_AND=0x08,OP_OR=0x09,OP_XOR=0x0A,OP_NOT=0x0B,OP_INC=0x0C,OP_DEC=0x0D,
@@ -206,11 +121,7 @@ OP_SCLR=0x24,OP_FILL=0x25,OP_SHL=0x26,OP_SHR=0x27,OP_HALT=0x28,OP_POKE=0x29,
 OP_FONT=0x2A,OP_STORER=0x2B,OP_STOREW=0x2C,
 OP_JOY=0x2D,OP_PEEK=0x2E,OP_STOREI=0x2F,OP_POKER=0x30,
 OP_RND=0x31,OP_SEED=0x32;
-var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,
-OP_NOT,OP_INC,OP_DEC,OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,
-OP_SPX,OP_SPY,OP_SPXP,OP_SPXM,OP_SPYP,OP_SPYM,OP_SPSHOW,OP_SPHIDE,OP_SCROLL,
-OP_HOME,OP_CUR,OP_CHR,OP_NL,OP_CLRLN,OP_SCLR,OP_FILL,OP_SHL,OP_SHR,OP_HALT,OP_POKE,
-OP_FONT,OP_STORER,OP_STOREW,OP_JOY,OP_PEEK,OP_STOREI,OP_POKER,OP_RND,OP_SEED];
+var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,OP_NOT,OP_INC,OP_DEC,OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,OP_SPX,OP_SPY,OP_SPXP,OP_SPXM,OP_SPYP,OP_SPYM,OP_SPSHOW,OP_SPHIDE,OP_SCROLL,OP_HOME,OP_CUR,OP_CHR,OP_NL,OP_CLRLN,OP_SCLR,OP_FILL,OP_SHL,OP_SHR,OP_HALT,OP_POKE,OP_FONT,OP_STORER,OP_STOREW,OP_JOY,OP_PEEK,OP_STOREI,OP_POKER,OP_RND,OP_SEED];
 
 var gates=[],sws=[],leds=[],latches=[],wires=[],sectionsData=[],frame43=null;
 var vp,lW_on,lW_off,lG,lL,lU,lS;
@@ -226,10 +137,8 @@ groupStack=[{x:20,y:80,rowH:0,maxW:60000,maxXUsed:0,maxYUsed:0,gStart:0,sStart:0
 vp=E("g",{});svg.appendChild(vp);
 lW_off=E("path",{fill:"none",stroke:"#cfcfcf","stroke-width":1,"stroke-linejoin":"round"});
 lW_on=E("path",{fill:"none",stroke:"#111","stroke-width":1.5,"stroke-linejoin":"round"});
-lS=E("g",{});
-lG=E("g",{});lL=E("g",{});lU=E("g",{});
-vp.appendChild(lW_off);vp.appendChild(lW_on);
-vp.appendChild(lS);vp.appendChild(lG);vp.appendChild(lL);vp.appendChild(lU);
+lS=E("g",{});lG=E("g",{});lL=E("g",{});lU=E("g",{});
+vp.appendChild(lW_off);vp.appendChild(lW_on);vp.appendChild(lS);vp.appendChild(lG);vp.appendChild(lL);vp.appendChild(lU);
 }
 function curFrame(){return groupStack[groupStack.length-1];}
 function framePlaceIn(f,w,h){
@@ -279,8 +188,7 @@ init=init|0;
 var p=place(46,40);
 var wrapper={t:"LATX",i:[K0,K0],o:N(init,1),px:p.x,py:p.y,prev:init,prevEn:0};
 wrapper.o.x=p.x+46;wrapper.o.y=p.y+20;
-latches.push(wrapper);
-return wrapper;
+latches.push(wrapper);return wrapper;
 }
 function setLat(wrapper,d,en){
 wrapper.i[0]=d;wrapper.i[1]=en;
@@ -380,20 +288,15 @@ if(showWires){
 var wB=8000;
 for(var i=0;i<wires.length&&wB>0;i++){
 var w=wires[i];var sx=w.s.x,sy=w.s.y;if(sx===undefined||sy===undefined)continue;
-var dx,dy;
-if(w.l){dx=w.l.px-(w.l.sz||22)*0.4-2;dy=w.l.py;}
-else{dx=w.g.px-6;dy=w.g.py+w.py;}
+var dx,dy;if(w.l){dx=w.l.px-(w.l.sz||22)*0.4-2;dy=w.l.py;}else{dx=w.g.px-6;dy=w.g.py+w.py;}
 var mxw=(w.mx===undefined?sx:w.mx);
-var minx=Math.min(sx,dx,mxw),maxx=Math.max(sx,dx,mxw);
-var miny=Math.min(sy,dy),maxy=Math.max(sy,dy);
+var minx=Math.min(sx,dx,mxw),maxx=Math.max(sx,dx,mxw),miny=Math.min(sy,dy),maxy=Math.max(sy,dy);
 if(maxx<vx1-pad||minx>vx2+pad||maxy<vy1-pad||miny>vy2+pad)continue;
 var p=pathFor(sx,sy,dx,dy,w.mx,minimal);
-if(w.s.v)onD+=p;else offD+=p;
-wB--;
+if(w.s.v)onD+=p;else offD+=p;wB--;
 }
 }
-lW_on.setAttribute("d",onD);
-lW_off.setAttribute("d",offD);
+lW_on.setAttribute("d",onD);lW_off.setAttribute("d",offD);
 lW_on.setAttribute("stroke-width",minimal?0.9:1.5);
 lW_off.setAttribute("stroke-width",minimal?0.35:1);
 lW_off.setAttribute("stroke",minimal?"#dcdcdc":"#cfcfcf");
@@ -410,47 +313,23 @@ function simulate(){
     var changed=false;
     for(var i=0;i<sL;i++){var s=sws[i];if(s.o.v!==s.v){s.o.v=s.v;changed=true;}}
     for(var i=0;i<gL;i++){
-      var g=gates[i];
-      var a=g.i[0]?g.i[0].v:0;
-      var b=g.i[1]?g.i[1].v:0;
-      var t=g.t;
-      var nv;
-      if(t==="AND") nv=a&b;
-      else if(t==="OR") nv=a|b;
-      else if(t==="XOR") nv=a^b;
-      else nv=a?0:1;
+      var g=gates[i];var a=g.i[0]?g.i[0].v:0;var b=g.i[1]?g.i[1].v:0;var t=g.t;var nv;
+      if(t==="AND")nv=a&b;else if(t==="OR")nv=a|b;else if(t==="XOR")nv=a^b;else nv=a?0:1;
       if(g.o.v!==nv){g.o.v=nv;changed=true;}
     }
     for(var i=0;i<lL;i++){var l=latches[i];if(l.o.v!==l.prev){l.o.v=l.prev;changed=true;}}
     if(!changed)break;
   }
   var snapLen=lL;
-  var snapD=new Int8Array(snapLen);
-  var snapEn=new Int8Array(snapLen);
-  for(var i=0;i<snapLen;i++){
-    var l=latches[i];
-    snapD[i]=l.i[0]?l.i[0].v:0;
-    snapEn[i]=l.i[1]?l.i[1].v:0;
-  }
-  for(var i=0;i<snapLen;i++){
-    var l=latches[i];
-    if(snapEn[i] && !l.prevEn) l.prev=snapD[i];
-    l.prevEn=snapEn[i];
-    l.o.v=l.prev;
-  }
+  var snapD=new Int8Array(snapLen),snapEn=new Int8Array(snapLen);
+  for(var i=0;i<snapLen;i++){var l=latches[i];snapD[i]=l.i[0]?l.i[0].v:0;snapEn[i]=l.i[1]?l.i[1].v:0;}
+  for(var i=0;i<snapLen;i++){var l=latches[i];if(snapEn[i]&&!l.prevEn)l.prev=snapD[i];l.prevEn=snapEn[i];l.o.v=l.prev;}
   for(var iter=0;iter<SETTLE_ITERS;iter++){
     var changed2=false;
     for(var i=0;i<sL;i++){var s=sws[i];if(s.o.v!==s.v){s.o.v=s.v;changed2=true;}}
     for(var i=0;i<gL;i++){
-      var g=gates[i];
-      var a=g.i[0]?g.i[0].v:0;
-      var b=g.i[1]?g.i[1].v:0;
-      var t=g.t;
-      var nv;
-      if(t==="AND") nv=a&b;
-      else if(t==="OR") nv=a|b;
-      else if(t==="XOR") nv=a^b;
-      else nv=a?0:1;
+      var g=gates[i];var a=g.i[0]?g.i[0].v:0;var b=g.i[1]?g.i[1].v:0;var t=g.t;var nv;
+      if(t==="AND")nv=a&b;else if(t==="OR")nv=a|b;else if(t==="XOR")nv=a^b;else nv=a?0:1;
       if(g.o.v!==nv){g.o.v=nv;changed2=true;}
     }
     for(var i=0;i<lL;i++){var l=latches[i];if(l.o.v!==l.prev){l.o.v=l.prev;changed2=true;}}
@@ -613,8 +492,7 @@ var rndAct=AND(core.effRunEdge,opDec[OP_RND]);
 var seedAct=AND(core.effRunEdge,opDec[OP_SEED]);
 var newbit=XOR(XOR(rndReg[0].o,rndReg[2].o),XOR(rndReg[3].o,rndReg[4].o));
 for(i=0;i<8;i++){
-var next=(i===0)?newbit:rndReg[i-1].o;
-var seedBit=core.finalData[i];
+var next=(i===0)?newbit:rndReg[i-1].o;var seedBit=core.finalData[i];
 var withSeed=OR(AND(seedAct,seedBit),AND(NOT(seedAct),next));
 setLat(rndReg[i],withSeed,OR(rndAct,seedAct));
 }
@@ -629,8 +507,7 @@ var db=[core.delayReg[0].o,core.delayReg[1].o,core.delayReg[2].o,core.delayReg[3
 var dAct=OR(OR(db[0],db[1]),OR(db[2],db[3]));
 var nDelay=NOT(dAct);
 var delayRise=AND(opDec[OP_DELAY],NOT(core.delayOpPrev.o));
-var dLoad=AND(delayRise,core.effRunEdge);
-var nLoad=NOT(dLoad);
+var dLoad=AND(delayRise,core.effRunEdge);var nLoad=NOT(dLoad);
 var decBits=addN(db,[K1,K1,K1,K1],K0,4).sum;
 for(i=0;i<4;i++){var keep=AND(dAct,decBits[i]);var dd=OR(AND(dLoad,core.finalData[i]),AND(nLoad,keep));setLat(core.delayReg[i],dd,core.effRunEdge);}
 setLat(core.delayOpPrev,opDec[OP_DELAY],core.effRunEdge);
@@ -680,8 +557,7 @@ core.peekRead=peekRead;
 section("STOREW · WRITE",3000,function(){
 var storAct=AND(AND(core.effRunEdge,core.nDelay),opDec[OP_STOREW]);
 for(i=0;i<STORE_SIZE;i++){
-beginGroup(80);
-var we=AND(storAct,dataDec[i]);
+beginGroup(80);var we=AND(storAct,dataDec[i]);
 for(b=0;b<8;b++)setLat(core.STORE[i][b],srcB[b],we);
 endGroup();
 }
@@ -690,8 +566,7 @@ endGroup();
 section("POKER · WRITE",12000,function(){
 var pokerAct=AND(AND(core.effRunEdge,core.nDelay),opDec[OP_POKER]);
 for(i=0;i<RAM_SIZE;i++){
-beginGroup(100);
-var we=AND(pokerAct,pokeDec[i]);
+beginGroup(100);var we=AND(pokerAct,pokeDec[i]);
 for(b=0;b<8;b++)setLat(RAM[i][b],srcC[b],we);
 endGroup();
 }
@@ -736,16 +611,8 @@ section("ALU · LOGIC",1400,function(){var aR=[],oR=[],xR=[],nR=[];for(b=0;b<8;b
 section("ALU · INC·DEC",1600,function(){addOp(OP_INC,add8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]));addOp(OP_DEC,sub8(srcB,[K1,K0,K0,K0,K0,K0,K0,K0]));});
 section("ALU · CLR",200,function(){addOp(OP_CLR,[K0,K0,K0,K0,K0,K0,K0,K0]);});
 section("ALU · SHL·SHR",1600,function(){var shl=[K0],shr=[K0];for(b=0;b<7;b++)shl.push(srcB[b]);for(b=1;b<8;b++)shr.push(srcB[b]);addOp(OP_SHL,shl);addOp(OP_SHR,shr);});
-section("ALU · INDIRECT",1000,function(){
-addOp(OP_JOY,joyByte.slice());
-addOp(OP_PEEK,peekRead.slice());
-addOp(OP_STOREI,storeiRead.slice());
-addOp(OP_STORER,storRead.slice());
-});
-section("ALU · RND",600,function(){
-var rr=[];for(b=0;b<8;b++)rr.push(core.rndReg[b].o);
-addOp(OP_RND,rr);
-});
+section("ALU · INDIRECT",1000,function(){addOp(OP_JOY,joyByte.slice());addOp(OP_PEEK,peekRead.slice());addOp(OP_STOREI,storeiRead.slice());addOp(OP_STORER,storRead.slice());});
+section("ALU · RND",600,function(){var rr=[];for(b=0;b<8;b++)rr.push(core.rndReg[b].o);addOp(OP_RND,rr);});
 forceNewRow();
 section("OUTPUT MUX",5000,function(){
 for(b=0;b<8;b++){beginGroup(700);var acc=null;
@@ -753,20 +620,14 @@ for(var ii=0;ii<opList.length;ii++){var opv=opList[ii];var t=AND(opDec[opv],opR[
 if(acc===null)acc=K0;finalR.push(acc);endGroup();}
 });
 
-var big=fontMode[1].o;
-var bold=fontMode[0].o;
-var nbig=NOT(big);
-var nbold=NOT(bold);
-
+var big=fontMode[1].o,bold=fontMode[0].o,nbig=NOT(big),nbold=NOT(bold);
 var colInc,rowInc,colOf,rowOf;
 section("CURSOR · ARITH",1800,function(){
 colInc=addN([cCol[0].o,cCol[1].o,cCol[2].o],[K1,K0,K0],K0,3).sum;
 rowInc=addN([cRow[0].o,cRow[1].o],[K1,K0],K0,2).sum;
-var colOf_s=AND(cCol[0].o,AND(cCol[1].o,cCol[2].o));
-var colOf_b=AND(cCol[0].o,cCol[1].o);
+var colOf_s=AND(cCol[0].o,AND(cCol[1].o,cCol[2].o)),colOf_b=AND(cCol[0].o,cCol[1].o);
 colOf=OR(AND(nbig,colOf_s),AND(big,colOf_b));
-var rowOf_s=AND(cRow[0].o,cRow[1].o);
-var rowOf_b=cRow[0].o;
+var rowOf_s=AND(cRow[0].o,cRow[1].o),rowOf_b=cRow[0].o;
 rowOf=OR(AND(nbig,rowOf_s),AND(big,rowOf_b));
 });
 
@@ -775,30 +636,19 @@ var chrA=AND(core.effRunEdge,opDec[OP_CHR]);
 var homeA=AND(core.effRunEdge,opDec[OP_HOME]);
 var curA=AND(core.effRunEdge,opDec[OP_CUR]);
 var nlA=AND(core.effRunEdge,opDec[OP_NL]);
-var anyOp=OR(OR(chrA,homeA),OR(curA,nlA));
-var zero=K0;
+var anyOp=OR(OR(chrA,homeA),OR(curA,nlA));var zero=K0;
 var chWrap=AND(chrA,colOf);
 for(i=0;i<3;i++){
-var c0=AND(curA,core.finalData[i]);
-var c1=AND(OR(homeA,nlA),zero);
-var c2=AND(chWrap,zero);
-var c3=AND(AND(chrA,NOT(colOf)),colInc[i]);
-var keep=AND(NOT(anyOp),cCol[i].o);
-var v=OR(OR(c0,OR(c1,c2)),OR(c3,keep));
-setLat(cCol[i],v,anyOp);
+var c0=AND(curA,core.finalData[i]);var c1=AND(OR(homeA,nlA),zero);var c2=AND(chWrap,zero);
+var c3=AND(AND(chrA,NOT(colOf)),colInc[i]);var keep=AND(NOT(anyOp),cCol[i].o);
+var v=OR(OR(c0,OR(c1,c2)),OR(c3,keep));setLat(cCol[i],v,anyOp);
 }
 for(i=0;i<2;i++){
-var r0=AND(curA,core.finalTag[i]);
-var r1=AND(homeA,zero);
-var nlW=AND(nlA,rowOf);
-var nlN=AND(nlA,NOT(rowOf));
-var chW=AND(chWrap,rowOf);
-var chN=AND(chWrap,NOT(rowOf));
-var v2=OR(OR(r0,r1),zero);
-v2=OR(v2,AND(nlN,rowInc[i]));
-v2=OR(v2,AND(chN,rowInc[i]));
-v2=OR(v2,AND(OR(nlW,chW),zero));
-v2=OR(v2,AND(NOT(anyOp),cRow[i].o));
+var r0=AND(curA,core.finalTag[i]);var r1=AND(homeA,zero);
+var nlW=AND(nlA,rowOf),nlN=AND(nlA,NOT(rowOf));
+var chW=AND(chWrap,rowOf),chN=AND(chWrap,NOT(rowOf));
+var v2=OR(OR(r0,r1),zero);v2=OR(v2,AND(nlN,rowInc[i]));v2=OR(v2,AND(chN,rowInc[i]));
+v2=OR(v2,AND(OR(nlW,chW),zero));v2=OR(v2,AND(NOT(anyOp),cRow[i].o));
 setLat(cRow[i],v2,anyOp);
 }
 });
@@ -806,8 +656,7 @@ setLat(cRow[i],v2,anyOp);
 section("OUTPUT · WRITE EN",20000,function(){
 var runOk=AND(core.effRunEdge,core.nDelay);
 var wrEnable=OR(core.WRo,core.RUNQo);
-var wrPulse=AND(runOk,wrEnable);
-var nClr=NOT(core.clrEdge);
+var wrPulse=AND(runOk,wrEnable);var nClr=NOT(core.clrEdge);
 var scrClrPulse=AND(runOk,opDec[OP_SCRCLR]);
 var scrollPulse=AND(runOk,opDec[OP_SCROLL]);
 var storerAct=AND(runOk,opDec[OP_STORER]);
@@ -828,8 +677,7 @@ noWrite=OR(noWrite,opDec[OP_STOREW]);noWrite=OR(noWrite,opDec[OP_POKER]);
 noWrite=OR(noWrite,opDec[OP_SEED]);
 var doWrite=NOT(noWrite);
 
-var cellBit0=cCol[0].o;
-var cellBit1=cCol[1].o;
+var cellBit0=cCol[0].o,cellBit1=cCol[1].o;
 var cellBit2=OR(AND(nbig,cCol[2].o),AND(big,cRow[0].o));
 var cellBit3=OR(AND(nbig,cRow[0].o),AND(big,K0));
 var cellBit4=OR(AND(nbig,cRow[1].o),AND(big,K0));
@@ -853,7 +701,6 @@ var pokeEn=AND(pokeAct,pokeDec[i]);
 var storerEn=AND(storerAct,destDec[i]);
 var inDisp=(i<DISPLAY_CELLS)?K1:K0;
 var scrollEn=AND(scrollPulse,inDisp);
-
 var chrEn=K0,clrEn=K0,sclrEn=K0,fillEn=K0;
 if(i<DISPLAY_CELLS){
 var chrHit=eqN(cellBits,i,5);
@@ -865,9 +712,7 @@ fillEn=AND(core.effRunEdge,opDec[OP_FILL]);
 if(i<DISPLAY_CELLS)wEn=OR(wEn,scrClrPulse);
 var textEn=OR(OR(chrEn,clrEn),OR(sclrEn,fillEn));
 var en=OR(OR(OR(wEn,core.clrEdge),scrollEn),pokeEn);
-en=OR(en,textEn);
-en=OR(en,storerEn);
-
+en=OR(en,textEn);en=OR(en,storerEn);
 for(b=0;b<8;b++){
 var norm=AND(finalR[b],nClr);
 var isLast=((i%CHAR_COLS)===CHAR_COLS-1)?K1:K0;
@@ -875,13 +720,8 @@ var nextBit=((i+1)<DISPLAY_CELLS)?RAM[i+1][b].o:K0;
 var inRowScroll=OR(AND(isLast,core.finalData[b]),AND(NOT(isLast),nextBit));
 var scrollData=OR(AND(rowMatchList[i],inRowScroll),AND(NOT(rowMatchList[i]),RAM[i][b].o));
 var dB=OR(AND(scrollEn,scrollData),AND(NOT(scrollEn),norm));
-
-var pokeBit=core.finalData[b];
-var chrBit=core.finalData[b];
-var clrBit=SPACE[b];
-var fillBit=core.finalData[b];
+var pokeBit=core.finalData[b];var chrBit=core.finalData[b];var clrBit=SPACE[b];var fillBit=core.finalData[b];
 var sclrBit=(i<DISPLAY_CELLS-CHAR_COLS)?RAM[i+CHAR_COLS][b].o:core.finalData[b];
-
 var anyText=OR(OR(chrEn,clrEn),OR(sclrEn,fillEn));
 var textBit=OR(OR(AND(chrEn,chrBit),AND(clrEn,clrBit)),OR(AND(sclrEn,sclrBit),AND(fillEn,fillBit)));
 var withText=OR(AND(anyText,textBit),AND(NOT(anyText),dB));
@@ -914,43 +754,25 @@ core.ptEdge=AND(core.BTN_POINT.o,NOT(core.ptPrev.o));
 forceNewRow();
 section("SPRITE · X UPD",1400,function(){
 var rE=core.effRunEdge;
-var sE=AND(rE,opDec[OP_SPX]);
-var iE=OR(AND(rE,opDec[OP_SPXP]),core.rtEdge);
-var dE=OR(AND(rE,opDec[OP_SPXM]),core.lfEdge);
+var sE=AND(rE,opDec[OP_SPX]);var iE=OR(AND(rE,opDec[OP_SPXP]),core.rtEdge);var dE=OR(AND(rE,opDec[OP_SPXM]),core.lfEdge);
 var now=[sx[0].o,sx[1].o,sx[2].o,sx[3].o,sx[4].o];
 var iV=addN(now,[K1,K0,K0,K0,K0],K0,5).sum;
 var dV=subN(now,[K1,K0,K0,K0,K0],5);
 var en=OR(OR(sE,iE),dE);
-for(i=0;i<5;i++){
-var v0=OR(AND(sE,core.finalData[i]),AND(NOT(sE),now[i]));
-var v1=OR(AND(iE,iV[i]),AND(NOT(iE),v0));
-var v2=OR(AND(dE,dV[i]),AND(NOT(dE),v1));
-setLat(sx[i],v2,en);
-}
+for(i=0;i<5;i++){var v0=OR(AND(sE,core.finalData[i]),AND(NOT(sE),now[i]));var v1=OR(AND(iE,iV[i]),AND(NOT(iE),v0));var v2=OR(AND(dE,dV[i]),AND(NOT(dE),v1));setLat(sx[i],v2,en);}
 });
 section("SPRITE · Y UPD",1200,function(){
 var rE=core.effRunEdge;
-var sE=AND(rE,opDec[OP_SPY]);
-var iE=OR(AND(rE,opDec[OP_SPYP]),core.dnEdge);
-var dE=OR(AND(rE,opDec[OP_SPYM]),core.upEdge);
+var sE=AND(rE,opDec[OP_SPY]);var iE=OR(AND(rE,opDec[OP_SPYP]),core.dnEdge);var dE=OR(AND(rE,opDec[OP_SPYM]),core.upEdge);
 var now=[sy[0].o,sy[1].o,sy[2].o,sy[3].o];
-var iV=addN(now,[K1,K0,K0,K0],K0,4).sum;
-var dV=subN(now,[K1,K0,K0,K0],4);
+var iV=addN(now,[K1,K0,K0,K0],K0,4).sum;var dV=subN(now,[K1,K0,K0,K0],4);
 var en=OR(OR(sE,iE),dE);
-for(i=0;i<4;i++){
-var v0=OR(AND(sE,core.finalData[i]),AND(NOT(sE),now[i]));
-var v1=OR(AND(iE,iV[i]),AND(NOT(iE),v0));
-var v2=OR(AND(dE,dV[i]),AND(NOT(dE),v1));
-setLat(sy[i],v2,en);
-}
+for(i=0;i<4;i++){var v0=OR(AND(sE,core.finalData[i]),AND(NOT(sE),now[i]));var v1=OR(AND(iE,iV[i]),AND(NOT(iE),v0));var v2=OR(AND(dE,dV[i]),AND(NOT(dE),v1));setLat(sy[i],v2,en);}
 });
 section("SPRITE · VIS UPD",600,function(){
-var rE=core.effRunEdge;
-var show=AND(rE,opDec[OP_SPSHOW]);
-var hide=AND(rE,opDec[OP_SPHIDE]);
+var rE=core.effRunEdge;var show=AND(rE,opDec[OP_SPSHOW]);var hide=AND(rE,opDec[OP_SPHIDE]);
 var en=OR(OR(show,hide),core.ptEdge);
-var v0=OR(AND(show,K1),AND(NOT(show),core.sprVis.o));
-var v1=OR(AND(hide,K0),AND(NOT(hide),v0));
+var v0=OR(AND(show,K1),AND(NOT(show),core.sprVis.o));var v1=OR(AND(hide,K0),AND(NOT(hide),v0));
 var v2=OR(AND(core.ptEdge,NOT(core.sprVis.o)),AND(NOT(core.ptEdge),v1));
 setLat(core.sprVis,v2,en);
 });
@@ -966,20 +788,20 @@ for(c=0;c<SCR_W;c++){var sl=ledPending("#111","",SIZE_LED);sl.isScreenLed=true;s
 endGroup();}
 });
 
-section("SCREEN · FONT ARRAY",8000,function(){
+// FONT ARRAY — maxW 8000 jadi lebih banyak baris. Kalau mau layout lebih
+// seimbang untuk 5:4, bisa naikkan ke 12000-15000.
+section("SCREEN · FONT ARRAY",12000,function(){
 for(r=0;r<SCR_H;r++){
 for(c=0;c<SCR_W;c++){
 var cellIdx=(r/CHAR_PX|0)*CHAR_COLS+(c/CHAR_PX|0);
-var px=c%CHAR_PX;
-var py=r%CHAR_PX;
-var bit=7-px;
+var px=c%CHAR_PX,py=r%CHAR_PX,bit=7-px;
 var acc=null;
 for(var si=0;si<SUPPORTED.length;si++){
 var ch=SUPPORTED[si];
 var fbit=(window.FONT8[ch][py]>>bit)&1;
 if(!fbit)continue;
-var b0=(ch>>0)&1, b1=(ch>>1)&1, b2=(ch>>2)&1, b3=(ch>>3)&1;
-var b4=(ch>>4)&1, b5=(ch>>5)&1, b6=(ch>>6)&1, b7=(ch>>7)&1;
+var b0=(ch>>0)&1,b1=(ch>>1)&1,b2=(ch>>2)&1,b3=(ch>>3)&1;
+var b4=(ch>>4)&1,b5=(ch>>5)&1,b6=(ch>>6)&1,b7=(ch>>7)&1;
 var e0=b0?RAM[cellIdx][0].o:NOT(RAM[cellIdx][0].o);
 var e1=b1?RAM[cellIdx][1].o:NOT(RAM[cellIdx][1].o);
 var e2=b2?RAM[cellIdx][2].o:NOT(RAM[cellIdx][2].o);
@@ -988,10 +810,7 @@ var e4=b4?RAM[cellIdx][4].o:NOT(RAM[cellIdx][4].o);
 var e5=b5?RAM[cellIdx][5].o:NOT(RAM[cellIdx][5].o);
 var e6=b6?RAM[cellIdx][6].o:NOT(RAM[cellIdx][6].o);
 var e7=b7?RAM[cellIdx][7].o:NOT(RAM[cellIdx][7].o);
-var a1=AND(e0,e1);
-var a2=AND(e2,e3);
-var a3=AND(e4,e5);
-var a4=AND(e6,e7);
+var a1=AND(e0,e1),a2=AND(e2,e3),a3=AND(e4,e5),a4=AND(e6,e7);
 var eq=AND(AND(a1,a2),AND(a3,a4));
 acc=(acc===null)?eq:OR(acc,eq);
 }
@@ -1038,10 +857,7 @@ forceNewRow();
 var NOOP=[0x00,0x00,0x00,0x00];
 function writeRamByte(arr,addr,val){if(addr<0||addr>=RAM_SIZE)return;for(var b=0;b<8;b++)latchReset(arr[addr][b],(val>>b)&1);}
 function writeStoreByte(addr,val){if(addr<0||addr>=STORE_SIZE)return;for(var b=0;b<8;b++)latchReset(core.STORE[addr][b],(val>>b)&1);}
-
-function clearMemory(){
-for(var q=0;q<latches.length;q++)latchReset(latches[q],0);
-}
+function clearMemory(){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);}
 function loadProgram(proj){
 clearMemory();
 var prog=proj.program||proj;
@@ -1060,9 +876,7 @@ latchReset(core.slots[i].valid,1);
 addr+=4;
 }
 for(var i=0;i<QUEUE_SLOTS*4 && i<STORE_SIZE;i++){
-var ins=pad[i>>2];
-var byteVal=ins[i&3]&0xFF;
-writeStoreByte(i,byteVal);
+var ins=pad[i>>2];var byteVal=ins[i&3]&0xFF;writeStoreByte(i,byteVal);
 }
 }
 function autoStart(){for(var i=0;i<sws.length;i++){if(sws[i].label==="RUN_Q"){sws[i].v=1;}}}
@@ -1079,16 +893,22 @@ autoStart();
 }
 function routeWires(){
 var STEP=2,buckets={},list=[],i,w;
-for(i=0;i<wires.length;i++){w=wires[i];delete w.mx;if(w.s.x===undefined)continue;if(w.l){w.ex=w.l.px-(w.l.sz||22)*0.4-2;w.ey=w.l.py;}else if(w.g&&w.g.px!==undefined){w.ex=w.g.px-6;w.ey=w.g.py+w.py;}else{continue;}if(Math.abs(w.s.y-w.ey)<3)continue;list.push(w);}
+for(i=0;i<wires.length;i++){w=wires[i];delete w.mx;if(w.s.x===undefined)continue;
+if(w.l){w.ex=w.l.px-(w.l.sz||22)*0.4-2;w.ey=w.l.py;}
+else if(w.g&&w.g.px!==undefined){w.ex=w.g.px-6;w.ey=w.g.py+w.py;}else{continue;}
+if(Math.abs(w.s.y-w.ey)<3)continue;list.push(w);}
 list.sort(function(a,b){return Math.abs(b.ey-b.s.y)-Math.abs(a.ey-a.s.y);});
-for(i=0;i<list.length;i++){w=list[i];var y1=Math.min(w.s.y,w.ey)-1,y2=Math.max(w.s.y,w.ey)+1;var ideal=w.s.x+(w.ex-w.s.x)/2,base=Math.round(ideal/STEP),pick=null;
-for(var d=0;d<400&&pick===null;d++){for(var sg=(d===0?1:-1);sg<=1&&pick===null;sg+=2){var key=base+sg*d,arr=buckets[key],ok=true;if(arr)for(var m=0;m<arr.length;m++){var o=arr[m];if(o.n!==w.s&&o.a<y2&&o.b>y1){ok=false;break;}}if(ok)pick=key;}}
+for(i=0;i<list.length;i++){w=list[i];var y1=Math.min(w.s.y,w.ey)-1,y2=Math.max(w.s.y,w.ey)+1;
+var ideal=w.s.x+(w.ex-w.s.x)/2,base=Math.round(ideal/STEP),pick=null;
+for(var d=0;d<400&&pick===null;d++){for(var sg=(d===0?1:-1);sg<=1&&pick===null;sg+=2){
+var key=base+sg*d,arr=buckets[key],ok=true;
+if(arr)for(var m=0;m<arr.length;m++){var o=arr[m];if(o.n!==w.s&&o.a<y2&&o.b>y1){ok=false;break;}}
+if(ok)pick=key;}}
 if(pick===null)pick=base;(buckets[pick]||(buckets[pick]=[])).push({a:y1,b:y2,n:w.s});w.mx=pick*STEP;}
 }
 function relayout43(){
 var GX=22,GY=26,M=60,TOP=110,CG=150,RG=55;
-// === PERUBAHAN 1: RATIO = 5/4 ===
-var RATIO=MAP_RATIO;
+var RATIO=MAP_RATIO;  // === 5:4 ===
 var secs=sectionsData,n=secs.length,i,k,maxW=0,totW=0,idx={};
 if(!n)return null;
 for(i=0;i<n;i++){idx[secs[i].title]=i;if(secs[i].w>maxW)maxW=secs[i].w;totW+=secs[i].w+GX;}
@@ -1114,8 +934,7 @@ if(isFix[j])continue;
 var s=secs[j],cand=[0],bx=0,by=Infinity;
 for(k=0;k<placed.length;k++){cand.push(placed[k].x);cand.push(placed[k].x+placed[k].w+GX);}
 for(c=0;c<cand.length;c++){
-var x=cand[c];
-if(x>0&&x+s.w>Wp)continue;
+var x=cand[c];if(x>0&&x+s.w>Wp)continue;
 var yy=0;
 for(k=0;k<placed.length;k++){rr=placed[k];if(rr.x<x+s.w+GX&&rr.x+rr.w+GX>x){var yb=rr.y+rr.h+GY;if(yb>yy)yy=yb;}}
 if(yy<by||(yy===by&&x<bx)){by=yy;bx=x;}
@@ -1149,12 +968,12 @@ view.x=(r.width - frame43.w*k)/2 - frame43.x*k;
 view.y=(r.height - frame43.h*k)/2 - frame43.y*k;
 applyView();
 }
-// === PERUBAHAN 2: fitScreen + fallback ke SCREEN · FONT ARRAY kalau GRID gak ada ===
+// === FIX UTAMA: fitScreen HANYA cari SCREEN · GRID ===
 function fitScreen(){
 var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity,found=false;
 for(var i=0;i<sectionsData.length;i++){
 var s=sectionsData[i];
-if(s.title!=="SCREEN · GRID" && s.title!=="SCREEN · FONT ARRAY")continue;
+if(s.title!=="SCREEN · GRID")continue;   // <-- hanya LED grid
 found=true;
 if(s.x<minX)minX=s.x;if(s.y<minY)minY=s.y;
 if(s.x+s.w>maxX)maxX=s.x+s.w;if(s.y+s.h>maxY)maxY=s.y+s.h;
@@ -1163,32 +982,23 @@ if(!found){fitView();return;}
 var w=maxX-minX,h=maxY-minY;
 var cx=(minX+maxX)/2,cy=(minY+maxY)/2;
 var r=svg.getBoundingClientRect();
-var k=Math.min(r.width/(w+120), r.height/(h+120))*0.95;
-if(k<0.02)k=0.02;
+// scale biar pas, jangan terlalu kecil
+var k=Math.min(r.width/(w+100), r.height/(h+100));
+if(k<1.5)k=1.5;   // minimum zoom biar LED kelihatan
+if(k>8)k=8;       // maximum zoom biar tidak terlalu pixelated
 view.k=k;
 view.x=r.width/2 - cx*k;
 view.y=r.height/2 - cy*k;
 applyView();
 }
 function updateGateCount(){
-var logicGates=gates.length;
-document.getElementById("gcount").textContent="· "+logicGates.toLocaleString()+" LOGIC GATES · "+latches.length.toLocaleString()+" FFs";
+document.getElementById("gcount").textContent="· "+gates.length.toLocaleString()+" LOGIC GATES · "+latches.length.toLocaleString()+" FFs";
 }
 function loadProject(){
 try{
 reset();
-buildFrontend();
-buildJoystick();
-buildQueue();
-buildExecutor();
-buildBackend();
-frame43=relayout43();
-routeWires();
-initProj();
-simulate();
-fitView();
-updateGateCount();
-renderFrame();
+buildFrontend();buildJoystick();buildQueue();buildExecutor();buildBackend();
+frame43=relayout43();routeWires();initProj();simulate();fitView();updateGateCount();renderFrame();
 }catch(e){showErr((e&&e.message)||String(e));console.error(e);if(e&&e.stack)console.error(e.stack);}
 }
 
@@ -1224,34 +1034,27 @@ if(panS.moved){view.x=panS.ox+dx;view.y=panS.oy+dy;applyView();}
 }
 });
 function endPtr(e){
-delete ptrs[e.pointerId];
-var ids=Object.keys(ptrs);
+delete ptrs[e.pointerId];var ids=Object.keys(ptrs);
 if(ids.length===0){mode=null;panS=null;pinchS=null;svg.classList.remove("drag");}
 else if(ids.length===1){mode="pan";var id=ids[0];panS={x:ptrs[id].x,y:ptrs[id].y,ox:view.x,oy:view.y,moved:false};pinchS=null;}
 }
 svg.addEventListener("pointerup",endPtr);
 svg.addEventListener("pointercancel",endPtr);
 svg.addEventListener("pointerleave",function(e){if(ptrs[e.pointerId])endPtr(e);});
-// === PERUBAHAN 2: dblclick SELALU zoom ke layar ===
-svg.addEventListener("dblclick",function(){
+// === dblclick selalu zoom ke layar ===
+svg.addEventListener("dblclick",function(e){
+e.preventDefault();
 fitScreen();
 });
 document.getElementById("zoomIn").addEventListener("click",function(){zoomC(1.3);});
 document.getElementById("zoomOut").addEventListener("click",function(){zoomC(1/1.3);});
 document.getElementById("zoomReset").addEventListener("click",function(){fitView();});
 
-var statPC=document.getElementById("statPC");
-var statCLK=document.getElementById("statCLK");
-
+var statPC=document.getElementById("statPC"),statCLK=document.getElementById("statCLK");
 loadProject();
-
 setInterval(function(){gInvertState = gInvertState ? 0 : 1;}, INVERT_PERIOD_MS);
-
 setInterval(function(){
-  try{
-    tickOsc();
-    simulate();
-    gCLKCount++;
+  try{tickOsc();simulate();gCLKCount++;
     statPC.textContent = core.ptr ? (core.ptr[0].o.v + core.ptr[1].o.v*2 + core.ptr[2].o.v*4 + core.ptr[3].o.v*8) : 0;
     statCLK.textContent = gCLKCount;
   }catch(e){showErr((e&&e.message)||String(e));}
