@@ -29,7 +29,7 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll = zoom · drag = pan · dblclick = screen · ⟲ = fit all</div>
+<div id="help">scroll = zoom · drag = pan · dblclick = layar · ⟲ = fit all</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <script>
@@ -193,6 +193,8 @@ var STORE_SIZE=256;
 var QUEUE_START=64, QUEUE_SLOTS=16;
 var ADDR_BITS=7, PTR_BITS=4;
 var INVERT_PERIOD_MS=1000;
+// === PERUBAHAN 1: rasio peta 5:4 ===
+var MAP_RATIO=5/4;
 
 var OP_NOP=0x00,OP_SET=0x01,OP_MOV=0x02,OP_ADD=0x04,OP_SUB=0x05,OP_MUL=0x06,OP_DIV=0x07,
 OP_AND=0x08,OP_OR=0x09,OP_XOR=0x0A,OP_NOT=0x0B,OP_INC=0x0C,OP_DEC=0x0D,
@@ -365,7 +367,6 @@ var r=getRect();
 var vx1=-view.x/view.k,vy1=-view.y/view.k,vx2=vx1+r.width/view.k,vy2=vy1+r.height/view.k;
 var lod=view.k,pad=40;
 var minimal=lod<0.015;
-// === FIX #2: longgarkan threshold ===
 var showSections=lod>0.003;
 var showGates=lod>0.040;
 var showSwitches=lod>0.070;
@@ -376,7 +377,6 @@ if(frame43&&lod>0.010){lS.appendChild(E("rect",{x:frame43.x,y:frame43.y,width:fr
 if(showSections){for(var i=0;i<sectionsData.length;i++){var s=sectionsData[i];if(s.x+s.w<vx1||s.x>vx2||s.y+s.h<vy1||s.y>vy2)continue;renderSection(s);}}
 var onD="",offD="";
 if(showWires){
-// === FIX #3a: budget untuk wires ===
 var wB=8000;
 for(var i=0;i<wires.length&&wB>0;i++){
 var w=wires[i];var sx=w.s.x,sy=w.s.y;if(sx===undefined||sy===undefined)continue;
@@ -397,11 +397,9 @@ lW_off.setAttribute("d",offD);
 lW_on.setAttribute("stroke-width",minimal?0.9:1.5);
 lW_off.setAttribute("stroke-width",minimal?0.35:1);
 lW_off.setAttribute("stroke",minimal?"#dcdcdc":"#cfcfcf");
-// === FIX #3b: budget untuk gates ===
 if(showGates){var gB=6000;for(var i=0;i<gates.length&&gB>0;i++){var g=gates[i];if(g.px+50<vx1-pad||g.px>vx2+pad)continue;if(g.py+44<vy1-pad||g.py>vy2+pad)continue;renderGate(g);gB--;}}
 if(showGates){var ltB=2000;for(var i=0;i<latches.length&&ltB>0;i++){var l=latches[i];if(l.px+54<vx1-pad||l.px-8>vx2+pad)continue;if(l.py+44<vy1-pad||l.py-4>vy2+pad)continue;renderLatch(l);ltB--;}}
 if(showSwitches){for(var i=0;i<sws.length;i++){var s=sws[i];if(s.px+70<vx1-pad||s.px>vx2+pad)continue;if(s.py+86<vy1-pad||s.py>vy2+pad)continue;renderSwitch(s);}}
-// === FIX #3c: budget untuk leds ===
 if(showLeds){var lB=6000;for(var i=0;i<leds.length&&lB>0;i++){var l=leds[i];var rad=(l.sz||22)*0.5+2;if(l.px+rad<vx1||l.px-rad>vx2)continue;if(l.py+rad<vy1||l.py-rad>vy2)continue;renderLed(l);lB--;}}
 }
 
@@ -962,10 +960,6 @@ section("SPRITE · XOFF",1200,function(){var now=[sx[0].o,sx[1].o,sx[2].o,sx[3].
 section("SPRITE · YOFF",900,function(){var now=[sy[0].o,sy[1].o,sy[2].o,sy[3].o];core.syK=[now,addN(now,[K1,K0,K0,K0],K0,4).sum,addN(now,[K0,K1,K0,K0],K0,4).sum,addN(now,[K1,K1,K0,K0],K0,4).sum];});
 
 forceNewRow();
-// ============================================================
-// SCREEN — per-pixel full 52-way decoder (independently built)
-// FIX #1: maxW dari 600000 → 8000
-// ============================================================
 section("SCREEN · GRID",SCR_W*(SIZE_LED+GAPX)+GAPX,function(){
 for(r=0;r<SCR_H;r++){beginGroup(SCR_W*(SIZE_LED+GAPX)+GAPX);screenLeds.push([]);
 for(c=0;c<SCR_W;c++){var sl=ledPending("#111","",SIZE_LED);sl.isScreenLed=true;screenLeds[r].push(sl);}
@@ -1092,7 +1086,9 @@ for(var d=0;d<400&&pick===null;d++){for(var sg=(d===0?1:-1);sg<=1&&pick===null;s
 if(pick===null)pick=base;(buckets[pick]||(buckets[pick]=[])).push({a:y1,b:y2,n:w.s});w.mx=pick*STEP;}
 }
 function relayout43(){
-var GX=22,GY=26,M=60,TOP=110,RATIO=16/9,CG=150,RG=55;
+var GX=22,GY=26,M=60,TOP=110,CG=150,RG=55;
+// === PERUBAHAN 1: RATIO = 5/4 ===
+var RATIO=MAP_RATIO;
 var secs=sectionsData,n=secs.length,i,k,maxW=0,totW=0,idx={};
 if(!n)return null;
 for(i=0;i<n;i++){idx[secs[i].title]=i;if(secs[i].w>maxW)maxW=secs[i].w;totW+=secs[i].w+GX;}
@@ -1153,22 +1149,25 @@ view.x=(r.width - frame43.w*k)/2 - frame43.x*k;
 view.y=(r.height - frame43.h*k)/2 - frame43.y*k;
 applyView();
 }
+// === PERUBAHAN 2: fitScreen + fallback ke SCREEN · FONT ARRAY kalau GRID gak ada ===
 function fitScreen(){
 var minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity,found=false;
 for(var i=0;i<sectionsData.length;i++){
 var s=sectionsData[i];
-if(s.title!=="SCREEN · GRID")continue;
+if(s.title!=="SCREEN · GRID" && s.title!=="SCREEN · FONT ARRAY")continue;
 found=true;
 if(s.x<minX)minX=s.x;if(s.y<minY)minY=s.y;
 if(s.x+s.w>maxX)maxX=s.x+s.w;if(s.y+s.h>maxY)maxY=s.y+s.h;
 }
 if(!found){fitView();return;}
 var w=maxX-minX,h=maxY-minY;
+var cx=(minX+maxX)/2,cy=(minY+maxY)/2;
 var r=svg.getBoundingClientRect();
 var k=Math.min(r.width/(w+120), r.height/(h+120))*0.95;
+if(k<0.02)k=0.02;
 view.k=k;
-view.x=(r.width - w*k)/2 - minX*k;
-view.y=(r.height - h*k)/2 - minY*k;
+view.x=r.width/2 - cx*k;
+view.y=r.height/2 - cy*k;
 applyView();
 }
 function updateGateCount(){
@@ -1233,8 +1232,9 @@ else if(ids.length===1){mode="pan";var id=ids[0];panS={x:ptrs[id].x,y:ptrs[id].y
 svg.addEventListener("pointerup",endPtr);
 svg.addEventListener("pointercancel",endPtr);
 svg.addEventListener("pointerleave",function(e){if(ptrs[e.pointerId])endPtr(e);});
+// === PERUBAHAN 2: dblclick SELALU zoom ke layar ===
 svg.addEventListener("dblclick",function(){
-if(view.k>0.05)fitScreen();else fitView();
+fitScreen();
 });
 document.getElementById("zoomIn").addEventListener("click",function(){zoomC(1.3);});
 document.getElementById("zoomOut").addEventListener("click",function(){zoomC(1/1.3);});
