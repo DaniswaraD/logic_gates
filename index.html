@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v6.3</title>
+<title>CPU 64 v6.4</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
@@ -24,7 +24,7 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 </style>
 </head>
 <body>
-<div id="title">CPU 64 v6.3<small id="gcount"></small></div>
+<div id="title">CPU 64 v6.4<small id="gcount"></small></div>
 <div id="stats">PC=<span id="statPC">0</span> OP=<span id="statOP">----</span> CLK=<span id="statCLK">0</span> CUR=<span id="statCUR">?</span></div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
@@ -71,7 +71,7 @@ var SUPPORTED=Object.keys(window.FONT8).map(Number);
 var Z6=[0,0,0,0,0,0];
 
 window.BUILTIN_PROJECTS = {
-version: 33,
+version: 34,
 projects: [
 {id:"sad", name:"SAD FACES", description:"16x16 blink di tengah",
 program:[
@@ -120,10 +120,7 @@ var svg=document.getElementById("s");
 function E(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
 var LAST_SECTION="(startup)";
 function showErr(m){
-try{
-var el=document.getElementById("err");
-if(el){el.style.display="block";el.textContent="ERROR ["+LAST_SECTION+"]: "+m;}
-}catch(x){}
+try{var el=document.getElementById("err");if(el){el.style.display="block";el.textContent="ERROR ["+LAST_SECTION+"]: "+m;}}catch(x){}
 console.error("["+LAST_SECTION+"]",m);
 }
 window.addEventListener("error",function(e){showErr(e.message+" @"+e.lineno);});
@@ -484,10 +481,9 @@ for(b=0;b<8;b++){
 beginGroup(1000);
 var acc=null;
 for(i=0;i<RAM_SIZE;i++){
-var dVal=bitAt(dec,i);
-if(dVal===K0){if(!dec||i>=dec.length)continue;}
+if(!dec||i>=dec.length)continue;
 if(!RAM[i]||!RAM[i][b])continue;
-var t=AND(dVal,RAM[i][b].o);
+var t=AND(dec[i],RAM[i][b].o);
 acc=acc===null?t:OR(acc,t);
 }
 if(acc===null)acc=K0;
@@ -676,7 +672,10 @@ var spriteRowDec=makeDecoder(core.qD2);
 var base1=add8(immD0,[K1,K0,K0,K0,K0,K0,K0,K0]);
 var base2=add8(immD0,[K0,K1,K0,K0,K0,K0,K0,K0]);
 var base3=add8(immD0,[K1,K1,K0,K0,K0,K0,K0,K0]);
-var spriteMatch=[],spriteChar=[];
+
+// build spriteMatch and spriteChar only for DISPLAY_CELLS entries
+var spriteMatch=[];
+var spriteChar=[];
 for(i=0;i<DISPLAY_CELLS;i++){
 var ci=i%CHAR_COLS,ri=(i/CHAR_COLS)|0;
 var c0=spriteColDec[ci]||K0;
@@ -713,7 +712,11 @@ var aluBit=AND(aluEn,finalR[b]||K0);
 var clrBit=AND(scrClrEn,K0);
 var fillBit=AND(fillEn,imm0(b));
 var chrBit=AND(chrEn,imm0(b));
-var sprBit=AND(spriteEn,spriteChar[i][b]||K0);
+// === FIX: guard spriteChar[i] existence ===
+var sprBit=K0;
+if(i<DISPLAY_CELLS && spriteChar[i]){
+sprBit=AND(spriteEn,spriteChar[i][b]||K0);
+}
 var d=OR(OR(OR(aluBit,clrBit),fillBit),OR(chrBit,sprBit));
 setLat(RAM[i][b],d,en);
 }
