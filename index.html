@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v5.8</title>
+<title>CPU 64 v5.9</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
@@ -24,7 +24,7 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 </style>
 </head>
 <body>
-<div id="title">CPU 64 v5.8<small id="gcount"></small></div>
+<div id="title">CPU 64 v5.9<small id="gcount"></small></div>
 <div id="stats">PC=<span id="statPC">0</span> CLK=<span id="statCLK">0</span> Cursor=<span id="statCUR">?</span></div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
@@ -63,58 +63,52 @@ window.FONT8 = {
 85:[0x66,0x66,0x66,0x66,0x66,0x66,0x3C,0],86:[0x66,0x66,0x66,0x66,0x66,0x3C,0x18,0],
 87:[0x63,0x63,0x63,0x6B,0x7F,0x77,0x63,0],88:[0x66,0x66,0x3C,0x18,0x3C,0x66,0x66,0],
 89:[0x66,0x66,0x66,0x3C,0x18,0x18,0x18,0],90:[0x7E,0x06,0x0C,0x18,0x30,0x60,0x7E,0],
-91:[0x0F,0x3F,0x7F,0xFF,0xE3,0xE3,0xFF,0xFF],
-92:[0xF0,0xFC,0xFE,0xFF,0xC7,0xC7,0xFF,0xFF],
-93:[0x7E,0x7C,0x78,0xFF,0xFF,0x7F,0x3F,0x0F],
-94:[0x7E,0x3E,0x1E,0xFF,0xFF,0xFE,0xFC,0xF0],
-95:[0x0F,0x3F,0x7F,0xFF,0xFF,0xE3,0xE3,0xFF],
-96:[0xF0,0xFC,0xFE,0xFF,0xFF,0xC7,0xC7,0xFF],
-97:[0xFF,0x7E,0x7C,0x78,0xFF,0x7F,0x3F,0x0F],
-98:[0xFF,0x7E,0x3E,0x1E,0xFF,0xFE,0xFC,0xF0]
+91:[0x00,0x07,0x18,0x20,0x40,0x40,0x86,0x86],
+92:[0x00,0xE0,0x18,0x04,0x02,0x02,0x61,0x61],
+93:[0x80,0x87,0x8C,0x98,0x40,0x20,0x18,0x07],
+94:[0x01,0xE1,0x31,0x19,0x02,0x04,0x30,0xE0],
+95:[0x00,0x07,0x18,0x20,0x40,0x40,0x00,0x86],
+96:[0x00,0xE0,0x18,0x04,0x02,0x02,0x00,0x61],
+97:[0x80,0x87,0x8C,0x98,0x40,0x20,0x18,0x07],
+98:[0x01,0xE1,0x31,0x19,0x02,0x04,0x30,0xE0]
 };
 var SUPPORTED=Object.keys(window.FONT8).map(Number);
 
 window.BUILTIN_PROJECTS = {
-version: 26,
+version: 27,
 projects: [
-{id:"sad-faces", name:"SAD FACES", description:"16x16 crying face 2 frame",
+{id:"sad-faces", name:"SAD FACES", description:"16x16 blink 2 frame",
 program:[
 [0x13,0,0,0],[0x2A,0,0,0],
-[0x33,40,50,0],[0x21,91,0,0],
-[0x33,60,50,0],[0x21,92,0,0],
-[0x33,40,80,0],[0x21,93,0,0],
-[0x33,60,80,0],[0x21,94,0,0],
-[0x12,6,0,0],
-[0x33,40,50,0],[0x21,95,0,0],
-[0x33,60,50,0],[0x21,96,0,0],
-[0x33,40,80,0],[0x21,97,0,0],
-[0x33,60,80,0],[0x21,98,0,0],
-[0x12,6,0,0],
+[0x34,91,2,1],
+[0x12,8,0,0],
+[0x34,95,2,1],
+[0x12,8,0,0],
 [0x10,2,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0]
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
-{id:"sad-cascade", name:"SAD CASCADE", description:"3 wajah 16x16 di 3 posisi",
+{id:"two-faces", name:"TWO FACES", description:"Sad + blink di 2 posisi",
 program:[
 [0x13,0,0,0],[0x2A,0,0,0],
-[0x33,0,20,0],[0x21,91,0,0],[0x33,10,20,0],[0x21,92,0,0],
-[0x33,0,50,0],[0x21,93,0,0],[0x33,10,50,0],[0x21,94,0,0],
-[0x33,40,20,0],[0x21,95,0,0],[0x33,50,20,0],[0x21,96,0,0],
-[0x33,40,50,0],[0x21,97,0,0],[0x33,50,50,0],[0x21,98,0,0],
-[0x12,20,0,0],[0x10,2,0,0],
-[0,0,0,0],[0,0,0,0],[0,0,0,0]
+[0x34,91,0,0],[0x34,91,4,0],
+[0x12,8,0,0],
+[0x34,95,0,0],[0x34,95,4,0],
+[0x12,8,0,0],
+[0x10,2,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
 {id:"danis", name:"DANIS", description:"DANIS walk",
 program:[[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],[0x1E,68,0,0],[0x12,3,0,0],[0x1E,65,0,0],[0x12,3,0,0],[0x1E,78,0,0],[0x12,3,0,0],[0x1E,73,0,0],[0x12,3,0,0],[0x1E,83,0,0],[0x12,3,0,0],[0x1E,32,0,0],[0x12,3,0,0],[0x10,3,0,0]]},
 {id:"hello", name:"HELLO", description:"HELLO marquee",
 program:[[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],[0x1E,72,0,0],[0x12,2,0,0],[0x1E,69,0,0],[0x12,2,0,0],[0x1E,76,0,0],[0x12,2,0,0],[0x1E,76,0,0],[0x12,2,0,0],[0x1E,79,0,0],[0x12,2,0,0],[0x1E,32,0,0],[0x12,2,0,0],[0x10,3,0,0]]},
-{id:"blink", name:"BLINK", description:"Fill flash",
-program:[[0x13,0,0,0],[0x2A,0,0,0],[0x25,35,0,0],[0x12,6,0,0],[0x13,0,0,0],[0x12,6,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 {id:"starfield", name:"STARFIELD", description:"Random dots",
 program:[[0x01,1,0,60],[0x01,31,0,63],[0x32,1,0,0],[0x31,0,0,62],[0x08,63,62,62],[0x01,46,0,61],[0x29,46,62,0],[0x12,1,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 {id:"bar", name:"BAR", description:"Bar pattern",
 program:[[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x12,20,0,0],[0x13,0,0,0],[0x12,5,0,0],[0x10,2,0,0],[0x10,2,0,0]]},
-{id:"box", name:"BOX", description:"Box outline",
-program:[[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x20,0,1,0],[0x21,35,0,0],[0x21,35,0,0],[0x21,35,0,0],[0x10,2,0,0]]},
 {id:"numbers", name:"NUMBERS", description:"Digit demo",
 program:[[0x13,0,0,0],[0x2A,0,0,0],[0x1F,0,0,0],[0x21,48,0,0],[0x21,49,0,0],[0x21,50,0,0],[0x21,51,0,0],[0x21,52,0,0],[0x21,53,0,0],[0x21,54,0,0],[0x21,55,0,0],[0x12,30,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 {id:"abc", name:"ABC", description:"Alphabet",
@@ -141,7 +135,7 @@ var CHAR_PX=8;
 var CHAR_COLS=SCR_W/CHAR_PX, CHAR_ROWS=SCR_H/CHAR_PX;
 var DISPLAY_CELLS=CHAR_COLS*CHAR_ROWS;
 var RAM_SIZE=128, STORE_SIZE=256;
-var QUEUE_START=20, QUEUE_SLOTS=24;
+var QUEUE_START=32, QUEUE_SLOTS=24;
 var ADDR_BITS=7, PTR_BITS=5;
 var MAP_RATIO=5/4;
 
@@ -154,8 +148,8 @@ OP_HOME=0x1F,OP_CUR=0x20,OP_CHR=0x21,OP_NL=0x22,OP_CLRLN=0x23,
 OP_SCLR=0x24,OP_FILL=0x25,OP_SHL=0x26,OP_SHR=0x27,OP_HALT=0x28,OP_POKE=0x29,
 OP_FONT=0x2A,OP_STORER=0x2B,OP_STOREW=0x2C,
 OP_JOY=0x2D,OP_PEEK=0x2E,OP_STOREI=0x2F,OP_POKER=0x30,
-OP_RND=0x31,OP_SEED=0x32,OP_POS=0x33;
-var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,OP_NOT,OP_INC,OP_DEC,OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,OP_SPX,OP_SPY,OP_SPXP,OP_SPXM,OP_SPYP,OP_SPYM,OP_SPSHOW,OP_SPHIDE,OP_SCROLL,OP_HOME,OP_CUR,OP_CHR,OP_NL,OP_CLRLN,OP_SCLR,OP_FILL,OP_SHL,OP_SHR,OP_HALT,OP_POKE,OP_FONT,OP_STORER,OP_STOREW,OP_JOY,OP_PEEK,OP_STOREI,OP_POKER,OP_RND,OP_SEED,OP_POS];
+OP_RND=0x31,OP_SEED=0x32,OP_POS=0x33,OP_SPRITE=0x34;
+var ALL_OPS=[OP_NOP,OP_SET,OP_MOV,OP_ADD,OP_SUB,OP_MUL,OP_DIV,OP_AND,OP_OR,OP_XOR,OP_NOT,OP_INC,OP_DEC,OP_JMP,OP_CLR,OP_DELAY,OP_SCRCLR,OP_JZ,OP_JNZ,OP_SPX,OP_SPY,OP_SPXP,OP_SPXM,OP_SPYP,OP_SPYM,OP_SPSHOW,OP_SPHIDE,OP_SCROLL,OP_HOME,OP_CUR,OP_CHR,OP_NL,OP_CLRLN,OP_SCLR,OP_FILL,OP_SHL,OP_SHR,OP_HALT,OP_POKE,OP_FONT,OP_STORER,OP_STOREW,OP_JOY,OP_PEEK,OP_STOREI,OP_POKER,OP_RND,OP_SEED,OP_POS,OP_SPRITE];
 
 var gates=[],sws=[],leds=[],latches=[],wires=[],sectionsData=[],frame43=null;
 var vp,lW_on,lW_off,lG,lL,lU,lS;
@@ -484,6 +478,34 @@ posRowBits=[orAll(rowT0),orAll(rowT1)];});
 core.posColBits=posColBits;core.posRowBits=posRowBits;
 forceNewRow();
 
+section("SPRITE · DECODE",4000,function(){
+var sprX=[core.finalTag[0],core.finalTag[1],core.finalTag[2]];
+var sprY=[core.finalDest[0],core.finalDest[1]];
+var sprBase=core.finalData;
+var base1=add8(sprBase,[K1,K0,K0,K0,K0,K0,K0,K0]);
+var base2=add8(sprBase,[K0,K1,K0,K0,K0,K0,K0,K0]);
+var base3=add8(sprBase,[K1,K1,K0,K0,K0,K0,K0,K0]);
+var xM=[],yM=[];
+for(i=0;i<6;i++)xM.push(eqN(sprX,i,3));
+for(i=0;i<3;i++)yM.push(eqN(sprY,i,2));
+var sprMatch=[],sprChar=[];
+for(i=0;i<DISPLAY_CELLS;i++){
+var ci=i%CHAR_COLS,ri=(i/CHAR_COLS)|0;
+var m0=AND(xM[ci],yM[ri]);
+var m1=ci>0?AND(xM[ci-1],yM[ri]):K0;
+var m2=ri>0?AND(xM[ci],yM[ri-1]):K0;
+var m3=(ci>0&&ri>0)?AND(xM[ci-1],yM[ri-1]):K0;
+sprMatch.push(OR(OR(m0,m1),OR(m2,m3)));
+var bits=[];
+for(b=0;b<8;b++){
+bits.push(OR(OR(AND(m0,sprBase[b]),AND(m1,base1[b])),OR(AND(m2,base2[b]),AND(m3,base3[b]))));
+}
+sprChar.push(bits);
+}
+core.sprMatch=sprMatch;core.sprChar=sprChar;
+});
+forceNewRow();
+
 var cCol=[],cRow=[];
 section("CURSOR · COL (3)",700,function(){for(i=0;i<3;i++)cCol.push(LAT(0));});
 section("CURSOR · ROW (2)",500,function(){for(i=0;i<2;i++)cRow.push(LAT(0));});
@@ -636,6 +658,7 @@ var nClr=NOT(core.clrEdge);
 var scrClrPulse=AND(runOk,opDec[OP_SCRCLR]);
 var scrollPulse=AND(runOk,opDec[OP_SCROLL]);
 var storerAct=AND(runOk,opDec[OP_STORER]);
+var spritePulse=AND(runOk,opDec[OP_SPRITE]);
 var noWrite=K0;
 noWrite=OR(noWrite,opDec[OP_NOP]);noWrite=OR(noWrite,opDec[OP_JMP]);
 noWrite=OR(noWrite,opDec[OP_JZ]);noWrite=OR(noWrite,opDec[OP_JNZ]);
@@ -651,6 +674,7 @@ noWrite=OR(noWrite,opDec[OP_SCLR]);noWrite=OR(noWrite,opDec[OP_FILL]);
 noWrite=OR(noWrite,opDec[OP_HALT]);noWrite=OR(noWrite,opDec[OP_FONT]);
 noWrite=OR(noWrite,opDec[OP_STOREW]);noWrite=OR(noWrite,opDec[OP_POKER]);
 noWrite=OR(noWrite,opDec[OP_SEED]);noWrite=OR(noWrite,opDec[OP_POS]);
+noWrite=OR(noWrite,opDec[OP_SPRITE]);
 var doWrite=NOT(noWrite);
 var pokeAct=AND(runOk,opDec[OP_POKE]);
 var SPACE=[K0,K0,K1,K0,K0,K0,K0,K0];
@@ -668,15 +692,19 @@ var storerEn=AND(storerAct,destDec[i]);
 var inDisp=(i<DISPLAY_CELLS)?K1:K0;
 var scrollEn=AND(scrollPulse,inDisp);
 var chrEn=K0,clrEn=K0,sclrEn=K0,fillEn=K0;
+var sprEn=K0,sprBits=[K0,K0,K0,K0,K0,K0,K0,K0];
 if(i<DISPLAY_CELLS){
 chrEn=AND(AND(core.effRunEdge,opDec[OP_CHR]),cellMatch[i]);
 clrEn=AND(AND(core.effRunEdge,opDec[OP_CLRLN]),rowMatchList[i]);
 sclrEn=AND(core.effRunEdge,opDec[OP_SCLR]);
-fillEn=AND(core.effRunEdge,opDec[OP_FILL]);}
+fillEn=AND(core.effRunEdge,opDec[OP_FILL]);
+sprEn=AND(spritePulse,core.sprMatch[i]);
+sprBits=core.sprChar[i];
+}
 if(i<DISPLAY_CELLS)wEn=OR(wEn,scrClrPulse);
 var textEn=OR(OR(chrEn,clrEn),OR(sclrEn,fillEn));
 var en=OR(OR(OR(wEn,core.clrEdge),scrollEn),pokeEn);
-en=OR(en,textEn);en=OR(en,storerEn);
+en=OR(en,textEn);en=OR(en,storerEn);en=OR(en,sprEn);
 for(b=0;b<8;b++){
 var norm=AND(finalR[b],nClr);
 var isLast=((i%CHAR_COLS)===CHAR_COLS-1)?K1:K0;
@@ -689,7 +717,8 @@ var sclrBit=(i<DISPLAY_CELLS-CHAR_COLS)?RAM[i+CHAR_COLS][b].o:core.finalData[b];
 var anyText=OR(OR(chrEn,clrEn),OR(sclrEn,fillEn));
 var textBit=OR(OR(AND(chrEn,chrBit),AND(clrEn,clrBit)),OR(AND(sclrEn,sclrBit),AND(fillEn,fillBit)));
 var withText=OR(AND(anyText,textBit),AND(NOT(anyText),dB));
-var withPoke=OR(AND(pokeEn,pokeBit),AND(NOT(pokeEn),withText));
+var withSprite=OR(AND(sprEn,sprBits[b]),AND(NOT(sprEn),withText));
+var withPoke=OR(AND(pokeEn,pokeBit),AND(NOT(pokeEn),withSprite));
 var storerBit=storRead[b];
 var withStorer=OR(AND(storerEn,storerBit),AND(NOT(storerEn),withPoke));
 setLat(RAM[i][b],withStorer,en);}
