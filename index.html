@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v5.7</title>
+<title>CPU 64 v5.8</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
@@ -24,20 +24,15 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 </style>
 </head>
 <body>
-<div id="title">CPU 64 v5.7<small id="gcount"></small></div>
+<div id="title">CPU 64 v5.8<small id="gcount"></small></div>
 <div id="stats">PC=<span id="statPC">0</span> CLK=<span id="statCLK">0</span> Cursor=<span id="statCUR">?</span></div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll=zoom · drag=pan · dblclick=LAYAR · ⟲=fit all · POS X% Y% · SAD FACES</div>
+<div id="help">scroll=zoom · drag=pan · dblclick=LAYAR · ⟲=fit all</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <script>
-// ============================================================
-// FONT 8x8 — termasuk 2 SAD FACE FRAMES
-//   Frame A (91): mata & mulut di posisi tinggi
-//   Frame B (92): mata & mulut turun 1 pixel → animasi "bernafas"
-// ============================================================
 window.FONT8 = {
 32:[0,0,0,0,0,0,0,0],33:[0x18,0x18,0x18,0x18,0x18,0,0x18,0],
 35:[0x24,0x24,0x7E,0x24,0x7E,0x24,0x24,0],37:[0x62,0x64,0x08,0x10,0x26,0x46,0,0],
@@ -68,61 +63,51 @@ window.FONT8 = {
 85:[0x66,0x66,0x66,0x66,0x66,0x66,0x3C,0],86:[0x66,0x66,0x66,0x66,0x66,0x3C,0x18,0],
 87:[0x63,0x63,0x63,0x6B,0x7F,0x77,0x63,0],88:[0x66,0x66,0x3C,0x18,0x3C,0x66,0x66,0],
 89:[0x66,0x66,0x66,0x3C,0x18,0x18,0x18,0],90:[0x7E,0x06,0x0C,0x18,0x30,0x60,0x7E,0],
-// Frame A (91): eyes + mouth tinggi
-//   ..####..    kepala atas
-//   .#....#.
-//   #.#..#.#    mata
-//   #......#
-//   #..##..#    mulut frown atas (∩)
-//   #.#..#.#    mulut frown sisi
-//   #......#
-//   ..####..
-91:[0x3C,0x42,0xA5,0x81,0x99,0xA5,0x81,0x3C],
-// Frame B (92): eyes + mouth turun 1 pixel
-//   ..####..
-//   .#....#.
-//   #......#
-//   #.#..#.#    mata (turun)
-//   #......#
-//   #..##..#    mulut frown atas (turun)
-//   #.#..#.#    mulut frown sisi (turun)
-//   ..####..
-92:[0x3C,0x42,0x81,0xA5,0x81,0x99,0xA5,0x3C]
+91:[0x0F,0x3F,0x7F,0xFF,0xE3,0xE3,0xFF,0xFF],
+92:[0xF0,0xFC,0xFE,0xFF,0xC7,0xC7,0xFF,0xFF],
+93:[0x7E,0x7C,0x78,0xFF,0xFF,0x7F,0x3F,0x0F],
+94:[0x7E,0x3E,0x1E,0xFF,0xFF,0xFE,0xFC,0xF0],
+95:[0x0F,0x3F,0x7F,0xFF,0xFF,0xE3,0xE3,0xFF],
+96:[0xF0,0xFC,0xFE,0xFF,0xFF,0xC7,0xC7,0xFF],
+97:[0xFF,0x7E,0x7C,0x78,0xFF,0x7F,0x3F,0x0F],
+98:[0xFF,0x7E,0x3E,0x1E,0xFF,0xFE,0xFC,0xF0]
 };
 var SUPPORTED=Object.keys(window.FONT8).map(Number);
 
 window.BUILTIN_PROJECTS = {
-version: 25,
+version: 26,
 projects: [
-{id:"sad-faces", name:"SAD FACES", description:"2-frame bernafas (POS+CHR)",
-program:[
-[0x13,0,0,0],           // 0: SCRCLR (sekali di awal, bukan loop!)
-[0x2A,0,0,0],           // 1: FONT normal
-[0x33,50,50,0],         // 2: POS 50% 50% (tengah)
-[0x21,91,0,0],          // 3: CHR 91 (frame A)
-[0x12,6,0,0],           // 4: DELAY 6 (~600ms)
-[0x33,50,50,0],         // 5: POS 50% 50%
-[0x21,92,0,0],          // 6: CHR 92 (frame B, overwrite)
-[0x12,6,0,0],           // 7: DELAY 6 (~600ms)
-[0x10,2,0,0],           // 8: JMP 2 (loop, tidak SCRCLR lagi)
-[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
-]},
-{id:"sad-cascade", name:"SAD CASCADE", description:"6 wajah di 6 posisi (POS chain)",
+{id:"sad-faces", name:"SAD FACES", description:"16x16 crying face 2 frame",
 program:[
 [0x13,0,0,0],[0x2A,0,0,0],
-[0x33,15,25,0],[0x21,91,0,0],
-[0x33,45,25,0],[0x21,92,0,0],
-[0x33,75,25,0],[0x21,91,0,0],
-[0x33,15,75,0],[0x21,92,0,0],
-[0x33,45,75,0],[0x21,91,0,0],
-[0x33,75,75,0],[0x21,92,0,0],
-[0x12,15,0,0],[0x10,2,0,0]
+[0x33,40,50,0],[0x21,91,0,0],
+[0x33,60,50,0],[0x21,92,0,0],
+[0x33,40,80,0],[0x21,93,0,0],
+[0x33,60,80,0],[0x21,94,0,0],
+[0x12,6,0,0],
+[0x33,40,50,0],[0x21,95,0,0],
+[0x33,60,50,0],[0x21,96,0,0],
+[0x33,40,80,0],[0x21,97,0,0],
+[0x33,60,80,0],[0x21,98,0,0],
+[0x12,6,0,0],
+[0x10,2,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0]
+]},
+{id:"sad-cascade", name:"SAD CASCADE", description:"3 wajah 16x16 di 3 posisi",
+program:[
+[0x13,0,0,0],[0x2A,0,0,0],
+[0x33,0,20,0],[0x21,91,0,0],[0x33,10,20,0],[0x21,92,0,0],
+[0x33,0,50,0],[0x21,93,0,0],[0x33,10,50,0],[0x21,94,0,0],
+[0x33,40,20,0],[0x21,95,0,0],[0x33,50,20,0],[0x21,96,0,0],
+[0x33,40,50,0],[0x21,97,0,0],[0x33,50,50,0],[0x21,98,0,0],
+[0x12,20,0,0],[0x10,2,0,0],
+[0,0,0,0],[0,0,0,0],[0,0,0,0]
 ]},
 {id:"danis", name:"DANIS", description:"DANIS walk",
 program:[[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],[0x1E,68,0,0],[0x12,3,0,0],[0x1E,65,0,0],[0x12,3,0,0],[0x1E,78,0,0],[0x12,3,0,0],[0x1E,73,0,0],[0x12,3,0,0],[0x1E,83,0,0],[0x12,3,0,0],[0x1E,32,0,0],[0x12,3,0,0],[0x10,3,0,0]]},
 {id:"hello", name:"HELLO", description:"HELLO marquee",
 program:[[0x13,0,0,0],[0x2A,0,0,0],[0x20,0,0,0],[0x1E,72,0,0],[0x12,2,0,0],[0x1E,69,0,0],[0x12,2,0,0],[0x1E,76,0,0],[0x12,2,0,0],[0x1E,76,0,0],[0x12,2,0,0],[0x1E,79,0,0],[0x12,2,0,0],[0x1E,32,0,0],[0x12,2,0,0],[0x10,3,0,0]]},
-{id:"blink", name:"BLINK", description:"Flash fill (program, bukan JS)",
+{id:"blink", name:"BLINK", description:"Fill flash",
 program:[[0x13,0,0,0],[0x2A,0,0,0],[0x25,35,0,0],[0x12,6,0,0],[0x13,0,0,0],[0x12,6,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
 {id:"starfield", name:"STARFIELD", description:"Random dots",
 program:[[0x01,1,0,60],[0x01,31,0,63],[0x32,1,0,0],[0x31,0,0,62],[0x08,63,62,62],[0x01,46,0,61],[0x29,46,62,0],[0x12,1,0,0],[0x10,2,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]},
@@ -156,8 +141,8 @@ var CHAR_PX=8;
 var CHAR_COLS=SCR_W/CHAR_PX, CHAR_ROWS=SCR_H/CHAR_PX;
 var DISPLAY_CELLS=CHAR_COLS*CHAR_ROWS;
 var RAM_SIZE=128, STORE_SIZE=256;
-var QUEUE_START=64, QUEUE_SLOTS=16;
-var ADDR_BITS=7, PTR_BITS=4;
+var QUEUE_START=20, QUEUE_SLOTS=24;
+var ADDR_BITS=7, PTR_BITS=5;
 var MAP_RATIO=5/4;
 
 var OP_NOP=0x00,OP_SET=0x01,OP_MOV=0x02,OP_ADD=0x04,OP_SUB=0x05,OP_MUL=0x06,OP_DIV=0x07,
@@ -297,7 +282,6 @@ if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT"||
 }
 lU.appendChild(grp);
 }
-// === renderLed: NO INVERT. LED on = hitam, LED off = putih. Statis.
 function renderLed(l){
 var sz=l.sz||SIZE_LED,r=sz*0.5;var on=l.i.v;
 var grp=E("g",{transform:"translate("+l.px+","+l.py+")"});
@@ -424,20 +408,21 @@ core.clrqPrev=LAT(0);setLat(core.clrqPrev,core.CLRQo,core.QCLKo);
 core.queueEdge=AND(core.QUEUEo,NOT(core.queuePrev.o));
 core.clrqEdge=AND(core.CLRQo,NOT(core.clrqPrev.o));});
 forceNewRow();
-section("QUEUE · STORAGE",900,function(){for(s=0;s<QUEUE_SLOTS;s++){beginGroup(90);var sl={addr:[],valid:null};for(b=0;b<ADDR_BITS;b++)sl.addr.push(LAT(0));sl.valid=LAT(0);slots.push(sl);endGroup();}});
-section("QUEUE · PUSH",1600,function(){var cum=K1;
+section("QUEUE · STORAGE",1200,function(){for(s=0;s<QUEUE_SLOTS;s++){beginGroup(90);var sl={addr:[],valid:null};for(b=0;b<ADDR_BITS;b++)sl.addr.push(LAT(0));sl.valid=LAT(0);slots.push(sl);endGroup();}});
+section("QUEUE · PUSH",2000,function(){var cum=K1;
 for(s=0;s<QUEUE_SLOTS;s++){beginGroup(130);
 var v=slots[s].valid.o;var nv=NOT(v);var push=AND(AND(core.queueEdge,cum),nv);var en=OR(push,core.clrqEdge);
 setLat(slots[s].valid,AND(push,K1),en);
 for(b=0;b<ADDR_BITS;b++)setLat(slots[s].addr[b],QADDR[b].o,push);
 cum=AND(cum,v);endGroup();}});
 forceNewRow();
-section("QUEUE · POINTER",500,function(){for(i=0;i<PTR_BITS;i++)ptr[i]=LAT(0);core.ptr=ptr;});
-section("QUEUE · PT DEC",500,function(){
+section("QUEUE · POINTER",700,function(){for(i=0;i<PTR_BITS;i++)ptr[i]=LAT(0);core.ptr=ptr;});
+section("QUEUE · PT DEC",1000,function(){
 var np=[];for(i=0;i<PTR_BITS;i++)np.push(NOT(ptr[i].o));
-for(s=0;s<QUEUE_SLOTS;s++){beginGroup(100);var acc=K1;for(i=0;i<PTR_BITS;i++){var bv=(s>>i)&1?ptr[i].o:np[i];acc=AND(acc,bv);}ptrSel.push(acc);endGroup();}});
+var qSlotsDec=1<<PTR_BITS;
+for(s=0;s<qSlotsDec;s++){beginGroup(100);var acc=K1;for(i=0;i<PTR_BITS;i++){var bv=(s>>i)&1?ptr[i].o:np[i];acc=AND(acc,bv);}ptrSel.push(acc);endGroup();}});
 forceNewRow();
-section("QUEUE · ADDR MUX",700,function(){for(b=0;b<ADDR_BITS;b++){beginGroup(150);var acc=null;for(s=0;s<QUEUE_SLOTS;s++){var t=AND(ptrSel[s],slots[s].addr[b].o);acc=(acc===null)?t:OR(acc,t);}qAddr.push(acc);endGroup();}});
+section("QUEUE · ADDR MUX",1400,function(){for(b=0;b<ADDR_BITS;b++){beginGroup(150);var acc=null;for(s=0;s<QUEUE_SLOTS;s++){var t=AND(ptrSel[s],slots[s].addr[b].o);acc=(acc===null)?t:OR(acc,t);}qAddr.push(acc);endGroup();}});
 core.qAddr=qAddr;core.slots=slots;
 forceNewRow();
 }
@@ -482,7 +467,6 @@ forceNewRow();
 section("CTRL · TAG DEC",1200,function(){tagDec=makeDecoder(core.finalTag.slice(0,ADDR_BITS));});
 section("CTRL · DATA DEC",1200,function(){dataDec=makeDecoder(core.finalData.slice(0,ADDR_BITS));});
 
-// POS decoder
 var posColBits=[],posRowBits=[];
 section("POS · DECODE",6000,function(){
 var colT0=[],colT1=[],colT2=[],rowT0=[],rowT1=[];
@@ -504,6 +488,18 @@ var cCol=[],cRow=[];
 section("CURSOR · COL (3)",700,function(){for(i=0;i<3;i++)cCol.push(LAT(0));});
 section("CURSOR · ROW (2)",500,function(){for(i=0;i<2;i++)cRow.push(LAT(0));});
 core.cCol=cCol;core.cRow=cRow;
+
+var cellMatch=[];
+section("CURSOR · CELL MATCH",2400,function(){
+var colDec=makeDecoder([cCol[0].o,cCol[1].o,cCol[2].o]);
+var rowDec=makeDecoder([cRow[0].o,cRow[1].o]);
+for(i=0;i<DISPLAY_CELLS;i++){
+var ci=i%CHAR_COLS,ri=(i/CHAR_COLS)|0;
+var match=AND(colDec[ci],rowDec[ri]);
+cellMatch.push(match);
+}});
+core.cellMatch=cellMatch;
+forceNewRow();
 
 var fontMode=[LAT(0),LAT(0)];core.fontMode=fontMode;
 section("FONT · MODE",600,function(){var fontA=AND(core.effRunEdge,opDec[OP_FONT]);
@@ -633,7 +629,7 @@ var v2=OR(OR(r0,rp),r1);v2=OR(v2,AND(nlN,rowInc[i]));v2=OR(v2,AND(chN,rowInc[i])
 v2=OR(v2,AND(OR(nlW,chW),zero));v2=OR(v2,AND(NOT(anyOp),cRow[i].o));
 setLat(cRow[i],v2,anyOp);}});
 
-section("OUTPUT · WRITE EN",20000,function(){
+section("OUTPUT · WRITE EN",24000,function(){
 var runOk=AND(core.effRunEdge,core.nDelay);
 var wrEnable=OR(core.WRo,core.RUNQo);var wrPulse=AND(runOk,wrEnable);
 var nClr=NOT(core.clrEdge);
@@ -656,11 +652,6 @@ noWrite=OR(noWrite,opDec[OP_HALT]);noWrite=OR(noWrite,opDec[OP_FONT]);
 noWrite=OR(noWrite,opDec[OP_STOREW]);noWrite=OR(noWrite,opDec[OP_POKER]);
 noWrite=OR(noWrite,opDec[OP_SEED]);noWrite=OR(noWrite,opDec[OP_POS]);
 var doWrite=NOT(noWrite);
-var cellBit0=cCol[0].o,cellBit1=cCol[1].o;
-var cellBit2=OR(AND(nbig,cCol[2].o),AND(big,cRow[0].o));
-var cellBit3=OR(AND(nbig,cRow[0].o),AND(big,K0));
-var cellBit4=OR(AND(nbig,cRow[1].o),AND(big,K0));
-var cellBits=[cellBit0,cellBit1,cellBit2,cellBit3,cellBit4];
 var pokeAct=AND(runOk,opDec[OP_POKE]);
 var SPACE=[K0,K0,K1,K0,K0,K0,K0,K0];
 var rowMatchList=[];
@@ -678,8 +669,7 @@ var inDisp=(i<DISPLAY_CELLS)?K1:K0;
 var scrollEn=AND(scrollPulse,inDisp);
 var chrEn=K0,clrEn=K0,sclrEn=K0,fillEn=K0;
 if(i<DISPLAY_CELLS){
-var chrHit=eqN(cellBits,i,5);
-chrEn=AND(AND(core.effRunEdge,opDec[OP_CHR]),chrHit);
+chrEn=AND(AND(core.effRunEdge,opDec[OP_CHR]),cellMatch[i]);
 clrEn=AND(AND(core.effRunEdge,opDec[OP_CLRLN]),rowMatchList[i]);
 sclrEn=AND(core.effRunEdge,opDec[OP_SCLR]);
 fillEn=AND(core.effRunEdge,opDec[OP_FILL]);}
@@ -952,11 +942,10 @@ document.getElementById("zoomReset").addEventListener("click",function(){fitView
 
 var statPC=document.getElementById("statPC"),statCLK=document.getElementById("statCLK"),statCUR=document.getElementById("statCUR");
 loadProject();
-// === INVERT TIMER SUDAH DIHAPUS — tidak ada flash ===
 setInterval(function(){
   try{
     tickOsc();simulate();gCLKCount++;
-    statPC.textContent = core.ptr ? (core.ptr[0].o.v + core.ptr[1].o.v*2 + core.ptr[2].o.v*4 + core.ptr[3].o.v*8) : 0;
+    statPC.textContent = core.ptr ? (core.ptr[0].o.v + core.ptr[1].o.v*2 + core.ptr[2].o.v*4 + core.ptr[3].o.v*8 + core.ptr[4].o.v*16) : 0;
     statCLK.textContent = gCLKCount;
     if(core.cCol && core.cRow){
       var cc = core.cCol[0].o.v + core.cCol[1].o.v*2 + core.cCol[2].o.v*4;
