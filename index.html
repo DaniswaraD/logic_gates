@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>CPU 64 v6.0</title>
+<title>CPU 64 v6.1</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#fff;overflow:hidden;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;-webkit-user-select:none;user-select:none}
@@ -24,12 +24,12 @@ text{font-family:inherit;user-select:none;pointer-events:none}
 </style>
 </head>
 <body>
-<div id="title">CPU 64 v6.0<small id="gcount"></small></div>
+<div id="title">CPU 64 v6.1<small id="gcount"></small></div>
 <div id="stats">PC=<span id="statPC">0</span> OP=<span id="statOP">----</span> CLK=<span id="statCLK">0</span> CUR=<span id="statCUR">?</span></div>
 <div id="err"></div>
 <div id="projSel"><label>PROJECT:</label><select id="projDropdown"></select></div>
 <div id="zoomCtrl"><button id="zoomIn">+</button><button id="zoomOut">−</button><button id="zoomReset">⟲</button></div>
-<div id="help">scroll=zoom · drag=pan · dblclick=LAYAR · ⟲=fit all · 2B opcode · 3B data · 1B tag</div>
+<div id="help">scroll=zoom · drag=pan · dblclick=LAYAR · ⟲=fit all</div>
 <svg id="s" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <script>
@@ -62,19 +62,15 @@ window.FONT8 = {
 85:[0x66,0x66,0x66,0x66,0x66,0x66,0x3C,0],86:[0x66,0x66,0x66,0x66,0x66,0x3C,0x18,0],
 87:[0x63,0x63,0x63,0x6B,0x7F,0x77,0x63,0],88:[0x66,0x66,0x3C,0x18,0x3C,0x66,0x66,0],
 89:[0x66,0x66,0x66,0x3C,0x18,0x18,0x18,0],90:[0x7E,0x06,0x0C,0x18,0x30,0x60,0x7E,0],
-91:[0x00,0x07,0x18,0x20,0x40,0x40,0x86,0x86],
-92:[0x00,0xE0,0x18,0x04,0x02,0x02,0x61,0x61],
-93:[0x80,0x87,0x8C,0x98,0x40,0x20,0x18,0x07],
-94:[0x01,0xE1,0x31,0x19,0x02,0x04,0x30,0xE0],
-95:[0x00,0x07,0x18,0x20,0x40,0x40,0x00,0x86],
-96:[0x00,0xE0,0x18,0x04,0x02,0x02,0x00,0x61],
-97:[0x80,0x87,0x8C,0x98,0x40,0x20,0x18,0x07],
-98:[0x01,0xE1,0x31,0x19,0x02,0x04,0x30,0xE0]
+91:[0x00,0x07,0x18,0x20,0x40,0x40,0x86,0x86],92:[0x00,0xE0,0x18,0x04,0x02,0x02,0x61,0x61],
+93:[0x80,0x87,0x8C,0x98,0x40,0x20,0x18,0x07],94:[0x01,0xE1,0x31,0x19,0x02,0x04,0x30,0xE0],
+95:[0x00,0x07,0x18,0x20,0x40,0x40,0x00,0x86],96:[0x00,0xE0,0x18,0x04,0x02,0x02,0x00,0x61],
+97:[0x80,0x87,0x8C,0x98,0x40,0x20,0x18,0x07],98:[0x01,0xE1,0x31,0x19,0x02,0x04,0x30,0xE0]
 };
 var SUPPORTED=Object.keys(window.FONT8).map(Number);
 
 window.BUILTIN_PROJECTS = {
-version: 30,
+version: 31,
 projects: [
 {id:"sad-faces", name:"SAD FACES", description:"16x16 blink di tengah",
 program:[
@@ -83,7 +79,7 @@ program:[
 [0x00,0x13,0,8,0,0],
 [0x05,0x09,95,2,1,0],
 [0x00,0x13,0,8,0,0],
-[0x00,0x10,0,1,0,0],
+[0x00,0x10,0,2,0,0],
 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
 [0,0,0,0,0,0],[0,0,0,0,0,0]
@@ -91,50 +87,29 @@ program:[
 {id:"two-faces", name:"TWO FACES", description:"Dua wajah blink",
 program:[
 [0x00,0x05,0,0,0,0],
-[0x05,0x09,91,0,1,0],
-[0x05,0x09,91,4,1,0],
+[0x05,0x09,91,0,1,0],[0x05,0x09,91,4,1,0],
 [0x00,0x13,0,8,0,0],
-[0x05,0x09,95,0,1,0],
-[0x05,0x09,95,4,1,0],
+[0x05,0x09,95,0,1,0],[0x05,0x09,95,4,1,0],
 [0x00,0x13,0,8,0,0],
-[0x00,0x10,0,1,0,0],
-[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]
-]},
-{id:"counter", name:"COUNTER", description:"Counter demo ADD_I",
-program:[
-[0x00,0x05,0,0,0,0],
-[0x01,0x00,0,0,0,0],
-[0x00,0x13,0,6,0,0],
-[0x01,0x05,0,1,0,0],
-[0x05,0x01,50,50,0,0],
-[0x05,0x00,0,0,0,0],
-[0x00,0x10,0,3,0,0],
-[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]
-]},
-{id:"scroll-danis", name:"DANIS WALK", description:"DANIS marquee",
-program:[
-[0x00,0x05,0,0,0,0],
-[0x05,0x02,0,0,0,0],
-[0x05,0x08,68,0,0,0],
-[0x00,0x13,0,3,0,0],
-[0x05,0x08,65,0,0,0],
-[0x00,0x13,0,3,0,0],
-[0x05,0x08,78,0,0,0],
-[0x00,0x13,0,3,0,0],
-[0x05,0x08,73,0,0,0],
-[0x00,0x13,0,3,0,0],
-[0x05,0x08,83,0,0,0],
-[0x00,0x13,0,3,0,0],
-[0x05,0x08,32,0,0,0],
-[0x00,0x13,0,3,0,0],
 [0x00,0x10,0,2,0,0],
-[0,0,0,0,0,0]
+[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]
+]},
+{id:"hello", name:"HELLO", description:"HELLO marquee",
+program:[
+[0x00,0x05,0,0,0,0],
+[0x05,0x03,0,0,0,0],
+[0x05,0x08,72,0,0,0],[0x00,0x13,0,3,0,0],
+[0x05,0x08,69,0,0,0],[0x00,0x13,0,3,0,0],
+[0x05,0x08,76,0,0,0],[0x00,0x13,0,3,0,0],
+[0x05,0x08,76,0,0,0],[0x00,0x13,0,3,0,0],
+[0x05,0x08,79,0,0,0],[0x00,0x13,0,3,0,0],
+[0x05,0x08,32,0,0,0],[0x00,0x13,0,3,0,0],
+[0x00,0x10,0,2,0,0]
 ]},
 {id:"noop", name:"IDLE", description:"NOP loop",
 program:[[0x00,0x10,0,0,0,0]]
-}
+]}
 ]};
 </script>
 
@@ -157,36 +132,31 @@ var QUEUE_START=32, QUEUE_SLOTS=16, INST_BYTES=6;
 var ADDR_BITS=7, PTR_BITS=4;
 var MAP_RATIO=5/4;
 
-var OP_NOP=0x0000,OP_HALT=0x0001,OP_JMP=0x0010,OP_JZ=0x0011,OP_JNZ=0x0012,OP_DELAY_I=0x0013,OP_DELAY_R=0x0014;
-var OP_SET=0x0100,OP_MOV=0x0101,OP_CLR=0x0102,OP_INC=0x0103,OP_DEC=0x0104,OP_INC_I=0x0105,OP_DEC_I=0x0106,OP_SWAP=0x0107;
-var OP_ADD=0x0200,OP_ADD_I=0x0201,OP_SUB=0x0202,OP_SUB_I=0x0203,OP_MUL=0x0204,OP_MUL_I=0x0205,OP_DIV=0x0206,OP_MOD=0x0207;
+var OP_NOP=0x0000,OP_HALT=0x0001,OP_JMP=0x0010,OP_JZ=0x0011,OP_JNZ=0x0012,OP_DELAY_I=0x0013;
+var OP_SET=0x0100,OP_MOV=0x0101,OP_CLR=0x0102,OP_INC=0x0103,OP_DEC=0x0104,OP_INC_I=0x0105,OP_DEC_I=0x0106;
+var OP_ADD=0x0200,OP_ADD_I=0x0201,OP_SUB=0x0202,OP_SUB_I=0x0203,OP_MUL=0x0204;
 var OP_AND=0x0300,OP_OR=0x0301,OP_XOR=0x0302,OP_NOT=0x0303,OP_SHL=0x0304,OP_SHR=0x0305;
-var OP_CMP=0x0400,OP_CMP_I=0x0401;
-var OP_CHR=0x0500,OP_POS=0x0501,OP_CUR=0x0502,OP_HOME=0x0503,OP_NL=0x0504,OP_SCRCLR=0x0505,OP_FILL=0x0506,OP_CLRLN=0x0507,OP_SCROLL=0x0508,OP_SPRITE=0x0509,OP_SPRITE_C=0x050A,OP_FONT=0x050B;
-var OP_POKE=0x0600,OP_POKE_R=0x0601,OP_PEEK=0x0602,OP_STOREW=0x0603,OP_STORER=0x0604;
-var OP_RND=0x0700,OP_RND_R=0x0701,OP_SEED=0x0702;
+var OP_CHR=0x0500,OP_POS=0x0501,OP_CUR=0x0502,OP_HOME=0x0503,OP_NL=0x0504,OP_SCRCLR=0x0505,OP_FILL=0x0506,OP_CLRLN=0x0507,OP_SCROLL=0x0508,OP_SPRITE=0x0509,OP_FONT=0x050B;
+var OP_POKE=0x0600,OP_POKE_R=0x0601,OP_STOREW=0x0603,OP_STORER=0x0604;
+var OP_RND=0x0700,OP_SEED=0x0702;
 var OP_TIME=0x0800,OP_JOY=0x0900;
-var ALL_OPS=[OP_NOP,OP_HALT,OP_JMP,OP_JZ,OP_JNZ,OP_DELAY_I,OP_DELAY_R,
-OP_SET,OP_MOV,OP_CLR,OP_INC,OP_DEC,OP_INC_I,OP_DEC_I,OP_SWAP,
-OP_ADD,OP_ADD_I,OP_SUB,OP_SUB_I,OP_MUL,OP_MUL_I,OP_DIV,OP_MOD,
+
+var ALL_OPS=[OP_NOP,OP_HALT,OP_JMP,OP_JZ,OP_JNZ,OP_DELAY_I,
+OP_SET,OP_MOV,OP_CLR,OP_INC,OP_DEC,OP_INC_I,OP_DEC_I,
+OP_ADD,OP_ADD_I,OP_SUB,OP_SUB_I,OP_MUL,
 OP_AND,OP_OR,OP_XOR,OP_NOT,OP_SHL,OP_SHR,
-OP_CMP,OP_CMP_I,
-OP_CHR,OP_POS,OP_CUR,OP_HOME,OP_NL,OP_SCRCLR,OP_FILL,OP_CLRLN,OP_SCROLL,OP_SPRITE,OP_SPRITE_C,OP_FONT,
-OP_POKE,OP_POKE_R,OP_PEEK,OP_STOREW,OP_STORER,
-OP_RND,OP_RND_R,OP_SEED,OP_TIME,OP_JOY];
+OP_CHR,OP_POS,OP_CUR,OP_HOME,OP_NL,OP_SCRCLR,OP_FILL,OP_CLRLN,OP_SCROLL,OP_SPRITE,OP_FONT,
+OP_POKE,OP_POKE_R,OP_STOREW,OP_STORER,
+OP_RND,OP_SEED,OP_TIME,OP_JOY];
 var MNEM={};MNEM[OP_NOP]="NOP";MNEM[OP_HALT]="HALT";MNEM[OP_JMP]="JMP";MNEM[OP_JZ]="JZ";MNEM[OP_JNZ]="JNZ";
-MNEM[OP_DELAY_I]="DELAY_I";MNEM[OP_DELAY_R]="DELAY_R";
-MNEM[OP_SET]="SET";MNEM[OP_MOV]="MOV";MNEM[OP_CLR]="CLR";MNEM[OP_INC]="INC";MNEM[OP_DEC]="DEC";
-MNEM[OP_INC_I]="INC_I";MNEM[OP_DEC_I]="DEC_I";MNEM[OP_SWAP]="SWAP";
-MNEM[OP_ADD]="ADD";MNEM[OP_ADD_I]="ADD_I";MNEM[OP_SUB]="SUB";MNEM[OP_SUB_I]="SUB_I";
-MNEM[OP_MUL]="MUL";MNEM[OP_MUL_I]="MUL_I";MNEM[OP_DIV]="DIV";MNEM[OP_MOD]="MOD";
-MNEM[OP_AND]="AND";MNEM[OP_OR]="OR";MNEM[OP_XOR]="XOR";MNEM[OP_NOT]="NOT";MNEM[OP_SHL]="SHL";MNEM[OP_SHR]="SHR";
-MNEM[OP_CMP]="CMP";MNEM[OP_CMP_I]="CMP_I";
+MNEM[OP_DELAY_I]="DELAY_I";MNEM[OP_SET]="SET";MNEM[OP_MOV]="MOV";MNEM[OP_CLR]="CLR";MNEM[OP_INC]="INC";MNEM[OP_DEC]="DEC";
+MNEM[OP_INC_I]="INC_I";MNEM[OP_DEC_I]="DEC_I";MNEM[OP_ADD]="ADD";MNEM[OP_ADD_I]="ADD_I";MNEM[OP_SUB]="SUB";MNEM[OP_SUB_I]="SUB_I";
+MNEM[OP_MUL]="MUL";MNEM[OP_AND]="AND";MNEM[OP_OR]="OR";MNEM[OP_XOR]="XOR";MNEM[OP_NOT]="NOT";MNEM[OP_SHL]="SHL";MNEM[OP_SHR]="SHR";
 MNEM[OP_CHR]="CHR";MNEM[OP_POS]="POS";MNEM[OP_CUR]="CUR";MNEM[OP_HOME]="HOME";MNEM[OP_NL]="NL";
 MNEM[OP_SCRCLR]="SCRCLR";MNEM[OP_FILL]="FILL";MNEM[OP_CLRLN]="CLRLN";MNEM[OP_SCROLL]="SCROLL";
-MNEM[OP_SPRITE]="SPRITE";MNEM[OP_SPRITE_C]="SPRITE_C";MNEM[OP_FONT]="FONT";
-MNEM[OP_POKE]="POKE";MNEM[OP_POKE_R]="POKE_R";MNEM[OP_PEEK]="PEEK";MNEM[OP_STOREW]="STOREW";MNEM[OP_STORER]="STORER";
-MNEM[OP_RND]="RND";MNEM[OP_RND_R]="RND_R";MNEM[OP_SEED]="SEED";MNEM[OP_TIME]="TIME";MNEM[OP_JOY]="JOY";
+MNEM[OP_SPRITE]="SPRITE";MNEM[OP_FONT]="FONT";
+MNEM[OP_POKE]="POKE";MNEM[OP_POKE_R]="POKE_R";MNEM[OP_STOREW]="STOREW";MNEM[OP_STORER]="STORER";
+MNEM[OP_RND]="RND";MNEM[OP_SEED]="SEED";MNEM[OP_TIME]="TIME";MNEM[OP_JOY]="JOY";
 
 var gates=[],sws=[],leds=[],latches=[],wires=[],sectionsData=[],frame43=null;
 var vp,lW_on,lW_off,lG,lL,lU,lS;
@@ -307,7 +277,6 @@ var hit=E("rect",{x:0,y:0,width:w,height:h,fill:"transparent",cursor:"pointer",c
 grp.appendChild(hit);
 hit.addEventListener("pointerdown",function(ev){
 ev.stopPropagation();ev.preventDefault();s.v=s.v?0:1;
-if(s.label==="DESTRUCT"&&s.v){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);setTimeout(function(){s.v=0;},200);}
 if(s.v&&(s.label==="UP"||s.label==="DOWN"||s.label==="LEFT"||s.label==="RIGHT"||s.label==="POINT")){setTimeout(function(){s.v=0;},100);}
 });
 }
@@ -391,13 +360,13 @@ var s0=[pp[0][0],pp[0][1],pp[0][2],pp[0][3],K0,K0,K0,K0];
 var s1=add8(s0,[K0,pp[1][0],pp[1][1],pp[1][2],pp[1][3],K0,K0,K0]);
 var s2=add8(s1,[K0,K0,pp[2][0],pp[2][1],pp[2][2],pp[2][3],K0,K0]);
 return add8(s2,[K0,K0,K0,pp[3][0],pp[3][1],pp[3][2],pp[3][3],K0]);}
-function eqN(bits,val,n){var acc=null;for(var i=0;i<n;i++){var b=(val>>i)&1;var s=b?bits[i]:NOT(bits[i]);acc=(acc===null)?s:AND(acc,s);}return acc;}
-function makeDecoder(bits){var n=bits.length;if(n===0)return[K1];if(n===1)return[NOT(bits[0]),bits[0]];var half=n>>1;var low=makeDecoder(bits.slice(0,half));var high=makeDecoder(bits.slice(half));var out=[];var lm=(1<<half)-1;for(var i=0;i<(1<<n);i++)out.push(AND(high[i>>half],low[i&lm]));return out;}
+function eqN(bits,val,n){if(!bits||!bits.length)return K0;if(n>bits.length)n=bits.length;var acc=null;for(var i=0;i<n;i++){var b=(val>>i)&1;var s=b?bits[i]:NOT(bits[i]);acc=(acc===null)?s:AND(acc,s);}return acc===null?K0:acc;}
+function makeDecoder(bits){if(!bits||!bits.length)return[K1];var n=bits.length;if(n===0)return[K1];if(n===1)return[NOT(bits[0]),bits[0]];var half=n>>1;var low=makeDecoder(bits.slice(0,half));var high=makeDecoder(bits.slice(half));var out=[];var lm=(1<<half)-1;for(var i=0;i<(1<<n);i++)out.push(AND(high[i>>half],low[i&lm]));return out;}
 
 function buildFrontend(){
 var i;
 section("INPUT · CLK",240,function(){core.CLKo=osc(1,"CLK").o;});
-section("INPUT · ACTION",900,function(){core.RUNo=sw("RUN").o;core.CLRo=sw("CLR").o;});
+section("INPUT · ACTION",400,function(){core.RUNo=sw("RUN").o;core.CLRo=sw("CLR").o;});
 forceNewRow();
 core.RAM=[];
 section("STORAGE · RAM 128×8",20000,function(){for(i=0;i<RAM_SIZE;i++){beginGroup(140);core.RAM.push([]);for(var b=0;b<8;b++){beginGroup(18);core.RAM[i].push(LAT(0));endGroup();}endGroup();}});
@@ -420,35 +389,38 @@ forceNewRow();
 
 function buildQueue(){
 var i,b,s;
-section("QUEUE · STORAGE",1200,function(){core.slots=[];
+core.slots=[];
+section("QUEUE · STORAGE",1200,function(){
 for(s=0;s<QUEUE_SLOTS;s++){beginGroup(90);var sl={bytes:[]};
 for(var k=0;k<INST_BYTES;k++){beginGroup(18);var bb=[];for(b=0;b<8;b++)bb.push(LAT(0));sl.bytes.push(bb);endGroup();}
 core.slots.push(sl);endGroup();}});
 forceNewRow();
-section("QUEUE · PC",700,function(){core.ptr=[];for(i=0;i<PTR_BITS;i++)core.ptr.push(LAT(0));});
+core.ptr=[];
+section("QUEUE · PC",400,function(){for(i=0;i<PTR_BITS;i++)core.ptr.push(LAT(0));});
 forceNewRow();
 }
 
 function buildExecutor(){
 var i,b;
-var RAM=core.RAM, slots=core.slots;
-// read 6 bytes from selected queue slot
+var slots=core.slots;
 var qBytes=[];
 for(var k=0;k<INST_BYTES;k++){
-section("FETCH · BYTE"+k,1200,function(){
+(function(kk){
+section("FETCH · BYTE"+kk,1200,function(){
 var bits=[];
 for(b=0;b<8;b++){
 var acc=null;
 for(var s=0;s<QUEUE_SLOTS;s++){
 var sel=eqN(core.ptr.map(function(l){return l.o;}),s,PTR_BITS);
-var t=AND(sel,slots[s].bytes[k][b].o);
+var t=AND(sel,slots[s].bytes[kk][b].o);
 acc=acc===null?t:OR(acc,t);
 }
 bits.push(acc);
 }
-qBytes.push(bits);
+qBytes[kk]=bits;
 });
 forceNewRow();
+})(k);
 }
 core.qOpHi=qBytes[0];core.qOpLo=qBytes[1];
 core.qD0=qBytes[2];core.qD1=qBytes[3];core.qD2=qBytes[4];core.qTAG=qBytes[5];
@@ -456,36 +428,43 @@ core.qD0=qBytes[2];core.qD1=qBytes[3];core.qD2=qBytes[4];core.qTAG=qBytes[5];
 
 function buildBackend(){
 var i,b;
-var opDec, d0Dec, d1Dec, d2Dec, tagDec;
+var opDec={}, d0Dec, d1Dec, d2Dec, tagDec;
 var RAM=core.RAM;
 var screenLeds=[],ramViewRows=[],storeViewRows=[];
-section("CTRL · EDGE",900,function(){
+
+// --- EDGE detection ---
+section("CTRL · EDGE",400,function(){
 core.runPrev=LAT(0);setLat(core.runPrev,core.RUNo,core.CLKo);
 core.clrPrev=LAT(0);setLat(core.clrPrev,core.CLRo,core.CLKo);
 core.runEdge=AND(core.RUNo,NOT(core.runPrev.o));
 core.clrEdge=AND(core.CLRo,NOT(core.clrPrev.o));
-core.effRunEdge=core.runEdge;});
+core.effRunEdge=core.runEdge;
+});
 
-// 2-byte opcode decoder
+// --- 2-byte opcode decoder ---
 section("CTRL · OP DEC",30000,function(){
-var hiDec=makeDecoder(core.qOpHi);   // 256 outputs
-var loDec=makeDecoder(core.qOpLo);   // 256 outputs
-opDec={};
-for(i=0;i<ALL_OPS.length;i++){
-var op=ALL_OPS[i];
-opDec[op]=AND(hiDec[(op>>8)&0xFF], loDec[op&0xFF]);
+var hiDec=makeDecoder(core.qOpHi);
+var loDec=makeDecoder(core.qOpLo);
+for(var k=0;k<ALL_OPS.length;k++){
+var op=ALL_OPS[k];
+var hiIdx=(op>>8)&0xFF, loIdx=op&0xFF;
+if(hiIdx<hiDec.length && loIdx<loDec.length){
+opDec[op]=AND(hiDec[hiIdx],loDec[loIdx]);
+} else {
+opDec[op]=K0;
+}
 }
 });
 core.opDec=opDec;
-forceNewRow();
+
+// --- Data decoders ---
 section("CTRL · D0 DEC",1200,function(){d0Dec=makeDecoder(core.qD0);});
 section("CTRL · D1 DEC",1200,function(){d1Dec=makeDecoder(core.qD1);});
 section("CTRL · D2 DEC",1200,function(){d2Dec=makeDecoder(core.qD2);});
 section("CTRL · TAG DEC",1200,function(){tagDec=makeDecoder(core.qTAG);});
 forceNewRow();
-core.d0Dec=d0Dec;core.d1Dec=d1Dec;core.d2Dec=d2Dec;core.tagDec=tagDec;
 
-// RAM read MUXes: given an address decoder, get 8-bit byte
+// --- RAM read MUXes ---
 function buildRamRead(dec,name){
 var bits=[];
 section(name,12000,function(){
@@ -493,9 +472,11 @@ for(b=0;b<8;b++){
 beginGroup(1000);
 var acc=null;
 for(i=0;i<RAM_SIZE;i++){
+if(!dec||i>=dec.length)continue;
 var t=AND(dec[i],RAM[i][b].o);
 acc=acc===null?t:OR(acc,t);
 }
+if(acc===null)acc=K0;
 bits.push(acc);
 endGroup();
 }
@@ -507,122 +488,81 @@ var readD1=buildRamRead(d1Dec,"MUX · RAM[D1]");
 var readD2=buildRamRead(d2Dec,"MUX · RAM[D2]");
 var readTAG=buildRamRead(tagDec,"MUX · RAM[TAG]");
 forceNewRow();
-core.readD0=readD0;core.readD1=readD1;core.readD2=readD2;core.readTAG=readTAG;
 
-// immediate versions
-function immByte(bits){return bits;}
 var immD0=core.qD0, immD1=core.qD1, immD2=core.qD2;
 
-// Cursor
+// --- Cursor ---
 var cCol=[],cRow=[];
-section("CURSOR · COL",700,function(){for(i=0;i<3;i++)cCol.push(LAT(0));});
-section("CURSOR · ROW",500,function(){for(i=0;i<2;i++)cRow.push(LAT(0));});
+section("CURSOR · COL (3)",400,function(){for(i=0;i<3;i++)cCol.push(LAT(0));});
+section("CURSOR · ROW (2)",300,function(){for(i=0;i<2;i++)cRow.push(LAT(0));});
 core.cCol=cCol;core.cRow=cRow;
+forceNewRow();
 
-var fontMode=LAT(0);
-section("FONT · MODE",300,function(){core.fontMode=fontMode;});
-
-// Delay
-section("CTRL · DELAY",1600,function(){
+// --- Delay ---
+section("CTRL · DELAY",1200,function(){
 core.delayReg=[];
 for(i=0;i<4;i++)core.delayReg.push(LAT(0));
 core.delayOpPrev=LAT(0);
 var db=[core.delayReg[0].o,core.delayReg[1].o,core.delayReg[2].o,core.delayReg[3].o];
 var dAct=OR(OR(db[0],db[1]),OR(db[2],db[3]));
 var nDelay=NOT(dAct);
-var delayRise=AND(OR(opDec[OP_DELAY_I],opDec[OP_DELAY_R]),NOT(core.delayOpPrev.o));
+var delayRise=AND(opDec[OP_DELAY_I],NOT(core.delayOpPrev.o));
 var dLoad=AND(delayRise,core.effRunEdge);
 var nLoad=NOT(dLoad);
-// if DELAY_I: use D0:D1 as 16-bit; else use RAM[D0]
-var loadVal=[];
-for(i=0;i<4;i++){
-if(i<2) loadVal.push(OR(AND(opDec[OP_DELAY_I],immD0[i]),AND(opDec[OP_DELAY_R],readD0[i+2])));
-else loadVal.push(OR(AND(opDec[OP_DELAY_I],immD1[i-2]),AND(opDec[OP_DELAY_R],readD0[i+2-2+2>7?7:i+2-2])));
-}
-// simpler: just take low nibble of D0 (works for both)
-for(i=0;i<4;i++){
-var low = opDec[OP_DELAY_I]?immD0[i]:readD0[i];
-loadVal[i]=low;
-}
 var decBits=addN(db,[K1,K1,K1,K1],K0,4).sum;
-for(i=0;i<4;i++){var keep=AND(dAct,decBits[i]);var dd=OR(AND(dLoad,loadVal[i]),AND(nLoad,keep));setLat(core.delayReg[i],dd,core.effRunEdge);}
-setLat(core.delayOpPrev,OR(opDec[OP_DELAY_I],opDec[OP_DELAY_R]),core.effRunEdge);
+for(i=0;i<4;i++){var keep=AND(dAct,decBits[i]);var dd=OR(AND(dLoad,immD0[i]||K0),AND(nLoad,keep));setLat(core.delayReg[i],dd,core.effRunEdge);}
+setLat(core.delayOpPrev,opDec[OP_DELAY_I],core.effRunEdge);
 core.nDelay=nDelay;core.delayRise=delayRise;
 });
 forceNewRow();
 
-// RND
+// --- RND ---
 var rndReg=[];for(i=0;i<8;i++)rndReg.push(LAT(i===0?1:0));core.rndReg=rndReg;
-section("RND · LFSR",1600,function(){
+section("RND · LFSR",1200,function(){
 var rndAct=AND(core.effRunEdge,opDec[OP_RND]);
 var seedAct=AND(core.effRunEdge,opDec[OP_SEED]);
 var newbit=XOR(XOR(rndReg[0].o,rndReg[2].o),XOR(rndReg[3].o,rndReg[4].o));
-for(i=0;i<8;i++){var next=(i===0)?newbit:rndReg[i-1].o;var withSeed=OR(AND(seedAct,immD0[i]),AND(NOT(seedAct),next));setLat(rndReg[i],withSeed,OR(rndAct,seedAct));}});
+for(i=0;i<8;i++){var next=(i===0)?newbit:rndReg[i-1].o;var withSeed=OR(AND(seedAct,immD0[i]||K0),AND(NOT(seedAct),next));setLat(rndReg[i],withSeed,OR(rndAct,seedAct));}});
 forceNewRow();
 
-// CMP flags
-var flagZ=LAT(0),flagLT=LAT(0),flagGT=LAT(0);
-core.flagZ=flagZ;core.flagLT=flagLT;core.flagGT=flagGT;
-section("CTRL · CMP FLAGS",1600,function(){
-var full=addN(readD0,readD1.map(function(x){return x;}),K0,8); // placeholder
-var nb=[];for(i=0;i<8;i++)nb.push(NOT(readD1[i]));
-var sub=addN(readD0,nb,K1,8);
-var z=null;for(i=0;i<8;i++){var nz=NOT(sub.sum[i]);z=z===null?nz:AND(z,nz);}
-var borrow=NOT(sub.carry);
-var gt=AND(sub.carry,NOT(z));
-var cmpAct=AND(core.effRunEdge,opDec[OP_CMP]);
-setLat(flagZ,z,cmpAct);setLat(flagLT,borrow,cmpAct);setLat(flagGT,gt,cmpAct);
-});
-forceNewRow();
-
-// Halt
+// --- HALT ---
 core.halt=LAT(0);
-section("HALT · LATCH",600,function(){
+section("HALT · LATCH",400,function(){
 var haltSet=AND(AND(opDec[OP_HALT],core.effRunEdge),NOT(core.halt.o));
 var next=OR(haltSet,core.halt.o);
 setLat(core.halt,next,OR(haltSet,core.clrEdge));
 });
 
-// PC update
-section("QUEUE · PC UPDATE",1400,function(){
+// --- PC update ---
+section("QUEUE · PC UPDATE",1000,function(){
 var runEdge=core.effRunEdge;
 var jmpAct=AND(opDec[OP_JMP],runEdge);
-// JZ/JNZ: D0:D1 = target, D2 = test RAM addr
-var testJZ=null,testJNZ=null;
-for(i=0;i<8;i++){
-var nz=NOT(RAM[0]?RAM[0][i].o:K0); // placeholder
-}
-// simpler: JZ/JNZ test uses RAM[D2] zero-ness
-// For simplicity, we skip JZ/JNZ target select and just do INC
 var haltEn=core.halt.o;
 var runGate=AND(core.nDelay,NOT(haltEn));
 var notRise=NOT(core.delayRise);
 var jumpEn=AND(AND(jmpAct,runEdge),AND(runGate,notRise));
-var incEn=AND(AND(runEdge,core.RUNQo),AND(runGate,notRise));
-// we use runEdge directly since always auto-run
-incEn=AND(runEdge,AND(runGate,notRise));
+var incEn=AND(runEdge,AND(runGate,notRise));
 var en=OR(jumpEn,incEn);
 var ptrNow=[];for(i=0;i<PTR_BITS;i++)ptrNow.push(core.ptr[i].o);
 var incOne=[K1];for(i=1;i<PTR_BITS;i++)incOne.push(K0);
 var incVal=addN(ptrNow,incOne,K0,PTR_BITS).sum;
 for(i=0;i<PTR_BITS;i++){
-// jmp target from D0 (low bits) — using just D1 low 4 bits as target
-var jv=(i<8)?immD1[i]:K0;
+var jv=(immD1[i]!==undefined)?immD1[i]:K0;
 var v=OR(AND(jumpEn,jv),AND(NOT(jumpEn),incVal[i]));
 setLat(core.ptr[i],v,en);
 }
 });
 forceNewRow();
 
-// ALU results (each in parallel)
+// --- ALU ---
 var opR={};
-function reg(name,bits){opR[name]=bits;}
-section("ALU · SET·MOV·CLR",900,function(){
-reg(OP_SET,immD0.slice());
+function reg(k,bits){opR[k]=bits;}
+section("ALU · MOV·SET·CLR",600,function(){
 reg(OP_MOV,readD0.slice());
+reg(OP_SET,immD0.slice());
 reg(OP_CLR,[K0,K0,K0,K0,K0,K0,K0,K0]);
 });
-section("ALU · INC·DEC",1600,function(){
+section("ALU · INC·DEC",1200,function(){
 var one=[K1,K0,K0,K0,K0,K0,K0,K0];
 reg(OP_INC,add8(readD0,one));
 reg(OP_DEC,sub8(readD0,one));
@@ -630,54 +570,52 @@ reg(OP_INC_I,add8(readD0,immD1.slice()));
 reg(OP_DEC_I,sub8(readD0,immD1.slice()));
 });
 forceNewRow();
-section("ALU · ADD·SUB",1600,function(){
+section("ALU · ADD·SUB",1200,function(){
 reg(OP_ADD,add8(readD0,readD1));
 reg(OP_SUB,sub8(readD0,readD1));
 reg(OP_ADD_I,add8(readD0,immD1.slice()));
 reg(OP_SUB_I,sub8(readD0,immD1.slice()));
 });
-section("ALU · MUL",1000,function(){
+section("ALU · MUL",800,function(){
 var a4=[readD0[0],readD0[1],readD0[2],readD0[3]];
 var b4=[readD1[0],readD1[1],readD1[2],readD1[3]];
 reg(OP_MUL,mul4low(a4,b4));
-var bi4=[immD1[0],immD1[1],immD1[2],immD1[3]];
-reg(OP_MUL_I,mul4low(a4,bi4));
 });
 forceNewRow();
-section("ALU · LOGIC",1400,function(){
+section("ALU · LOGIC",1200,function(){
 var aR=[],oR=[],xR=[],nR=[];
 for(b=0;b<8;b++){aR.push(AND(readD0[b],readD1[b]));oR.push(OR(readD0[b],readD1[b]));xR.push(XOR(readD0[b],readD1[b]));nR.push(NOT(readD0[b]));}
 reg(OP_AND,aR);reg(OP_OR,oR);reg(OP_XOR,xR);reg(OP_NOT,nR);
 });
-section("ALU · SHL·SHR",1600,function(){
+section("ALU · SHIFT",1000,function(){
 var shl=[K0],shr=[K0];
 for(b=0;b<7;b++)shl.push(readD0[b]);
 for(b=1;b<8;b++)shr.push(readD0[b]);
 reg(OP_SHL,shl);reg(OP_SHR,shr);
 });
-section("ALU · RND·TIME·JOY",800,function(){
+section("ALU · RND·TIME·JOY",600,function(){
 var rr=[];for(b=0;b<8;b++)rr.push(rndReg[b].o);
-reg(OP_RND,rr);
-reg(OP_TIME,rr); // same for now
-var jj=[];for(b=0;b<8;b++)jj.push(b<5?[core.BTN_UP.o,core.BTN_DOWN.o,core.BTN_LEFT.o,core.BTN_RIGHT.o,core.BTN_POINT.o][b]:K0);
+reg(OP_RND,rr);reg(OP_TIME,rr);
+var jj=[];var joySrc=[core.BTN_UP.o,core.BTN_DOWN.o,core.BTN_LEFT.o,core.BTN_RIGHT.o,core.BTN_POINT.o,K0,K0,K0];
+for(b=0;b<8;b++)jj.push(joySrc[b]);
 reg(OP_JOY,jj);
 });
 forceNewRow();
 
-// output MUX
+// --- Output mux ---
 var finalR=[];
-section("OUTPUT MUX",8000,function(){
-var allOps=[OP_SET,OP_MOV,OP_CLR,OP_INC,OP_DEC,OP_INC_I,OP_DEC_I,
-OP_ADD,OP_SUB,OP_ADD_I,OP_SUB_I,OP_MUL,OP_MUL_I,
+section("OUTPUT MUX",6000,function(){
+var allOps=[OP_MOV,OP_SET,OP_CLR,OP_INC,OP_DEC,OP_INC_I,OP_DEC_I,
+OP_ADD,OP_SUB,OP_ADD_I,OP_SUB_I,OP_MUL,
 OP_AND,OP_OR,OP_XOR,OP_NOT,OP_SHL,OP_SHR,
 OP_RND,OP_TIME,OP_JOY];
 for(b=0;b<8;b++){
-beginGroup(1200);
+beginGroup(900);
 var acc=null;
 for(var k=0;k<allOps.length;k++){
 var op=allOps[k];
 if(!opR[op]) continue;
-var t=AND(opDec[op],opR[op][b]);
+var t=AND(opDec[op]||K0,opR[op][b]);
 acc=acc===null?t:OR(acc,t);
 }
 if(acc===null)acc=K0;
@@ -688,198 +626,115 @@ endGroup();
 core.finalR=finalR;
 forceNewRow();
 
-// Cursor control (POS, CUR, HOME, NL, CHR)
-var big=fontMode.o;
-var nbig=NOT(big);
+// --- Cursor updates ---
 var colInc=addN([cCol[0].o,cCol[1].o,cCol[2].o],[K1,K0,K0],K0,3).sum;
 var rowInc=addN([cRow[0].o,cRow[1].o],[K1,K0],K0,2).sum;
-var colOf_s=AND(cCol[0].o,AND(cCol[1].o,cCol[2].o));
-var colOf_b=AND(cCol[0].o,cCol[1].o);
-var colOf=OR(AND(nbig,colOf_s),AND(big,colOf_b));
-var rowOf_s=AND(cRow[0].o,cRow[1].o);
-var rowOf_b=cRow[0].o;
-var rowOf=OR(AND(nbig,rowOf_s),AND(big,rowOf_b));
-
-section("CURSOR · POS MAP",1200,function(){
-// POS: D0=X%, D1=Y% → cell col = floor(X% * 6 / 100), row = floor(Y% * 3 / 100)
-var posX=[],posY=[];
-for(var v=0;v<128;v++){
-var cx=Math.floor(v*CHAR_COLS/100);if(cx>=CHAR_COLS)cx=CHAR_COLS-1;
-var cy=Math.floor(v*CHAR_ROWS/100);if(cy>=CHAR_ROWS)cy=CHAR_ROWS-1;
-if(cx&1)posX.push(d0Dec[v]);
-if(cx&2)posX.push(d0Dec[v]);
-if(cx&4)posX.push(d0Dec[v]);
-if(cy&1)posY.push(d0Dec[v]);  // should be d1Dec actually
-if(cy&2)posY.push(d0Dec[v]);
-}
-});
-// Actually we need separate decoders for D0 and D1 for POS mapping
-// Simplify: POS uses D0% → col directly via a decoder on D0 for X, D1 for Y
-var posXDec=makeDecoder(core.qD0);
-var posYDec=makeDecoder(core.qD1);
-var cellX=[],cellY=[];
-section("CURSOR · POS CELL",2400,function(){
-for(i=0;i<CHAR_COLS;i++){
-beginGroup(200);
-// find all v where floor(v*6/100) == i
-var terms=[];
-for(var v=0;v<128;v++){
-var cx=Math.floor(v*CHAR_COLS/100);if(cx>=CHAR_COLS)cx=CHAR_COLS-1;
-if(cx===i)terms.push(posXDec[v]);
-}
-var acc=null;
-for(var k=0;k<terms.length;k++) acc=acc===null?terms[k]:OR(acc,terms[k]);
-cellX.push(acc===null?K0:acc);
-endGroup();
-}
-for(i=0;i<CHAR_ROWS;i++){
-beginGroup(200);
-var terms=[];
-for(var v=0;v<128;v++){
-var cy=Math.floor(v*CHAR_ROWS/100);if(cy>=CHAR_ROWS)cy=CHAR_ROWS-1;
-if(cy===i)terms.push(posYDec[v]);
-}
-var acc=null;
-for(var k=0;k<terms.length;k++) acc=acc===null?terms[k]:OR(acc,terms[k]);
-cellY.push(acc===null?K0:acc);
-endGroup();
-}
-});
-forceNewRow();
+var colOf=AND(cCol[0].o,AND(cCol[1].o,cCol[2].o));
+var rowOf=AND(cRow[0].o,cRow[1].o);
 
 var cellMatch=[];
-section("CURSOR · CELL MATCH",2400,function(){
+section("CURSOR · CELL MATCH",1200,function(){
 var colDec=makeDecoder([cCol[0].o,cCol[1].o,cCol[2].o]);
 var rowDec=makeDecoder([cRow[0].o,cRow[1].o]);
 for(i=0;i<DISPLAY_CELLS;i++){
 var ci=i%CHAR_COLS,ri=(i/CHAR_COLS)|0;
-cellMatch.push(AND(colDec[ci],rowDec[ri]));
+var m=AND(colDec[ci]||K0,rowDec[ri]||K0);
+cellMatch.push(m);
 }
 });
 core.cellMatch=cellMatch;
 forceNewRow();
 
-section("CURSOR · UPDATE",2800,function(){
+section("CURSOR · UPDATE",1600,function(){
 var chrA=AND(core.effRunEdge,opDec[OP_CHR]);
 var homeA=AND(core.effRunEdge,opDec[OP_HOME]);
 var posA=AND(core.effRunEdge,opDec[OP_POS]);
 var curA=AND(core.effRunEdge,opDec[OP_CUR]);
 var nlA=AND(core.effRunEdge,opDec[OP_NL]);
 var anyOp=OR(OR(OR(chrA,homeA),OR(posA,curA)),nlA);
-var chWrap=AND(chrA,colOf);
+// POS uses D0=col (0-5) direct, D1=row (0-2) direct
+var posColDec=makeDecoder(core.qD0);
+var posRowDec=makeDecoder(core.qD1);
 for(i=0;i<3;i++){
-var c0=AND(curA,immD0[i]); // CUR uses D0,D1 as cell
-var cp=AND(posA,cellX[i]);
+var c0=AND(curA,immD0[i]||K0);
+var cp=AND(posA,posColDec[i]||K0);
 var keep=AND(NOT(anyOp),cCol[i].o);
 var c3=AND(AND(chrA,NOT(colOf)),colInc[i]);
 var v=OR(OR(OR(c0,cp),keep),c3);
 setLat(cCol[i],v,anyOp);
 }
 for(i=0;i<2;i++){
-var r0=AND(curA,immD1[i]);
-var rp=AND(posA,cellY[i]);
+var r0=AND(curA,immD1[i]||K0);
+var rp=AND(posA,posRowDec[i]||K0);
 var keep=AND(NOT(anyOp),cRow[i].o);
 var nlW=AND(nlA,rowOf);
-var chW=AND(chWrap,rowOf);
-var chN=AND(chWrap,NOT(rowOf));
+var chW=AND(chrA,colOf);
+var chN=AND(AND(chrA,NOT(colOf)),rowOf);
 var v2=OR(OR(r0,rp),keep);
-v2=OR(v2,AND(nlW,K0)); // wrap → 0
-v2=OR(v2,AND(AND(chN,NOT(rowOf)),rowInc[i]));
+v2=OR(v2,AND(nlW,K0));
+v2=OR(v2,AND(chN,rowInc[i]));
 setLat(cRow[i],v2,anyOp);
 }
 });
 forceNewRow();
 
-// Write enable logic
+// --- Write enable + screen writes ---
 section("OUTPUT · WRITE EN",24000,function(){
 var runOk=AND(core.effRunEdge,core.nDelay);
 var scrClrPulse=AND(runOk,opDec[OP_SCRCLR]);
-var scrollPulse=AND(runOk,opDec[OP_SCROLL]);
 var fillPulse=AND(runOk,opDec[OP_FILL]);
-var clrLnPulse=AND(runOk,opDec[OP_CLRLN]);
 var chrPulse=AND(runOk,opDec[OP_CHR]);
 var spritePulse=AND(runOk,opDec[OP_SPRITE]);
-var spriteCPulse=AND(runOk,opDec[OP_SPRITE_C]);
-var fontPulse=AND(runOk,opDec[OP_FONT]);
-var pokePulse=AND(runOk,opDec[OP_POKE]);
-var pokeRPulse=AND(runOk,opDec[OP_POKE_R]);
 var writeALU=K0;
-var aluOps=[OP_SET,OP_MOV,OP_CLR,OP_INC,OP_DEC,OP_INC_I,OP_DEC_I,OP_ADD,OP_SUB,OP_ADD_I,OP_SUB_I,OP_MUL,OP_MUL_I,OP_AND,OP_OR,OP_XOR,OP_NOT,OP_SHL,OP_SHR,OP_RND,OP_TIME,OP_JOY];
+var aluOps=[OP_MOV,OP_SET,OP_CLR,OP_INC,OP_DEC,OP_INC_I,OP_DEC_I,OP_ADD,OP_SUB,OP_ADD_I,OP_SUB_I,OP_MUL,OP_AND,OP_OR,OP_XOR,OP_NOT,OP_SHL,OP_SHR,OP_RND,OP_TIME,OP_JOY];
 for(var k=0;k<aluOps.length;k++) writeALU=OR(writeALU,opDec[aluOps[k]]);
 var writeALUp=AND(runOk,writeALU);
+var pokePulse=AND(runOk,opDec[OP_POKE]);
+var pokeRPulse=AND(runOk,opDec[OP_POKE_R]);
 
-// SPRITE mapping: 4 chars at cell (cx, cy), (cx+1, cy), (cx, cy+1), (cx+1, cy+1)
-// D0 = base char, D1 = X% (or cell), D2 = Y% (or cell)
-var spriteCellX=[],spriteCellY=[];
-for(i=0;i<CHAR_COLS;i++){
-var terms=[];
-for(var v=0;v<128;v++){
-var cx=Math.floor(v*CHAR_COLS/100);if(cx>=CHAR_COLS)cx=CHAR_COLS-1;
-if(cx===i)terms.push(d1Dec[v]);
-}
-var acc=null;
-for(var k=0;k<terms.length;k++)acc=acc===null?terms[k]:OR(acc,terms[k]);
-spriteCellX.push(acc===null?K0:acc);
-}
-for(i=0;i<CHAR_ROWS;i++){
-var terms=[];
-for(var v=0;v<128;v++){
-var cy=Math.floor(v*CHAR_ROWS/100);if(cy>=CHAR_ROWS)cy=CHAR_ROWS-1;
-if(cy===i)terms.push(d2Dec[v]);
-}
-var acc=null;
-for(var k=0;k<terms.length;k++)acc=acc===null?terms[k]:OR(acc,terms[k]);
-spriteCellY.push(acc===null?K0:acc);
-}
-
-var spriteMatch=[],spriteChar=[];
-for(i=0;i<DISPLAY_CELLS;i++){
-var ci=i%CHAR_COLS,ri=(i/CHAR_COLS)|0;
-var m00=AND(spriteCellX[ci]||K0,spriteCellY[ri]||K0);
-var m01=ci>0?AND(spriteCellX[ci-1]||K0,spriteCellY[ri]||K0):K0;
-var m10=ri>0?AND(spriteCellX[ci]||K0,spriteCellY[ri-1]||K0):K0;
-var m11=(ci>0&&ri>0)?AND(spriteCellX[ci-1]||K0,spriteCellY[ri-1]||K0):K0;
-spriteMatch.push(OR(OR(m00,m01),OR(m10,m11)));
+// SPRITE direct: D0=base char, D1=col (0-5), D2=row (0-2)
+var spriteColDec=makeDecoder(core.qD1);
+var spriteRowDec=makeDecoder(core.qD2);
 var base1=add8(immD0,[K1,K0,K0,K0,K0,K0,K0,K0]);
 var base2=add8(immD0,[K0,K1,K0,K0,K0,K0,K0,K0]);
 var base3=add8(immD0,[K1,K1,K0,K0,K0,K0,K0,K0]);
+var spriteMatch=[],spriteChar=[];
+for(i=0;i<DISPLAY_CELLS;i++){
+var ci=i%CHAR_COLS,ri=(i/CHAR_COLS)|0;
+var c0=spriteColDec[ci]||K0;
+var c1=(ci>0)?(spriteColDec[ci-1]||K0):K0;
+var r0=spriteRowDec[ri]||K0;
+var r1=(ri>0)?(spriteRowDec[ri-1]||K0):K0;
+var m0=AND(c0,r0);
+var m1=AND(c1,r0);
+var m2=AND(c0,r1);
+var m3=AND(c1,r1);
+spriteMatch.push(OR(OR(m0,m1),OR(m2,m3)));
 var bits=[];
 for(b=0;b<8;b++){
-bits.push(OR(OR(AND(m00,immD0[b]),AND(m01,base1[b])),OR(AND(m10,base2[b]),AND(m11,base3[b]))));
+bits.push(OR(OR(AND(m0,immD0[b]||K0),AND(m1,base1[b])),OR(AND(m2,base2[b]),AND(m3,base3[b]))));
 }
 spriteChar.push(bits);
 }
-core.spriteMatch=spriteMatch;core.spriteChar=spriteChar;
 
 for(i=0;i<RAM_SIZE;i++){
 beginGroup(120);
-var aluEn=AND(writeALUp,tagDec[i]);
-var pokeEn=AND(pokePulse,d0Dec[i]);
-var pokeREn=AND(pokeRPulse,d0Dec[i]);
+var aluEn=AND(writeALUp,tagDec[i]||K0);
+var pokeEn=AND(pokePulse,d0Dec[i]||K0);
+var pokeREn=AND(pokeRPulse,d0Dec[i]||K0);
 var scrClrEn=(i<DISPLAY_CELLS)?scrClrPulse:K0;
 var fillEn=(i<DISPLAY_CELLS)?fillPulse:K0;
-var clrLnEn=K0;
-if(i<DISPLAY_CELLS){
-var ci0=i%CHAR_COLS,ri0=(i/CHAR_COLS)|0;
-var lnTest=null;
-for(var k=0;k<CHAR_ROWS;k++){
-var rDec=(ri0===k)?K1:K0;
-var chk=AND(d0Dec[k],rDec);
-lnTest=lnTest===null?chk:OR(lnTest,chk);
-}
-clrLnEn=AND(clrLnPulse,lnTest);
-}
 var chrEn=(i<DISPLAY_CELLS)?AND(chrPulse,cellMatch[i]):K0;
 var spriteEn=(i<DISPLAY_CELLS)?AND(spritePulse,spriteMatch[i]):K0;
-var en=OR(OR(OR(aluEn,pokeEn),OR(pokeREn,scrClrEn)),OR(fillEn,OR(clrLnEn,chrEn)));
+var en=OR(OR(OR(aluEn,pokeEn),OR(pokeREn,scrClrEn)),OR(fillEn,chrEn));
 en=OR(en,spriteEn);
 for(b=0;b<8;b++){
 var aluBit=AND(aluEn,finalR[b]);
-var pokeBit=AND(pokeEn,(immD1[b]));
+var pokeBit=AND(pokeEn,(immD1[b]||K0));
 var pokeRBit=AND(pokeREn,readD1[b]);
-var clrBit=AND(OR(scrClrEn,clrLnEn),K0);
-var fillBit=AND(fillEn,immD0[b]);
-var chrBit=AND(chrEn,immD0[b]);
+var clrBit=AND(scrClrEn,K0);
+var fillBit=AND(fillEn,immD0[b]||K0);
+var chrBit=AND(chrEn,immD0[b]||K0);
 var sprBit=AND(spriteEn,spriteChar[i][b]);
 var d=OR(OR(OR(aluBit,pokeBit),OR(pokeRBit,clrBit)),OR(fillBit,chrBit));
 d=OR(d,sprBit);
@@ -890,13 +745,14 @@ endGroup();
 });
 forceNewRow();
 
-// SCREEN: efficient per-cell FONT (shared equality, per-pixel OR)
+// --- SCREEN ---
 section("SCREEN · GRID",SCR_W*(SIZE_LED+GAPX)+GAPX,function(){
 for(var r=0;r<SCR_H;r++){beginGroup(SCR_W*(SIZE_LED+GAPX)+GAPX);screenLeds.push([]);
 for(var c=0;c<SCR_W;c++){var sl=ledPending("#111","",SIZE_LED);sl.isScreenLed=true;screenLeds[r].push(sl);}
 endGroup();}
 });
 
+// Cell equality check (per cell, one set)
 var cellCharMatch=[];
 section("SCREEN · CELL FONT DECODE",12000,function(){
 for(var ci=0;ci<DISPLAY_CELLS;ci++){
@@ -940,7 +796,7 @@ endGroup();
 });
 forceNewRow();
 
-// RAM/STORAGE view LEDs
+// --- RAM/STORAGE view ---
 section("OUTPUT · RAM VIEW",RAM_SIZE*(SIZE_LED+GAPX)+GAPX,function(){
 for(var br=0;br<8;br++){beginGroup(RAM_SIZE*(SIZE_LED+GAPX)+GAPX);var row=[];for(var a=0;a<RAM_SIZE;a++)row.push(ledPending("#ffb020","",SIZE_LED));ramViewRows.push(row);endGroup();}
 });
@@ -954,7 +810,6 @@ forceNewRow();
 }
 
 function writeRamByte(arr,addr,val){if(addr<0||addr>=RAM_SIZE)return;for(var b=0;b<8;b++)latchReset(arr[addr][b],(val>>b)&1);}
-function writeStoreByte(addr,val){if(addr<0||addr>=STORE_SIZE)return;for(var b=0;b<8;b++)latchReset(core.STORE[addr][b],(val>>b)&1);}
 function clearMemory(){for(var q=0;q<latches.length;q++)latchReset(latches[q],0);}
 var NOOP6=[0,0,0,0,0,0];
 function loadProgram(proj){
@@ -966,7 +821,7 @@ for(var i=0;i<QUEUE_SLOTS;i++){
 var ins=pad[i];
 for(var k=0;k<INST_BYTES;k++){
 if(core.slots[i]&&core.slots[i].bytes[k]){
-var v=ins[k]|0;
+var v=(ins[k]|0)&0xFF;
 for(var b=0;b<8;b++) latchReset(core.slots[i].bytes[k][b],(v>>b)&1);
 }
 }
@@ -1055,9 +910,22 @@ if(k<1.5)k=1.5;if(k>8)k=8;
 view.k=k;view.x=r.width/2-cx*k;view.y=r.height/2-cy*k;applyView();}
 function updateGateCount(){document.getElementById("gcount").textContent="· "+gates.length.toLocaleString()+" LOGIC GATES · "+latches.length.toLocaleString()+" FFs";}
 function loadProject(){
-try{reset();buildFrontend();buildJoystick();buildQueue();buildExecutor();buildBackend();
-frame43=relayout43();routeWires();initProj();simulate();fitView();updateGateCount();renderFrame();
-}catch(e){showErr((e&&e.message)||String(e));console.error(e);if(e&&e.stack)console.error(e.stack);}}
+try{
+reset();
+buildFrontend();
+buildJoystick();
+buildQueue();
+buildExecutor();
+buildBackend();
+frame43=relayout43();
+routeWires();
+initProj();
+simulate();
+fitView();
+updateGateCount();
+renderFrame();
+}catch(e){showErr((e&&e.message)||String(e));console.error(e);if(e&&e.stack)console.error(e.stack);}
+}
 
 var view={x:0,y:0,k:1};
 var MIN_K=0.0002,MAX_K=30;
